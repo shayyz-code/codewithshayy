@@ -3,7 +3,7 @@ export default function PagePrivacyPolicy() {
     <main className="">
       <section className="flex flex-col">
         <div className="flex flex-col items-center py-28 md:py-40 gap-5">
-          <div className="overflow-hidden flex flex-col gap-5 px-10 py-5 w-[400px] md:w-full md:max-w-2xl shadow-2xl shadow-orange-600 border-4 border-black">
+          <div className="overflow-hidden flex flex-col gap-5 px-10 py-5 w-[350px] md:w-full md:max-w-2xl shadow-2xl shadow-orange-600 border-4 border-black">
             <h2 className="font-burbankblack text-3xl tracking-wider text-center my-5">
               Privacy Policy
             </h2>
@@ -15,7 +15,7 @@ export default function PagePrivacyPolicy() {
               courses, or interact with us in any way.
             </p>
             <h3 className="text-lg font-extrabold">Information We Collect</h3>
-            <p>
+            <div>
               <ul className="list-disc flex flex-col gap-2">
                 <li>
                   <strong>Personal Information</strong>: When you sign up for
@@ -33,11 +33,11 @@ export default function PagePrivacyPolicy() {
                   disable cookies in your browser settings.
                 </li>
               </ul>
-            </p>
+            </div>
             <h3 className="text-lg font-extrabold">
               How We Use Your Information
             </h3>
-            <p>
+            <div>
               <ul className="list-disc flex flex-col gap-2">
                 <li>
                   To provide and manage our services, including course
@@ -52,7 +52,7 @@ export default function PagePrivacyPolicy() {
                 </li>
                 <li>To process payments securely.</li>
               </ul>
-            </p>
+            </div>
             <h3 className="text-lg font-extrabold">Data Sharing</h3>
             <p>
               We do not sell, rent, or trade your personal information to third
@@ -82,7 +82,7 @@ export default function PagePrivacyPolicy() {
           </div>
         </div>
         <p className="px-10 pb-10 text-center font-burbankmedium">
-          {"If you have any questions about our Privacy Policy, please contact us at aungminkhant.shay@gmail.com"
+          {"If you have any questions about our Privacy Policy, please contact us at our email."
             .split(" ")
             .map((word, index) => (
               <b key={index} className="hover:bg-secondary">{` ${word} `}</b>

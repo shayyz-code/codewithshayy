@@ -22,7 +22,7 @@ export default function Canvas4() {
         initial={{ opacity: 0, x: -200 }}
         whileInView={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.5, duration: 1.5, type: "spring" }}
-        className="bg-white border-4 border-black px-4 py-2 text-black font-burbankblack text-3xl tracking-wider"
+        className="bg-white border-4 border-black px-4 py-2 text-black font-burbankblack text-xl md:text-3xl tracking-wider"
       >
         No Filler. Just Code. 🥝
       </motion.div>

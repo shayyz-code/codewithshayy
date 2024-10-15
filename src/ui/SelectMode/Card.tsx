@@ -14,19 +14,20 @@ export default function Card({
 }: PropsCard) {
   const handleOnClick = () => {};
   return (
-    <div className="flex items-center group relative h-[309px]">
-      <div className="absolute top-[14.5px] left-0 transition-all duration-300 ease-in-out w-[175px] h-[280px] group-hover:h-[309px] group-hover:top-0 bg-black group-hover:shadow-3xl scale-105 -z-10"></div>
+    <div className="flex items-center group relative h-[309px] hover:shadow-3xl">
       <div
-        className={`relative transition-all duration-300 ease-out pb-0.5 flex flex-col justify-end items-center w-[175px] h-[280px] hover:h-[315px] bg-gradient-to-b cursor-pointer overflow-hidden`}
+        className={`relative transition-all duration-300 ease-out pb-0.5 flex flex-col justify-end items-center w-[155px] h-[280px] hover:h-[315px] bg-gradient-to-b cursor-pointer overflow-hidden`}
       >
         <Image
           src={`/card${cImg}.jpeg`}
           alt="picture of mode"
           fill
           style={{ objectFit: "cover" }}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="border-4 border-black"
         />
         <div className="absolute -top-5">
-          <div className="transform translate-y-8 transition group-hover:delay-700 ease-in-out w-[130px] text-3xl font-burbankblack uppercase text-black text-center z-10">
+          <div className="transform translate-y-8 transition group-hover:delay-700 ease-in-out w-[130px] text-2xl font-burbankblack uppercase text-black text-center z-10">
             {displayText}
           </div>
           <div className="transfrom translate-y-44 invisible group-hover:visible z-20 transition group-hover:delay-700 ease-in-out">

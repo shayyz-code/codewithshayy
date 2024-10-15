@@ -91,8 +91,6 @@ export function CourseProvider({ children }: TProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  console.log(pathname);
-
   const openSheet = (key: string) => {
     if (!isOpen) {
       router.push(pathname + "?key=" + key);

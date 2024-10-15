@@ -15,8 +15,9 @@ export default function EnrollCanvas2() {
         src="/bg4.jpg"
         fill={true}
         alt="bg"
-        objectFit="cover"
+        style={{ objectFit: "cover" }}
         className="-z-50"
+        priority={true}
       />
       <motion.div
         initial={{ opacity: 0, x: -200 }}

@@ -46,16 +46,17 @@ export default function CSheet() {
           {data ? (
             <div className="flex flex-col">
               <div className="pb-5">
-                <h3 className="font-burbankblack text-3xl md:text-4xl tracking-wider uppercase text-center">
+                <h3 className="font-burbankblack text-2xl md:text-4xl tracking-wider uppercase text-center">
                   {data.title}
                 </h3>
                 <p className="text-center font-burbankmedium text-xs">
                   {data.description}
                 </p>
               </div>
-              <div className="flex flex-col gap-20 items-center max-h-[80vh] pt-10 pb-10 overflow-y-scroll">
+              <div className="flex flex-col gap-20 items-center max-h-[80vh] pt-0 pb-10 overflow-y-scroll">
                 <Image
                   src={data.photo_url}
+                  priority={true}
                   alt="picture of course"
                   width={400}
                   height={400}
@@ -70,7 +71,8 @@ export default function CSheet() {
                     <Image
                       src={`/bg2.jpg`}
                       alt="picture of mode"
-                      fill
+                      fill={true}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       style={{ objectFit: "cover" }}
                       className="-z-10"
                     />

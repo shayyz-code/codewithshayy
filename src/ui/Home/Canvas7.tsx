@@ -20,7 +20,7 @@ export default function Canvas7() {
         className="-z-50"
       />
       <Slide cImg="Purple" justify="center">
-        <h2 className="absolute font-burbankblack text-lg md:w-[450px] md:text-3xl text-center tracking-wider bg-white py-2 md:py-3">
+        <h2 className="absolute font-burbankblack text-lg md:w-[450px] md:text-3xl md:bg-white text-center tracking-wider py-2 md:py-3">
           🫐 Forget the beginner struggles.
         </h2>
 

@@ -7,7 +7,7 @@ import {
 
 export default async function getAllCourses(ref: string, subRef: string) {
   try {
-    const q = doc(db, ref, subRef);
+    const q = doc(db, "/", ref, subRef);
     const querySnapshot = await getDoc(q);
 
     if (querySnapshot.exists()) {

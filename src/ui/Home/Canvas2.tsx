@@ -10,7 +10,7 @@ export default function Canvas2() {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       transition={{ delay: 0.5 }}
-      className="px-0 md:px-10 h-svh relative border-y-8 border-black flex items-center justify-end"
+      className="px-0 md:px-10 py-20 relative border-y-8 border-black flex items-center justify-end"
     >
       <Image
         src="/bg2.jpg"

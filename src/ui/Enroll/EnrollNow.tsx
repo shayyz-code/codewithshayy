@@ -42,7 +42,7 @@ export default function EnrollNow() {
               alt="poster image of event"
               width={400}
               height={400}
-              className="mb-10 md:mb-0 shadow-2xl shadow-red-500 border-4 border-black"
+              className="mb-10 md:mb-0 shadow-2xl shadow-lime-500 border-4 border-black"
             />
           </motion.div>
         )}

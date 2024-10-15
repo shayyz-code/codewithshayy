@@ -13,8 +13,10 @@ export default function Courses() {
           src="/bg3.jpg"
           fill={true}
           alt="bg"
-          objectFit="cover"
+          style={{ objectFit: "cover" }}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="-z-50"
+          priority={true}
         />
         <motion.header
           initial={{ y: -50, opacity: 0 }}
@@ -22,7 +24,7 @@ export default function Courses() {
           transition={{ duration: 1.5, type: "spring" }}
           className="flex flex-col gap-2 justify-center items-center pt-5 pb-5 md:pb-10"
         >
-          <h1 className="font-burbankblack text-4xl uppercase tracking-wider">
+          <h1 className="font-burbankblack text-3xl md:text-4xl uppercase tracking-wider">
             Courses
           </h1>
           <p className="text-center font-burbankmedium text-sm">

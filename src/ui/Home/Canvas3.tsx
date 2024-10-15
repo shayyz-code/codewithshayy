@@ -11,7 +11,7 @@ export default function Canvas3() {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       transition={{ delay: 0.5 }}
-      className="px-10 py-24 md:py-10 relative border-y-8 border-black flex flex-col items-center justify-center gap-16"
+      className="px-5 py-16 md:py-10 relative border-y-8 border-black flex flex-col items-center justify-center gap-16"
     >
       <Image
         src="/bg3.jpg"
@@ -26,7 +26,7 @@ export default function Canvas3() {
         transition={{ duration: 1.5, type: "spring" }}
         className=""
       >
-        <h2 className="font-burbankblack text-4xl text-center uppercase tracking-wider">
+        <h2 className="font-burbankblack text-3xl md:text-4xl text-center uppercase tracking-wider">
           Featured Courses
         </h2>
         <p className="font-burbankmedium text-center">Fast Practical Courses</p>
@@ -35,7 +35,7 @@ export default function Canvas3() {
         initial={{ opacity: 0, y: 100 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.5, type: "spring" }}
-        className="flex gap-10 flex-wrap justify-center md:flex-nowrap items-center"
+        className="flex gap-5 flex-wrap justify-center md:flex-nowrap items-center"
       >
         <Card
           displayText="Web Dev w/ HTML, CSS and JS"

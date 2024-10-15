@@ -15,7 +15,7 @@ export default function EnrollCanvas3() {
         src="/bg2.jpg"
         fill={true}
         alt="bg"
-        objectFit="cover"
+        style={{ objectFit: "cover" }}
         className="-z-50"
       />
       <motion.div

@@ -16,13 +16,14 @@ export default function HowToEnroll() {
         <Image
           src={`/bg5.jpg`}
           alt="picture of mode"
-          fill
+          fill={true}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           style={{ objectFit: "cover" }}
           className="-z-10"
         />
         How to Enroll
       </h2>
-      <div className="flex flex-col gap-5 w-[400px] mt-12">
+      <div className="flex flex-col gap-5 w-[350px] px-5 mt-12">
         <div>
           <h3 className="font-burbankblack tracking-wider text-xl pb-4">
             Choose Your Course

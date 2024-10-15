@@ -13,6 +13,5 @@ export function clto(str: string): TModel[] {
     const _List = cstl_(equalList[1]);
     return { key: equalList[0], value: _List };
   });
-  console.log(result);
   return result;
 }

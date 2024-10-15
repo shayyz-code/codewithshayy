@@ -29,7 +29,7 @@ export default function Home() {
         initial={{ scale: 0.5, opacity: 0 }}
         whileInView={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1.5, type: "spring" }}
-        className="flex flex-col items-center py-16 justify-center gap-10"
+        className="w-[350px] mx-auto flex flex-col items-center py-16 justify-center gap-10"
       >
         <h3 className="font-burbankblack tracking-widest uppercase text-3xl lg:text-4xl max-w-lg text-center">
           🚀 Ready to <b className="text-secondary">code</b>?

@@ -13,6 +13,7 @@ export default function Canvas1() {
         fill
         style={{ objectFit: "cover" }}
         className="-z-20"
+        priority={true}
       />
       <div className="md:relative">
         <motion.div
@@ -26,6 +27,7 @@ export default function Canvas1() {
             alt="poster image of event"
             width={400}
             height={400}
+            priority={true}
             className="mb-10 md:mb-0 shadow-2xl shadow-primary border-4 border-black"
           />
         </motion.div>

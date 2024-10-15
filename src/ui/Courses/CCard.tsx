@@ -10,6 +10,7 @@ export default function CCard({ data }: { data: TCourse }) {
       <div className="w-[250px] h-[250px] overflow-y-hidden">
         <Image
           src={data.photo_url}
+          priority={true}
           alt="picture of course"
           width={250}
           height={250}

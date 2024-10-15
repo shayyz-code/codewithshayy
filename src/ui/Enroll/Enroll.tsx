@@ -22,7 +22,7 @@ export default function Enroll() {
         initial={{ scale: 0.5, opacity: 0 }}
         whileInView={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1.5, type: "spring" }}
-        className="flex flex-col items-center py-16 justify-center gap-10"
+        className="w-[350px] mx-auto flex flex-col items-center py-16 justify-center gap-10"
       >
         <h3 className="font-burbankblack tracking-widest uppercase text-2xl lg:text-4xl max-w-lg text-center">
           🚀 What Are You <b className="text-secondary">Waiting For</b>?

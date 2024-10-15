@@ -56,14 +56,14 @@ export default function EnrollForm() {
       <div className="flex flex-col items-center py-28 md:py-40 gap-5">
         <form
           onSubmit={handleSubmit}
-          className="overflow-hidden relative px-10 py-5 w-[400px] shadow-2xl shadow-orange-600 border-4 border-black"
+          className="overflow-hidden relative px-10 py-5 w-[350px] shadow-2xl shadow-orange-600 border-4 border-black"
         >
           <Image
             src="/bg2.jpg"
             alt="comic bg"
             width={800}
             height={800}
-            className="absolute top-16 left-0 scale-150 w-full -z-20"
+            className="absolute top-10 left-0 scale-[250%] w-full -z-20"
           />
           <h3 className="font-burbankblack tracking-widest uppercase text-3xl lg:text-4xl max-w-lg text-center mb-5">
             🚀 Enroll <b className="text-secondary">Form</b>
