@@ -18,7 +18,7 @@ export default function Canvas8() {
         className="bg-white max-w-[620px] px-4 py-2 text-black font-burbankblack shadow-4xl shadow-secondary"
       >
         <p className="font-burbankmedium">
-          I am AI engineer and a Full Stack Developer, having attended RMIT
+          An AI engineer and a Full Stack Developer, having attended RMIT
           University, Vietnam. My expertise includes webapp development, mobile
           app development, database management, API integration, software
           architecture, and of course, artificial intelligence. Passionate about
