@@ -6,7 +6,7 @@ Welcome to **Code w/ Shayy**, an innovative learning platform dedicated to teach
 
 At **Code w/ Shayy**, we offer a range of coding courses that cater to both beginners and experienced developers. Our mission is to provide high-quality, practical education in web development, JavaScript, TypeScript, React, Next.js, and more. All courses are led by experienced instructors who are passionate about sharing their knowledge and helping you succeed.
 
-## 💻 Tech Stack Used for this Webapp
+## 💻 Tech Stack Used for this Lightweight Webapp
 
 - **NextJS**
 - **Firebase**
@@ -34,25 +34,6 @@ Interested in joining us? Visit our [enroll page](#codewithshayy.vercel.app/enro
 ## 🤝 Contributing
 
 We are always open to feedback and collaboration. If you have suggestions or want to contribute to the development of **Code w/ Shayy**, feel free to submit a pull request or contact us.
-
-## 🛠 Installation (for developers)
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/shayyz-code/codewithshayy.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd codewithshayy
-   ```
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Run the project locally:
-   ```bash
-   npm run dev
-   ```
 
 ## 📧 Contact
 

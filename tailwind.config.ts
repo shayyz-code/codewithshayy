@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
 const config: Config = {
   content: {
@@ -24,19 +24,19 @@ const config: Config = {
       },
       fontSize: {
         "btn-lg": [
-          "40px",
+          "32px",
           {
             letterSpacing: "0.1rem",
           },
         ],
         "btn-md": [
-          "30px",
+          "24px",
           {
             letterSpacing: "0.1rem",
           },
         ],
         "btn-sm": [
-          "20px",
+          "18px",
           {
             letterSpacing: "0.1rem",
           },
@@ -53,8 +53,8 @@ const config: Config = {
         selectMode2BgFrom: "#EAFAFF",
         selectMode2BgTo: "#54C3D6",
         textSelectedEffect: "rgba(150, 150, 255, 0.2)",
-        primary: "#FEFF04",
-        secondary: "rgb(124 58 237)",
+        primary: "#0243fd",
+        secondary: "#0055ff",
       },
       backgroundImage: {
         bgGradientRadial:
@@ -68,5 +68,5 @@ const config: Config = {
   },
   plugins: [require("@designbycode/tailwindcss-text-stroke")],
   safelist: ["!duration-[0ms]", "!delay-[0ms]"],
-};
-export default config;
+}
+export default config

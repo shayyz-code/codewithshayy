@@ -3,14 +3,9 @@
 import { motion } from "framer-motion"
 import PrimaryBtn from "../PrimaryBtn"
 import Link from "next/link"
-import { Suspense, useContext } from "react"
-import CoursesContextProvider, {
-  CoursesContext,
-} from "@/context/coursesContext"
-import CCanvas1 from "../Courses/CCanvas1"
+import Projects from "./Projects"
 
 export default function Canvas3() {
-  const courses = useContext(CoursesContext)
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -25,25 +20,36 @@ export default function Canvas3() {
         className=""
       >
         <h2 className="font-burbankblack text-3xl md:text-4xl text-center uppercase tracking-wider">
-          Featured Courses
+          Projects
         </h2>
         <p className="font-burbankmedium text-center">
-          Courses are now available for free only at{" "}
-          <Link href="https://www.rangoonacademy.com/courses">
-            rangoon-academy.com
+          See all my projects at{" "}
+          <Link
+            className="text-sky-600"
+            href="https://www.github.com/shayyz-code/"
+          >
+            github.com/shayyz-code
           </Link>
         </p>
       </motion.div>
-      <CCanvas1
-        specificCourses={courses.filter((undefined, index) => index <= 3)}
-      />
+      <motion.div
+        initial={{ opacity: 0, y: 100 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.5, type: "spring" }}
+        className="flex gap-5 flex-wrap justify-center md:flex-nowrap items-center"
+      >
+        <Projects />
+      </motion.div>
       <motion.div
         initial={{ y: 50, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
         transition={{ duration: 1.5, type: "spring" }}
         className=""
       >
-        <PrimaryBtn href="https://www.rangoon-academy.com/courses" size="sm">
+        <PrimaryBtn
+          href="https://github.com/shayyz-code?tab=repositories"
+          size="sm"
+        >
           See More
         </PrimaryBtn>
       </motion.div>

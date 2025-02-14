@@ -1,22 +1,15 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import PrimaryBtn from "../PrimaryBtn";
-import { TEvent } from "@/context/eventsContext";
-import { clto } from "@/functions/convertModel";
-import { motion } from "framer-motion";
+import Image from "next/image"
+import PrimaryBtn from "../PrimaryBtn"
+import { TEvent } from "@/context/eventsContext"
+import { clto } from "@/functions/convertModel"
+import { motion } from "framer-motion"
 
 export default function UpcomingEvent({ data }: { data?: TEvent }) {
-  const handleOnClick = () => {};
+  const handleOnClick = () => {}
   return (
     <article className="relative p-10 md:px-16 py-28 md:py-40">
-      <Image
-        src="/bg1.jpg"
-        alt="comic bg"
-        fill
-        style={{ objectFit: "cover" }}
-        className="-z-20"
-      />
       <div className="md:relative">
         {data && data.photo_url && (
           <motion.div
@@ -63,7 +56,7 @@ export default function UpcomingEvent({ data }: { data?: TEvent }) {
                       </span>
                       {` ${item.value}`}
                     </span>
-                  );
+                  )
                 } else {
                   return (
                     <span key={index}>
@@ -72,7 +65,7 @@ export default function UpcomingEvent({ data }: { data?: TEvent }) {
                       </span>
                       {` ${item.value}`}
                     </span>
-                  );
+                  )
                 }
               })}
             </p>
@@ -99,5 +92,5 @@ export default function UpcomingEvent({ data }: { data?: TEvent }) {
         )}
       </div>
     </article>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"
 
 export default function LookingForMaths() {
   return (
@@ -8,7 +8,7 @@ export default function LookingForMaths() {
       initial={{ y: 100, opacity: 0 }}
       whileInView={{ y: 0, opacity: 1 }}
       transition={{ duration: 1.5, type: "spring" }}
-      className="flex justify-between items-center w-[350px] md:w-[600px] px-10 py-5 mx-auto my-16 font-burbankmedium bg-white text-black border-4 border-black gap-10 shadow-2xl shadow-primary"
+      className="flex justify-between items-center w-[350px] md:w-[472px] px-10 py-5 mx-auto my-16 font-burbankmedium bg-white text-black border-4 border-black gap-10 shadow-2xl shadow-primary"
     >
       <h3 className="text-base">
         Maths Courses are also Coming Soon. Stay Tuned &lt;/🍓&gt;
@@ -17,5 +17,5 @@ export default function LookingForMaths() {
         Go to
       </PrimaryBtn> */}
     </motion.div>
-  );
+  )
 }

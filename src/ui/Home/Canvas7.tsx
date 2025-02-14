@@ -1,8 +1,6 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import Slide from "./Slide";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"
 
 export default function Canvas7() {
   return (
@@ -10,22 +8,16 @@ export default function Canvas7() {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       transition={{ delay: 0.5 }}
-      className="px-10 py-28 relative border-y-8 border-black flex items-center justify-end"
+      className="px-10 py-8 relative border-y-8 border-black flex items-center justify-start"
     >
-      <Image
-        src="/bg6.jpg"
-        fill={true}
-        alt="bg"
-        style={{ objectFit: "cover" }}
-        className="-z-50"
-      />
-      <Slide cImg="Purple" justify="center">
-        <h2 className="absolute font-burbankblack text-lg md:w-[450px] md:text-3xl md:bg-white text-center tracking-wider py-2 md:py-3">
-          🫐 Forget the beginner struggles.
-        </h2>
-
-        {/* <p>Enroll now, and start coding smarter, not harder.</p> */}
-      </Slide>
+      <motion.div
+        initial={{ opacity: 0, x: -200 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.5, duration: 1.5, type: "spring" }}
+        className="bg-primary border-4 border-black px-4 py-2 text-white font-burbankblack text-lg md:text-2xl"
+      >
+        Forget your beginner struggles.
+      </motion.div>
     </motion.div>
-  );
+  )
 }

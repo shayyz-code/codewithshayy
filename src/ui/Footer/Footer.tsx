@@ -1,7 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
-import socialHrefs from "./socialHref";
-import hrefs from "../Navigation/hrefs";
+import Image from "next/image"
+import Link from "next/link"
+import socialHrefs from "./socialHref"
+import hrefs from "../Navigation/hrefs"
 
 export default function Footer() {
   return (
@@ -10,7 +10,7 @@ export default function Footer() {
         Find an issue with this page?{" "}
         <Link
           href="https://github.com/shayyz-code/codewithshayy"
-          className="text-sky-600 ml-2"
+          className="text-sky-600 ml-2 transition-all ease-out hover:text-blue-600"
         >
           Fix it on GitHub
         </Link>
@@ -35,7 +35,10 @@ export default function Footer() {
       </div>
       <ul className="flex items-center justify-center divide-x-2 divide-black dark:divide-white">
         {hrefs.map((href, index) => (
-          <li key={index} className="px-2 hover:bg-white hover:text-black">
+          <li
+            key={index}
+            className="px-2 transition-all ease-out hover:bg-white hover:text-black"
+          >
             <Link href={href.href}>{href.name}</Link>
           </li>
         ))}
@@ -47,11 +50,11 @@ export default function Footer() {
         </li>
       </ul>
       <p className="text-xs flex justify-center items-center gap-2">
-        Copyright &copy; 2024 Code w/ Shayy
+        Copyright &copy; 2025 Code w/ Shayy
       </p>
       <Link
         href="/"
-        className="flex justify-center transition ease-out transform rotate-1  hover:scale-110"
+        className="flex justify-center my-6 transition ease-out transform rotate-1  hover:scale-110"
       >
         <Image
           src="/logo.jpg"
@@ -62,5 +65,5 @@ export default function Footer() {
         />
       </Link>
     </footer>
-  );
+  )
 }

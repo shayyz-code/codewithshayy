@@ -1,23 +1,14 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import CCanvas1 from "./CCanvas1";
-import CSheet from "./CSheet";
-import { motion } from "framer-motion";
+import Image from "next/image"
+import CCanvas1 from "./CCanvas1"
+import CSheet from "./CSheet"
+import { motion } from "framer-motion"
 
 export default function Courses() {
   return (
     <section className="flex flex-col">
-      <div className="px-10 h-svh overflow-y-scroll relative mb-2 py-16">
-        <Image
-          src="/bg3.jpg"
-          fill={true}
-          alt="bg"
-          style={{ objectFit: "cover" }}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="-z-50"
-          priority={true}
-        />
+      <div className="px-10 relative mb-2 py-16">
         <motion.header
           initial={{ y: -50, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -35,5 +26,5 @@ export default function Courses() {
         <CSheet />
       </div>
     </section>
-  );
+  )
 }

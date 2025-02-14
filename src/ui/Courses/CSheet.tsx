@@ -1,25 +1,25 @@
-import { CourseContext, TCourseDetail } from "@/context/courseContext";
-import { motion, AnimatePresence } from "framer-motion";
-import { useContext, useEffect, useState } from "react";
-import xcircle from "../icons/xcircle";
-import Image from "next/image";
-import getAllFromCourse from "@/backend/getAllFromCourse";
-import { clto } from "@/functions/convertModel";
-import { TModel } from "@/functions/convertModel";
-import { cstlc, cstle } from "@/functions/convertStringToList";
-import { techstacksMap } from "../icons/techstacks/techstacksMap";
+import { CourseContext, TCourseDetail } from "@/context/courseContext"
+import { motion, AnimatePresence } from "framer-motion"
+import { useContext, useEffect, useState } from "react"
+import xcircle from "../icons/xcircle"
+import Image from "next/image"
+import getAllFromCourse from "@/backend/getAllFromCourse"
+import { clto } from "@/functions/convertModel"
+import { TModel } from "@/functions/convertModel"
+import { cstlc, cstle } from "@/functions/convertStringToList"
+import { techstacksMap } from "../icons/techstacks/techstacksMap"
 
 export default function CSheet() {
-  const [data, setData] = useState<TCourseDetail>();
-  const { isOpen, key, closeSheet } = useContext(CourseContext);
+  const [data, setData] = useState<TCourseDetail>()
+  const { isOpen, key, closeSheet } = useContext(CourseContext)
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getAllFromCourse("courses", key);
-      setData(data);
+      const data = await getAllFromCourse("courses", key)
+      setData(data)
     }
-    fetchData();
-  }, [key]);
+    fetchData()
+  }, [key])
   return (
     <AnimatePresence initial={false}>
       {isOpen && (
@@ -37,7 +37,7 @@ export default function CSheet() {
         >
           <div className="flex justify-end pt-3">
             <span
-              className="h-7 cursor-pointer transition-all ease-out transform hover:text-white dark:hover:text-black"
+              className="h-7 cursor-pointer transition-all ease-out transform hover:text-primary dark:hover:text-primary"
               onClick={() => closeSheet()}
             >
               {xcircle()}
@@ -80,8 +80,8 @@ export default function CSheet() {
                   </h4>
                   <ul className="flex justify-center items-center gap-5 my-12">
                     {cstlc(data.techstacks).map((item, index) => {
-                      const typedKey = item as keyof typeof techstacksMap;
-                      return <li key={index}>{techstacksMap[typedKey]()}</li>;
+                      const typedKey = item as keyof typeof techstacksMap
+                      return <li key={index}>{techstacksMap[typedKey]()}</li>
                     })}
                   </ul>
                   <ul className="w-[400px] mt-10 text-justify flex flex-col gap-3">
@@ -97,7 +97,7 @@ export default function CSheet() {
                               {` ` + item.value}
                             </p>
                           </li>
-                        );
+                        )
                       }
                     )}
                   </ul>
@@ -134,7 +134,7 @@ export default function CSheet() {
                               ))}
                             </ul>
                           </div>
-                        );
+                        )
                       }
                     )}
                   </div>
@@ -171,7 +171,7 @@ export default function CSheet() {
                               ))}
                             </ul>
                           </div>
-                        );
+                        )
                       }
                     )}
                   </div>
@@ -224,5 +224,5 @@ export default function CSheet() {
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }

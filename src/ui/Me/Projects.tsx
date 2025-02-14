@@ -1,17 +1,16 @@
 import { useContext } from "react"
-import CCard from "./CCard"
-import CLoadingCard from "./CLoadingCard"
 import { motion } from "framer-motion"
-import { CoursesContext } from "@/context/coursesContext"
-import { TCourse } from "@/context/courseContext"
+import { ProjectsContext, TProject } from "@/context/projectsContext"
+import ProjectCard from "./ProjectCard"
+import ProjectLoadingCard from "./ProjectLoadingCard"
 
-export default function CCanvas1({
-  specificCourses = null,
+export default function Projects({
+  specificProjects = null,
 }: {
-  specificCourses?: TCourse[] | null
+  specificProjects?: TProject[] | null
 }) {
   const courses =
-    specificCourses === null ? useContext(CoursesContext) : specificCourses
+    specificProjects === null ? useContext(ProjectsContext) : specificProjects
 
   if (courses.length === 0)
     return (
@@ -23,7 +22,7 @@ export default function CCanvas1({
       >
         {[0, 1, 2].map((val) => (
           <li key={val}>
-            <CLoadingCard />
+            <ProjectLoadingCard />
           </li>
         ))}
       </motion.ul>
@@ -38,7 +37,7 @@ export default function CCanvas1({
     >
       {courses.map((doc) => (
         <li key={doc.key}>
-          <CCard data={doc} isSpecificCourse={specificCourses !== null}></CCard>
+          <ProjectCard data={doc}></ProjectCard>
         </li>
       ))}
     </motion.ul>

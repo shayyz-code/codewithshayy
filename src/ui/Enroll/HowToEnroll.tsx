@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import Image from "next/image"
+import Link from "next/link"
+import { motion } from "framer-motion"
 
 export default function HowToEnroll() {
   return (
@@ -12,15 +12,7 @@ export default function HowToEnroll() {
       transition={{ duration: 1.5, type: "spring" }}
       className="flex flex-col items-center justify-center"
     >
-      <h2 className="relative font-burbankblack text-2xl md:text-4xl tracking-wider uppercase text-center p-5 px-10 border-4 border-black">
-        <Image
-          src={`/bg5.jpg`}
-          alt="picture of mode"
-          fill={true}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          style={{ objectFit: "cover" }}
-          className="-z-10"
-        />
+      <h2 className="relative font-burbankblack text-2xl md:text-4xl tracking-wider uppercase text-center p-5 px-10 bg-primary">
         How to Enroll
       </h2>
       <div className="flex flex-col gap-5 w-[350px] px-5 mt-12">
@@ -72,5 +64,5 @@ export default function HowToEnroll() {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }

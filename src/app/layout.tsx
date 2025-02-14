@@ -1,33 +1,37 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
-import Navigation from "@/ui/Navigation/Navigation";
-import Footer from "@/ui/Footer/Footer";
-import { ThemeProvider } from "@/context/themeContext";
-import Head from "next/head";
+import type { Metadata } from "next"
+import localFont from "next/font/local"
+import { Kanit } from "next/font/google"
+import "./globals.css"
+import Navigation from "@/ui/Navigation/Navigation"
+import Footer from "@/ui/Footer/Footer"
+import { ThemeProvider } from "@/context/themeContext"
+import Head from "next/head"
 
-const fontBurbankBlack = localFont({
-  src: "../../public/BurbankBigCondensed-Black.otf",
+const fontBurbankBlack = Kanit({
+  weight: "600",
+  subsets: ["latin"],
   variable: "--font-burbankblack",
-});
+})
 
-const fontBurbankMedium = localFont({
-  src: "../../public/BurbankBigWide-Medium.otf",
+const fontBurbankMedium = Kanit({
+  weight: "200",
+  subsets: ["latin"],
   variable: "--font-burbankmedium",
-});
+})
 
 export const metadata: Metadata = {
   title: "Code w/ Shayy",
+  metadataBase: new URL("https://codewithshayy.online"),
   description: "No Filler, Just Code. We offer courses on Coding and Maths.",
   keywords:
     "Web Development, HTML, CSS, JavaScript, TypeScript, React, Next.js, Node.js, coding courses, full stack development, hands-on learning, coding myanmar",
-  authors: [{ name: "Shayy", url: "https://codewithshayy.vercel.app" }],
+  authors: [{ name: "Shayy", url: "https://codewithshayy.online/me" }],
   icons: {
     icon: "/favicon.ico", // Path to your favicon
   },
   openGraph: {
     type: "website",
-    url: "https://codewithshayy.vercel.app",
+    url: "https://codewithshayy.online",
     title: "Code w/ Shayy",
     description: "No Filler, Just Code. We offer courses on Coding and Maths.",
     images: [
@@ -46,12 +50,12 @@ export const metadata: Metadata = {
     description: "No Filler, Just Code. We offer courses on Coding and Maths.",
     images: ["/logo.jpg"], // Path to Twitter image
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <ThemeProvider>
@@ -84,5 +88,5 @@ export default function RootLayout({
         </body>
       </html>
     </ThemeProvider>
-  );
+  )
 }

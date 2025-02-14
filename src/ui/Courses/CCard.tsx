@@ -1,12 +1,19 @@
-import { CourseContext, TCourse } from "@/context/courseContext";
-import { cstlc } from "@/functions/convertStringToList";
-import Image from "next/image";
-import { useContext } from "react";
+import { CourseContext, TCourse } from "@/context/courseContext"
+import { cstlc } from "@/functions/convertStringToList"
+import Image from "next/image"
+import Link from "next/link"
+import { useContext } from "react"
 
-export default function CCard({ data }: { data: TCourse }) {
-  const { openSheet } = useContext(CourseContext);
+export default function CCard({
+  data,
+  isSpecificCourse = false,
+}: {
+  data: TCourse
+  isSpecificCourse?: boolean
+}) {
+  const { openSheet } = useContext(CourseContext)
   return (
-    <article className="group flex flex-col gap-5 max-w-[250px] bg-white/75 dark:bg-black/75 border-4 border-black pb-5 hover:shadow-3xl transform transition-all ease-out overflow-hidden">
+    <article className="group flex flex-col gap-5 max-w-[250px] bg-white/75 dark:bg-black/75 border-4 border-black pb-5 hover:shadow-3xl transform transition-all ease-out overflow-hidden shadow-3xl shadow-primary">
       <div className="w-[250px] h-[250px] overflow-y-hidden">
         <Image
           src={data.photo_url}
@@ -28,11 +35,20 @@ export default function CCard({ data }: { data: TCourse }) {
             {data.title}
           </h2>
           <p className="font-burbankmedium text-sm py-3">{data.description}</p>
-          <button onClick={() => openSheet(data.key)} className="text-sky-600">
-            Learn more &gt;
-          </button>
+          {!isSpecificCourse ? (
+            <button
+              onClick={() => openSheet(data.key)}
+              className="text-sky-600"
+            >
+              Learn more &gt;
+            </button>
+          ) : (
+            <Link className="text-sky-600" href={`/courses?key=${data.key}`}>
+              Learn more &gt;
+            </Link>
+          )}
         </div>
       </div>
     </article>
-  );
+  )
 }

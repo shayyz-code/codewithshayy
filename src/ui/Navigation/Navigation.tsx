@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import hrefs from "./hrefs";
-import { motion } from "framer-motion";
-import Image from "next/image";
+import Link from "next/link"
+import hrefs from "./hrefs"
+import { motion } from "framer-motion"
+import Image from "next/image"
 
 export default function Navigation() {
   return (
@@ -23,7 +23,7 @@ export default function Navigation() {
               height={100}
               className="-z-10 filter size-12 border-4 border-black"
             />
-            <span className="text-white bg-black h-6 px-1 group-hover:text-lime-200 transition-all ease-out">
+            <span className="text-white bg-black h-6 px-1 group-hover:text-primary transition-all ease-out">
               w/ Shayy
             </span>
           </h1>
@@ -45,5 +45,5 @@ export default function Navigation() {
         </div>
       </div>
     </motion.nav>
-  );
+  )
 }

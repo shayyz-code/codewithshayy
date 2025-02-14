@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { motion } from "framer-motion"
 
-export default function EnrollCanvas3() {
+export default function Canvas5() {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -15,13 +15,9 @@ export default function EnrollCanvas3() {
         initial={{ opacity: 0, x: -200 }}
         whileInView={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.5, duration: 1.5, type: "spring" }}
-        className="bg-white px-4 py-2 text-black max-w-md shadow-4xl shadow-primary"
+        className="bg-primary px-4 py-2 text-white font-burbankblack text-lg md:text-2xl"
       >
-        <h2 className="font-burbankblack text-xl">⚡ Expert Guidance</h2>
-        <p>
-          Learn from experienced developers who knows the challenges and
-          shortcuts to help you code smarter.
-        </p>
+        About Me
       </motion.div>
     </motion.div>
   )

@@ -1,20 +1,13 @@
-"use client";
+"use client"
 
-import { TEvent } from "@/context/eventsContext";
-import { clto } from "@/functions/convertModel";
-import Image from "next/image";
-import { motion } from "framer-motion";
+import { TEvent } from "@/context/eventsContext"
+import { clto } from "@/functions/convertModel"
+import Image from "next/image"
+import { motion } from "framer-motion"
 
 export default function LatestEvent({ data }: { data: TEvent }) {
   return (
     <article className="relative group flex flex-col md:flex-row justify-center gap-5 lg:gap-10 border-y-8 p-10 border-black overflow-hidden">
-      <Image
-        src="/bg6.jpg"
-        alt="comic bg"
-        fill
-        style={{ objectFit: "cover" }}
-        className="-z-20"
-      />
       {data && data.photo_url && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
@@ -58,14 +51,14 @@ export default function LatestEvent({ data }: { data: TEvent }) {
                       <strong className=" text-primary">{item.key}</strong>
                       {` ${item.value}`}
                     </span>
-                  );
+                  )
                 } else {
                   return (
                     <span key={index}>
                       <em className="">{` ${item.key}`}</em>
                       {` ${item.value}`}
                     </span>
-                  );
+                  )
                 }
               })}
             </p>
@@ -89,5 +82,5 @@ export default function LatestEvent({ data }: { data: TEvent }) {
         </motion.div>
       )}
     </article>
-  );
+  )
 }
