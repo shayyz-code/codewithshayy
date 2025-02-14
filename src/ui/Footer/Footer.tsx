@@ -16,9 +16,12 @@ export default function Footer() {
         </Link>
         <br />
         Need help? Email{" "}
-        <span className="font-burbankblack text-base tracking-widest">
+        <Link
+          href="mailto:aungminkhant.shay@gmail.com"
+          className="font-burbankblack text-base tracking-widest hover:text-blue-500 transition-all ease-out"
+        >
           aungminkhant.shay@gmail.com
-        </span>
+        </Link>
       </p>
       <ul className="flex justify-center flex-wrap gap-5">
         {socialHrefs.map((socialHref, index) => (

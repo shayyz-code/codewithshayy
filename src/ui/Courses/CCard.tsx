@@ -13,7 +13,7 @@ export default function CCard({
 }) {
   const { openSheet } = useContext(CourseContext)
   return (
-    <article className="group flex flex-col gap-5 max-w-[250px] bg-white/75 dark:bg-black/75 border-4 border-black pb-5 hover:shadow-3xl transform transition-all ease-out overflow-hidden shadow-3xl shadow-primary">
+    <article className="group flex flex-col gap-5 max-w-[250px] bg-white/75 dark:bg-black/75 border-4 border-black pb-5 transform transition-all ease-out overflow-hidden shadow-3xl hover:shadow-3xl shadow-primary">
       <div className="w-[250px] h-[250px] overflow-y-hidden">
         <Image
           src={data.photo_url}
