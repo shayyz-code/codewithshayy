@@ -33,9 +33,9 @@ export default function CSheet() {
             collapsed: { y: "100%", height: 0 },
           }}
           transition={{ type: "spring" }}
-          className="fixed bottom-0 right-0 left-0 z-20 px-5 w-full max-h-[90vh] bg-white/65 dark:bg-black/65 backdropBlur"
+          className="fixed bottom-0 right-0 left-0 z-20 w-full px-2 max-h-[90vh] bg-white/65 dark:bg-black/65 backdropBlur"
         >
-          <div className="flex justify-end pt-3">
+          <div className="flex justify-end pt-3 mr-5">
             <span
               className="h-7 cursor-pointer transition-all ease-out transform hover:text-primary dark:hover:text-primary"
               onClick={() => closeSheet()}
@@ -58,8 +58,8 @@ export default function CSheet() {
                   src={data.photo_url}
                   priority={true}
                   alt="picture of course"
-                  width={400}
-                  height={400}
+                  width={380}
+                  height={380}
                   className="border-4 border-black"
                 />
                 <div className="font-burbankmedium px-10 py-6 bg-white border-4 border-black text-black">
@@ -67,15 +67,7 @@ export default function CSheet() {
                   <span className="text-sky-600 ">{data.taughtby}</span>
                 </div>
                 <div className="flex flex-col items-center mb-10">
-                  <h4 className="relative font-burbankblack text-2xl md:text-4xl tracking-wider uppercase text-center p-5 px-10 border-4 border-black">
-                    <Image
-                      src={`/bg2.jpg`}
-                      alt="picture of mode"
-                      fill={true}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      style={{ objectFit: "cover" }}
-                      className="-z-10"
-                    />
+                  <h4 className="relative font-burbankblack text-xl md:text-2xl max-w-80 tracking-wider uppercase text-center p-5 px-10 border-4 border-black bg-primary">
                     Tech Stack
                   </h4>
                   <ul className="flex justify-center items-center gap-5 my-12">
@@ -84,7 +76,7 @@ export default function CSheet() {
                       return <li key={index}>{techstacksMap[typedKey]()}</li>
                     })}
                   </ul>
-                  <ul className="w-[400px] mt-10 text-justify flex flex-col gap-3">
+                  <ul className="w-[380px] mt-10 text-justify flex flex-col gap-3">
                     {clto(data.techstacksdescription).map(
                       (item: TModel, index1: number) => {
                         return (
@@ -103,17 +95,10 @@ export default function CSheet() {
                   </ul>
                 </div>
                 <div className="flex flex-col items-center mb-10">
-                  <h4 className="relative font-burbankblack text-2xl md:text-4xl tracking-wider uppercase text-center p-5 px-10 border-4 border-black">
-                    <Image
-                      src={`/bg4.jpg`}
-                      alt="picture of mode"
-                      fill
-                      style={{ objectFit: "cover" }}
-                      className="-z-10"
-                    />
+                  <h4 className="relative font-burbankblack text-xl md:text-2xl max-w-80 tracking-wider uppercase text-center p-5 px-7 border-4 border-black bg-primary">
                     What will I learn?
                   </h4>
-                  <div className="flex flex-col gap-5 w-[400px] mt-12">
+                  <div className="flex flex-col gap-5 w-[380px] mt-12">
                     {clto(data.whatwillilearn).map(
                       (item: TModel, index1: number) => {
                         return (
@@ -140,17 +125,10 @@ export default function CSheet() {
                   </div>
                 </div>
                 <div className="flex flex-col items-center mb-10">
-                  <h4 className="relative font-burbankblack text-2xl md:text-4xl tracking-wider uppercase text-center p-5 px-10 border-4 border-black">
-                    <Image
-                      src={`/bg5.jpg`}
-                      alt="picture of mode"
-                      fill
-                      style={{ objectFit: "cover" }}
-                      className="-z-10"
-                    />
+                  <h4 className="relative font-burbankblack text-xl md:text-2xl max-w-80 tracking-wider uppercase text-center p-5 px-10 border-4 border-black bg-primary">
                     What will I build?
                   </h4>
-                  <div className="flex flex-col gap-5 w-[400px] mt-12">
+                  <div className="flex flex-col gap-5 w-[380px] mt-12">
                     {clto(data.whatwillibuild).map(
                       (item: TModel, index1: number) => {
                         return (
@@ -177,29 +155,15 @@ export default function CSheet() {
                   </div>
                 </div>
                 <div className="flex flex-col items-center mb-10">
-                  <h4 className="relative font-burbankblack text-2xl md:text-4xl tracking-wider uppercase text-center p-5 px-10 border-4 border-black">
-                    <Image
-                      src={`/bg6.jpg`}
-                      alt="picture of mode"
-                      fill
-                      style={{ objectFit: "cover" }}
-                      className="-z-10"
-                    />
+                  <h4 className="relative font-burbankblack text-xl md:text-2xl max-w-80 tracking-wider uppercase text-center p-5 px-10 border-4 border-black bg-primary">
                     Is this course right for me?
                   </h4>
-                  <p className="w-[400px] text-justify m-12">
+                  <p className="w-[380px] text-justify m-12">
                     {data.isthiscourserightforme}
                   </p>
                 </div>
                 <div className="flex flex-col items-center mb-10">
-                  <h4 className="relative font-burbankblack text-2xl md:text-4xl tracking-wider uppercase text-center p-5 border-4 border-black">
-                    <Image
-                      src={`/bg3.jpg`}
-                      alt="picture of mode"
-                      fill
-                      style={{ objectFit: "cover" }}
-                      className="-z-10"
-                    />
+                  <h4 className="relative font-burbankblack text-xl md:text-2xl max-w-80 tracking-wider uppercase text-center p-5 px-7 border-4 border-black bg-primary">
                     How long will this course take?
                   </h4>
                   <p className="font-burbankblack px-5 py-3 text-xl tracking-widest text-sky-600 bg-white border-4 border-black mt-12">
