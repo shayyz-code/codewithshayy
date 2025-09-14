@@ -18,14 +18,13 @@ export default function Canvas8() {
         className="bg-white max-w-[620px] px-4 py-2 text-black font-burbankblack shadow-4xl shadow-secondary"
       >
         <p className="font-burbankmedium">
-          An AI engineer and a Full Stack Developer, having attended RMIT
-          University, Vietnam. My expertise includes webapp development, mobile
-          app development, database management, API integration, software
-          architecture, and of course, artificial intelligence. Passionate about
-          continuous learning, I am expanding my skills in Rust and exploring
-          capable ways of sharing it to others. Yes, I enjoy sharing my
-          knowledge and skills. You can check out my community supportive
-          projects below.
+          My expertise includes software architecture, cross-platform apps and
+          webapps development, database management, Cloud Service integration,
+          and I'm currently studying deep learning. Passionate about continuous
+          learning, I am expanding my skills in Rust and exploring capable ways
+          of sharing it to others. Yes, I enjoy sharing my knowledge and skills.
+          You can check out my community supportive projects on this site's home
+          page.
         </p>
       </motion.div>
     </motion.div>

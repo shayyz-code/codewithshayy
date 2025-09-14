@@ -24,8 +24,7 @@ export default function Canvas4() {
         transition={{ delay: 0.5, duration: 1.5, type: "spring" }}
         className="px-12 py-2 font-burbankblack text-xl md:text-3xl text-right w-full"
       >
-        <p>AI Engineer</p>
-        <p>Full Stack Developer</p>
+        <p>Software Engineer</p>
         <p className="text-[9px] md:text-base">Co-Founder of</p>
         <p className="text-[9px] md:text-base">Rangoon Academy</p>
       </motion.div>
