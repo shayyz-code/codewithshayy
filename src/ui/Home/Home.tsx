@@ -2,7 +2,6 @@
 
 import PrimaryBtn from "../PrimaryBtn"
 import Hero from "./Hero"
-import Canvas3 from "./Canvas3"
 import Developer from "./Developer"
 import Canvas5 from "./Canvas5"
 import Canvas6 from "./Canvas6"
@@ -13,6 +12,8 @@ import LookingForMaths from "./LookingForMaths"
 import { motion } from "framer-motion"
 import { Suspense } from "react"
 import CoursesContextProvider from "@/context/coursesContext"
+import ProjectsContextProvider from "@/context/projectsContext"
+import Canvas3 from "../Me/Canvas3"
 
 export default function Home() {
   return (
@@ -20,18 +21,23 @@ export default function Home() {
       <Hero />
       <Developer />
 
-      <Suspense>
+      {/* <Suspense>
         <CoursesContextProvider>
           <Canvas3 />
         </CoursesContextProvider>
+      </Suspense> */}
+      <Suspense>
+        <ProjectsContextProvider>
+          <Canvas3 />
+        </ProjectsContextProvider>
       </Suspense>
 
       <CanvasUpcomingEvent />
-      <Canvas5 />
+      {/* <Canvas5 />
       <Canvas6 />
       <Canvas7 />
-      <Canvas8 />
-      <motion.div
+      <Canvas8 /> */}
+      {/* <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         whileInView={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1.5, type: "spring" }}
@@ -50,7 +56,7 @@ export default function Home() {
         <PrimaryBtn href="/enrollnow" size="md">
           Enroll Now
         </PrimaryBtn>
-      </motion.div>
+      </motion.div> */}
       <LookingForMaths />
     </section>
   )

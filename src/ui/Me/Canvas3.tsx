@@ -50,7 +50,7 @@ export default function Canvas3() {
           href="https://github.com/shayyz-code?tab=repositories"
           size="sm"
         >
-          See More
+          See GitHub
         </PrimaryBtn>
       </motion.div>
     </motion.div>

@@ -1,5 +1,5 @@
 import { TProject } from "@/context/projectsContext"
-import { cstlc } from "@/functions/convertStringToList"
+import { cstlc } from "@/utils/convertStringToList"
 import Image from "next/image"
 import Link from "next/link"
 import PrimaryBtn from "../PrimaryBtn"

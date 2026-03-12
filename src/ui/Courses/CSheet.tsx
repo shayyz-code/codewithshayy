@@ -4,9 +4,9 @@ import { useContext, useEffect, useState } from "react"
 import xcircle from "../icons/xcircle"
 import Image from "next/image"
 import getAllFromCourse from "@/backend/getAllFromCourse"
-import { clto } from "@/functions/convertModel"
-import { TModel } from "@/functions/convertModel"
-import { cstlc, cstle } from "@/functions/convertStringToList"
+import { clto } from "@/utils/convertModel"
+import { TModel } from "@/utils/convertModel"
+import { cstlc, cstle } from "@/utils/convertStringToList"
 import { techstacksMap } from "../icons/techstacks/techstacksMap"
 
 export default function CSheet() {
@@ -90,7 +90,7 @@ export default function CSheet() {
                             </p>
                           </li>
                         )
-                      }
+                      },
                     )}
                   </ul>
                 </div>
@@ -120,7 +120,7 @@ export default function CSheet() {
                             </ul>
                           </div>
                         )
-                      }
+                      },
                     )}
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function CSheet() {
                             </ul>
                           </div>
                         )
-                      }
+                      },
                     )}
                   </div>
                 </div>

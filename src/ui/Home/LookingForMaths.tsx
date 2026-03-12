@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 
-export default function LookingForMaths() {
+export default function StayTuned() {
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
@@ -11,7 +11,7 @@ export default function LookingForMaths() {
       className="flex justify-between items-center w-[350px] md:w-[472px] px-10 py-5 mx-auto my-16 font-burbankmedium bg-white text-black border-4 border-black gap-10 shadow-2xl shadow-primary"
     >
       <h3 className="text-base">
-        Maths Courses are also Coming Soon. Stay Tuned &lt;/🍓&gt;
+        I Make Coding Videos On a Whim. So, Stay Tuned &lt;/🍓&gt;
       </h3>
       {/* <PrimaryBtn href="/kids" size="sm">
         Go to

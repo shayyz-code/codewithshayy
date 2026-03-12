@@ -23,7 +23,7 @@ export default function Contact() {
       >
         📬 aungminkhant.shay@gmail.com
       </Link>
-      <p>📍 73rd st, Between 107th A and 108th, Mandalay, Myanmar</p>
+      <p>📍 York street, Dagon Township, Yangon, Myanmar</p>
     </motion.div>
   )
 }

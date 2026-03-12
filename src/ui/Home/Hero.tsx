@@ -43,20 +43,19 @@ export default function Hero() {
             </li>
           </ul>
           <h2 className="font-burbankblack md:[w-500px] text-3xl md:text-5xl">
-            <div className="bg-black w-fit">Stop Wasting Time.</div>
+            <div className="bg-black w-fit">Stop Scrolling.</div>
             <div className="bg-black w-fit">Start Coding.</div>
           </h2>
           <p className="font-burbankmedium md:w-[500px] text-base mt-5 mb-10 bg-black">
             <span className="text-xl font-burbankblack text-primary">
               Code w/ Shayy
             </span>{" "}
-            is your <span className="font-burbankblack">go-to hub</span> for
-            practical coding. We skip the fluff and focus on building real-world
-            projects. Join us to turn{" "}
-            <span className="font-burbankblack">ideas into code—fast.</span>
+            is where I make coding tutorials and hacks{" "}
+            <span className="font-burbankblack">on a whim</span>. I skip the
+            fluff and focus on real-world tips.
           </p>
-          <PrimaryBtn href="/enroll" size="md">
-            Enroll
+          <PrimaryBtn href="https://github.com/shayyz-code" size="md">
+            Visit GitHub
           </PrimaryBtn>
         </motion.div>
       </div>

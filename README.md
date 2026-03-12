@@ -1,40 +1,24 @@
+[![Next](https://img.shields.io/badge/NextJs-000000?logo=next.js&logoColor=white&style=for-the-badge)](https://www.nextjs.org)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Firebase](https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)
+
 # Code w/ Shayy
 
-Welcome to **Code w/ Shayy**, an innovative learning platform dedicated to teaching web development and programming to aspiring developers. Our courses are designed to give you hands-on experience, practical skills, and the ability to build real-world projects.
+Welcome to **Code w/ Shayy**, my portfolio.
 
-## 🚀 About Code w/ Shayy
+## Tech Stacks
 
-At **Code w/ Shayy**, we offer a range of coding courses that cater to both beginners and experienced developers. Our mission is to provide high-quality, practical education in web development, JavaScript, TypeScript, React, Next.js, and more. All courses are led by experienced instructors who are passionate about sharing their knowledge and helping you succeed.
+For this lightweight webapp, I used:
 
-## 💻 Tech Stack Used for this Lightweight Webapp
-
-- **NextJS**
+- **NextJS 14** (Upgraded to 16)
 - **Firebase**
 
-## 🌟 Why Choose Code w/ Shayy?
+Notes: NextJS will be replaced with Astro in the coming update.
 
-- **Real-world Projects**: You'll work on projects that mirror actual development scenarios.
-- **Industry-relevant Skills**: Learn the tech stack used by top companies.
-- **Fast-track Learning**: Skip common beginner hurdles and get up to speed quickly with expert guidance.
+## Contributing
 
-## 📅 Events and Workshops
+If you have suggestions or want to help fix some errors on **Code w/ Shayy**, feel free to submit a pull request or issue.
 
-We also host workshops and events covering topics like:
+## Contact
 
-- **How to Get Started with Web Dev**
-- **Coding Best Practices**
-- **Rockstar Developer Concepts**
-
-Stay tuned for more!
-
-## 📝 How to Enroll
-
-Interested in joining us? Visit our [enroll page](#codewithshayy.vercel.app/enroll) to sign up for a course today!
-
-## 🤝 Contributing
-
-We are always open to feedback and collaboration. If you have suggestions or want to contribute to the development of **Code w/ Shayy**, feel free to submit a pull request or contact us.
-
-## 📧 Contact
-
-Have any questions? Feel free to reach out at [aungminkhant.shay@gmail.com](mailto:aungminkhant.shay@gmail.com) or follow us on social media for updates!
+Have any questions? Reach out at [aungminkhant.shay@gmail.com](mailto:aungminkhant.shay@gmail.com) or follow me on social media!

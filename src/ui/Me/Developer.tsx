@@ -25,8 +25,7 @@ export default function Canvas4() {
         className="px-12 py-2 font-burbankblack text-xl md:text-3xl text-right w-full"
       >
         <p>Software Engineer</p>
-        <p className="text-[9px] md:text-base">Co-Founder of</p>
-        <p className="text-[9px] md:text-base">Rangoon Academy</p>
+        <p className="text-[9px] md:text-base">Aung Min Khant aka. Shayy</p>
       </motion.div>
 
       <motion.div

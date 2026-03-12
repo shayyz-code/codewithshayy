@@ -24,7 +24,8 @@ export default function Canvas4() {
         transition={{ delay: 0.5, duration: 1.5, type: "spring" }}
         className="px-12 py-2 font-burbankblack text-lg md:text-2xl"
       >
-        Developed by
+        <p>Software Engineer</p>
+        <p className="text-[9px] md:text-base">Aung Min Khant aka. Shayy</p>
       </motion.div>
 
       <motion.div

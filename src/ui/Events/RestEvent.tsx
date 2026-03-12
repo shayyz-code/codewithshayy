@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { TEvent } from "@/context/eventsContext";
-import { clto } from "@/functions/convertModel";
-import Image from "next/image";
+import { TEvent } from "@/context/eventsContext"
+import { clto } from "@/utils/convertModel"
+import Image from "next/image"
 
 export default function RestEvent({ data }: { data: TEvent }) {
   return (
@@ -48,14 +48,14 @@ export default function RestEvent({ data }: { data: TEvent }) {
                       <strong className=" text-primary">{item.key}</strong>
                       {` ${item.value}`}
                     </span>
-                  );
+                  )
                 } else {
                   return (
                     <span key={index}>
                       <em className="">{` ${item.key}`}</em>
                       {` ${item.value}`}
                     </span>
-                  );
+                  )
                 }
               })}
             </p>
@@ -74,5 +74,5 @@ export default function RestEvent({ data }: { data: TEvent }) {
         </div>
       )}
     </article>
-  );
+  )
 }

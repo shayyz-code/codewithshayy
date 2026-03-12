@@ -10,21 +10,21 @@ interface IHrefs {
 }
 
 const hrefs: IHrefs[] = [
-  {
-    href: "/courses",
-    name: "Courses",
-    icon: rectanglestack(),
-  },
-  {
-    href: "/events",
-    name: "Events",
-    icon: calendar(),
-  },
-  {
-    href: "/enroll",
-    name: "Enroll",
-    icon: star(),
-  },
+  // {
+  //   href: "/blogs",
+  //   name: "Blogs",
+  //   icon: rectanglestack(),
+  // },
+  // {
+  //   href: "/projects",
+  //   name: "Projects",
+  //   icon: calendar(),
+  // },
+  // {
+  //   href: "/enroll",
+  //   name: "Enroll",
+  //   icon: star(),
+  // },
   {
     href: "/me",
     name: "Me",

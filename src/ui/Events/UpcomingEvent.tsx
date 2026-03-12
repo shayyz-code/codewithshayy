@@ -3,7 +3,7 @@
 import Image from "next/image"
 import PrimaryBtn from "../PrimaryBtn"
 import { TEvent } from "@/context/eventsContext"
-import { clto } from "@/functions/convertModel"
+import { clto } from "@/utils/convertModel"
 import { motion } from "framer-motion"
 
 export default function UpcomingEvent({ data }: { data?: TEvent }) {

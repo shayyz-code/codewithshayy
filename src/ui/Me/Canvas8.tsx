@@ -18,13 +18,10 @@ export default function Canvas8() {
         className="bg-white max-w-[620px] px-4 py-2 text-black font-burbankblack shadow-4xl shadow-secondary"
       >
         <p className="font-burbankmedium">
-          My expertise includes software architecture, cross-platform apps and
-          webapps development, database management, Cloud Service integration,
-          and I'm currently studying deep learning. Passionate about continuous
-          learning, I am expanding my skills in Rust and exploring capable ways
-          of sharing it to others. Yes, I enjoy sharing my knowledge and skills.
-          You can check out my community supportive projects on this site's home
-          page.
+          Heyy, I'm Shayy, a{" "}
+          <span className="text-[#B7410E] font-burbankblack italic">Rusty</span>{" "}
+          Software Engineer. I've been coding since I was 12, and now I build
+          industry projects and contribute to open source, when I can.
         </p>
       </motion.div>
     </motion.div>

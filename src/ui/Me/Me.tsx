@@ -1,6 +1,5 @@
 "use client"
 
-import PrimaryBtn from "../PrimaryBtn"
 import Canvas3 from "./Canvas3"
 import Developer from "./Developer"
 import Canvas5 from "./Canvas5"
@@ -22,6 +21,7 @@ export default function Me() {
           <Canvas3 />
         </ProjectsContextProvider>
       </Suspense>
+
       <CanvasUpcomingEvent />
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
@@ -30,16 +30,15 @@ export default function Me() {
         className="w-[350px] mx-auto flex flex-col items-center py-16 justify-center gap-10"
       >
         <h3 className="font-burbankblack uppercase text-xl lg:text-2xl max-w-lg text-center">
-          🚀 Let&apos;s Work <b className="text-secondary">Together</b>?
+          Let&apos;s Work <b className="text-secondary">Together</b>?
         </h3>
         <p className="px-10 text-center font-burbankmedium">
-          {"Turn your ideas into Quality Projects by a Professional with Affordable Price."
+          {"Turn your ideas into Quality Outcomes."
             .split(" ")
             .map((word, index) => (
               <b key={index} className="hover:bg-secondary">{` ${word} `}</b>
             ))}
         </p>
-        <PrimaryBtn size="md">Contact Me</PrimaryBtn>
       </motion.div>
       <Contact />
     </section>

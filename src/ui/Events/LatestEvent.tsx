@@ -1,7 +1,7 @@
 "use client"
 
 import { TEvent } from "@/context/eventsContext"
-import { clto } from "@/functions/convertModel"
+import { clto } from "@/utils/convertModel"
 import Image from "next/image"
 import { motion } from "framer-motion"
 

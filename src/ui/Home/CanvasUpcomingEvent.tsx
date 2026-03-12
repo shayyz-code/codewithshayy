@@ -2,7 +2,7 @@
 
 import getUpcomingEvent from "@/backend/getUpcomingEvent"
 import { EventDefaultValues, TEvent } from "@/context/eventsContext"
-import { clto } from "@/functions/convertModel"
+import { clto } from "@/utils/convertModel"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { useEffect, useState } from "react"

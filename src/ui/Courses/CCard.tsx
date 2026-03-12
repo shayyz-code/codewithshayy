@@ -1,5 +1,5 @@
 import { CourseContext, TCourse } from "@/context/courseContext"
-import { cstlc } from "@/functions/convertStringToList"
+import { cstlc } from "@/utils/convertStringToList"
 import Image from "next/image"
 import Link from "next/link"
 import { useContext } from "react"
