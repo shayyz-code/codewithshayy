@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# One-off Firestore archives (contains PII) — keep local, back up outside the repo
+/.archive/

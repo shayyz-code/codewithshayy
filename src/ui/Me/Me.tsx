@@ -4,7 +4,6 @@ import Canvas3 from "./Canvas3"
 import Developer from "./Developer"
 import Canvas5 from "./Canvas5"
 import Canvas8 from "./Canvas8"
-import CanvasUpcomingEvent from "./CanvasUpcomingEvent"
 import Contact from "./Contact"
 import { motion } from "framer-motion"
 import { Suspense } from "react"
@@ -22,7 +21,6 @@ export default function Me() {
         </ProjectsContextProvider>
       </Suspense>
 
-      <CanvasUpcomingEvent />
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         whileInView={{ scale: 1, opacity: 1 }}
