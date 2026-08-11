@@ -1,8 +1,6 @@
 "use client"
 import { ReactNode, useEffect, useState } from "react"
 import { createContext } from "react"
-import getAllCourses from "@/backend/getAllCourses"
-import { TCourse } from "./courseContext"
 import getAllProjects from "@/backend/getAllProjects"
 
 export type TProject = {
