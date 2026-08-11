@@ -3,9 +3,10 @@
 import { motion } from "framer-motion"
 import PrimaryBtn from "../PrimaryBtn"
 import Link from "next/link"
+import type { Project } from "@/data/projects"
 import Projects from "./Projects"
 
-export default function Canvas3() {
+export default function Canvas3({ projects }: { projects: Project[] }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -38,7 +39,7 @@ export default function Canvas3() {
         transition={{ duration: 1.5, type: "spring" }}
         className="flex gap-5 flex-wrap justify-center md:flex-nowrap items-center"
       >
-        <Projects />
+        <Projects projects={projects} />
       </motion.div>
       <motion.div
         initial={{ y: 50, opacity: 0 }}

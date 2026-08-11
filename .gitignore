@@ -41,3 +41,6 @@ next-env.d.ts
 # Cloudflare Workers build output + local wrangler/miniflare state
 /.open-next/
 /.wrangler/
+
+# Generated seed data (derived from the gitignored .archive/)
+/seeds/

@@ -52,29 +52,40 @@ Sections within a feature are named `Canvas<N>` (`Canvas3`, `Canvas5`, `Canvas8`
 
 **Path aliases:** `@/*` → `./src/*`, `$/*` → `./public/*`.
 
-## Data access — mid-migration
+## Data access
 
-The repo is being migrated from Firebase to Cloudflare D1 + R2, deployed on Workers via `@opennextjs/cloudflare`. Both shapes coexist until that lands, so check which one a given feature uses before extending it.
+Projects live in **Cloudflare D1, read through Drizzle in server components**. Firebase is gone from this path entirely — no client-side fetching, no context provider, no loading skeleton.
 
-**Current (pre-migration) shape:** every fetch is client-side. Providers in `src/context/*.tsx` call `src/backend/*.ts` from a `useEffect` on mount, and `src/backend/*` uses the **Firebase client SDK directly from the browser**. There is no server-side data access anywhere in the app.
+```
+src/data/schema.ts    Drizzle table definitions — the source of truth
+src/data/db.ts        getDb(): Drizzle client bound to env.DB
+src/data/projects.ts  listProjects() / getProject(slug)
+```
 
-**Target shape:** server components reading D1 through a `src/data/*` module via `getCloudflareContext().env.DB`, with media served from R2. Prefer adding to `src/data/` over extending `src/context/` + `src/backend/`.
+```bash
+pnpm db:generate       # schema.ts -> migrations/*.sql (never hand-edit those)
+pnpm db:migrate        # apply to local D1
+pnpm db:migrate:remote # apply to the real database
+pnpm db:seed           # regenerate + load seeds/seed.sql into local D1
+pnpm db:studio         # browse the data
+```
+
+`seeds/` is deliberately **outside** `migrations/` — `wrangler d1 migrations apply` runs every `.sql` in that directory, and the seed opens with `DELETE FROM projects`.
+
+**Routes that read D1 must set `export const dynamic = "force-dynamic"`.** `getCloudflareContext({ async: true })` resolves to *local* bindings during static generation, so a prerendered route bakes your local database into the deployed output. Check the build output: data routes should be `ƒ (Dynamic)`, not `○ (Static)`.
+
+**Drizzle's `with` clause must be written inline** at each call site. Hoisting it into a shared const or helper widens the literal `true` to `boolean`, and the relational types reject it.
+
+Three columns are nullable because the data needs them to be — **render them conditionally**: `siteUrl` (not every project has a site), `repoUrl` (two repos are private and one doesn't exist; a private repo 404s for visitors), `mediaKey` (one project has no image, and shows a titled placeholder). This replaced a hardcoded `github.com/shayyz-code/<slug>` template that produced dead links for 3 of 6 projects.
+
+`mediaKey` stores an R2 object key, never an absolute URL.
 
 ### Firebase cannot run on the server. This is not a preference.
 
-`firebase/firestore` pulls in `protobufjs`, which calls `new Function` **at import time**. Workers forbids that, and the failure is `EvalError: Code generation from strings disallowed for this context`.
-
-OpenNext bundles every route into one worker, so this is contagious in two ways:
-
-1. Module-scope `initializeApp()` broke *every* route, including `/privacy` and `/terms`, which touch no Firebase. Hence the lazy `getDb()` in `src/backend/firebase.ts` — never reintroduce module-scope Firebase calls.
-2. Merely *importing* the module server-side is enough. So the projects subtree is isolated in `src/ui/Me/ProjectsSection.tsx` and pulled in with `next/dynamic(..., { ssr: false })` from both `Home.tsx` and `Me.tsx`. Importing `@/context/projectsContext` from anything server-rendered will break the build's runtime again.
-
-Both workarounds disappear when projects move to D1 — that's the point of moving.
+Still true, and worth keeping in mind before adding any Firebase back: `firebase/firestore` pulls in `protobufjs`, which calls `new Function` **at import time**. Workers forbids it — `EvalError: Code generation from strings disallowed for this context`. Because OpenNext bundles every route into one worker, module-scope `initializeApp()` took down `/privacy` and `/terms` too, and merely *importing* the module server-side was enough to break it.
 
 ### Images
 
-The default `next/image` optimizer does not run on Workers; optimization goes through the `IMAGES` binding in `wrangler.jsonc`. Cloudflare Images returns **403 `Blocked`** for the 1 MB animated `rangoon-academy.gif`, so `ProjectCard` sets `unoptimized` for `.gif` sources. Match the extension *before* the query string — Firebase Storage URLs end in `?alt=media&token=...`, so `endsWith(".gif")` is always false.
+The default `next/image` optimizer does not run on Workers; optimization goes through the `IMAGES` binding in `wrangler.jsonc`. Cloudflare Images returns **403 `Blocked`** for the 1 MB animated `rangoon-academy.gif` — keep that in mind when the migration copies images into R2; it should be re-encoded as a static image.
 
-**Known-broken images, baseline 2 on `/me`** — use this as a regression check:
-- `/developer.png` 400s; `public/` actually holds `developer.PNG` (fails on macOS too).
-- The `dreamyfancies-pvs` card has an empty `photo_url` in Firestore.
+**Known-broken image:** `/developer.png` 400s because `public/` actually holds `developer.PNG` (fails on macOS too). Not yet fixed.
