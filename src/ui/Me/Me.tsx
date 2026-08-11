@@ -1,20 +1,20 @@
 "use client"
 
-import Developer from "./Developer"
-import Canvas5 from "./Canvas5"
-import Canvas8 from "./Canvas8"
+import Developer from "../sections/Developer"
+import SectionLabel from "../sections/SectionLabel"
+import Bio from "../sections/Bio"
 import Contact from "./Contact"
 import { motion } from "framer-motion"
-import Canvas3 from "./Canvas3"
+import FeaturedProjects from "../sections/FeaturedProjects"
 import type { Project } from "@/data/projects"
 
 export default function Me({ projects }: { projects: Project[] }) {
   return (
     <section className="flex flex-col mb-16">
-      <Developer />
-      <Canvas5 />
-      <Canvas8 />
-      <Canvas3 projects={projects} />
+      <Developer size="lg" />
+      <SectionLabel>About Me</SectionLabel>
+      <Bio />
+      <FeaturedProjects projects={projects} />
 
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}

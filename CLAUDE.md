@@ -115,11 +115,22 @@ export default function PageMe() {
 
 All real markup lives in `src/ui/<Feature>/<Feature>.tsx`. When changing what a page looks like, edit the `src/ui/` component, not the route file.
 
-`src/ui/Me/` still has `Canvas3`, `Canvas5`, `Canvas8`. Those numbers are
-historical and carry no meaning — not ordered, with gaps. **Do not add more.**
-Everything written since uses descriptive names (`Hero`, `Developer`,
-`StayTuned`, `BlogIndex`, `ProjectDetail`), and the remaining `Canvas*` files are
-candidates for renaming whenever they are next touched.
+No `Canvas<N>` files remain — the last three were renamed when they moved into
+`src/ui/sections/`. Use descriptive names.
+
+**Sections shared by more than one page live in `src/ui/sections/`**, not inside
+whichever feature happened to introduce them. `Developer`, `FeaturedProjects`,
+`SectionLabel`, `Bio`, `ProjectGrid` and `ProjectCard` are rendered by two or
+three of `/`, `/me` and `/projects`. `src/ui/<Feature>/` keeps only what that one
+page renders — `Home/Hero`, `Home/StayTuned`, `Me/Contact`.
+
+`sections/Band` is the full-bleed rule-topped strip every section sits in, with
+the shared `whileInView` fade; `SlideIn` is its inner slide-from-left. Three
+copies of both existed before.
+
+These are all `"use client"` for framer-motion. A section that stops being a
+client component renders permanently at `opacity: 0`, because the animations are
+`whileInView`.
 
 **Path aliases:** `@/*` → `./src/*`, `$/*` → `./public/*`.
 

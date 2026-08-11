@@ -4,10 +4,13 @@ import { motion } from "framer-motion"
 import type { Project } from "@/data/projects"
 import ProjectCard from "./ProjectCard"
 
-// Purely presentational now. Data is fetched in the route's server component
+// The card grid, shared by /, /me and /projects. It lived in ui/Me/ while two
+// other features imported it across the directory boundary.
+//
+// Purely presentational. Data is fetched in the route's server component
 // and passed down — no context, no useEffect, and no loading skeleton, because
 // the markup arrives already populated.
-export default function Projects({ projects }: { projects: Project[] }) {
+export default function ProjectGrid({ projects }: { projects: Project[] }) {
   if (projects.length === 0) return null
 
   return (
