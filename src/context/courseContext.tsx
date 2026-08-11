@@ -103,6 +103,10 @@ export function CourseProvider({ children }: TProps) {
     }
   };
 
+  // Suppressed rather than fixed: this whole provider is dead code slated for
+  // deletion with the courses surface. The gate below tests for "/courses",
+  // a route that no longer exists, so this effect never runs at all.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (pathname === "/courses") {
       const courseKey = searchParams.get("key");
@@ -115,6 +119,7 @@ export function CourseProvider({ children }: TProps) {
       }
     }
   }, [searchParams]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <CourseContext.Provider value={{ isOpen, key, openSheet, closeSheet }}>

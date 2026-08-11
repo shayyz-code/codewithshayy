@@ -22,7 +22,7 @@ export default function Canvas6() {
         </h2>
         <p className="font-burbankmedium">
           At Code w/ Shayy, we can skip the boring theory and focus on what
-          really matters—building stuff. You'll be hands-on from day one,
+          really matters—building stuff. You&apos;ll be hands-on from day one,
           learning by doing, and working on projects that actually prepare you
           for the real world.
         </p>

@@ -10,8 +10,10 @@ export default function CCanvas1({
 }: {
   specificCourses?: TCourse[] | null
 }) {
-  const courses =
-    specificCourses === null ? useContext(CoursesContext) : specificCourses
+  // Hook must run unconditionally — the previous inline ternary called
+  // useContext only when specificCourses was null, breaking hook order.
+  const contextCourses = useContext(CoursesContext)
+  const courses = specificCourses ?? contextCourses
 
   if (courses.length === 0)
     return (

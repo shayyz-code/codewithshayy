@@ -9,8 +9,10 @@ export default function Projects({
 }: {
   specificProjects?: TProject[] | null
 }) {
-  const courses =
-    specificProjects === null ? useContext(ProjectsContext) : specificProjects
+  // Hook must run unconditionally — the previous inline ternary called
+  // useContext only when specificProjects was null, breaking hook order.
+  const contextProjects = useContext(ProjectsContext)
+  const courses = specificProjects ?? contextProjects
 
   if (courses.length === 0)
     return (

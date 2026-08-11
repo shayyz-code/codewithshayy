@@ -58,7 +58,8 @@ export default function EnrollNow() {
               Your journey to becoming a developer starts here.
             </span>{" "}
             We offer hands-on courses that get you building real projects fast,
-            whether you're a beginner or looking to advance your skills.{" "}
+            whether you&apos;re a beginner or looking to advance your skills.
+            {" "}
             <span className="font-burbankblack text-xl">
               No fluff, no wasted time
             </span>{" "}
