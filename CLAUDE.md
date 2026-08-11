@@ -161,9 +161,12 @@ that is not `codewithshayy.com`, so `www` and the workers.dev subdomain do not
 become duplicates. There is deliberately no `www` → apex redirect: it is the
 stronger signal but breaks existing links.
 
-`robots.txt` must be served by the worker. With no origin robots, Cloudflare
-injects a default content-signals policy that neither disallows `/admin` nor
-names a sitemap.
+`robots.txt` is served by both. Cloudflare prepends a managed content-signals
+block — `Content-Signal: search=yes,ai-train=no` plus `Disallow: /` for a list of
+AI crawlers — and the worker's own rules follow after
+`# END Cloudflare Managed Content`. They coexist, so `Disallow: /admin` and the
+`Sitemap:` line survive. Fetching only the first lines shows Cloudflare's block
+and looks like the worker's is being ignored; it is not.
 
 `/admin` lives at `src/app/admin/`. `src/middleware.ts` confines it to
 `admin.codewithshayy.com` and 404s it everywhere else.
