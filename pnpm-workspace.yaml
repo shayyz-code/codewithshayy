@@ -4,6 +4,5 @@ allowBuilds:
   # clone gets a missing binary rather than a clear error.
   esbuild: true
   workerd: true
-  protobufjs: true
   sharp: true
   unrs-resolver: true
