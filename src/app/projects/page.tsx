@@ -6,6 +6,7 @@ import ProjectsIndex from "@/ui/Projects/ProjectsIndex"
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/projects" },
   title: "Projects — Code w/ Shayy",
   description: "Things I have designed, built and shipped.",
 }

@@ -147,13 +147,25 @@ client component renders permanently at `opacity: 0`, because the animations are
 | `/rss.xml` | `○` static | the generated post manifest |
 | `/media/[...key]` | `ƒ` dynamic | R2, resized via `IMAGES` |
 | `/privacy`, `/terms` | `○` static | nothing |
+| `/robots.txt` | `○` static | nothing |
+| `/sitemap.xml` | `ƒ` dynamic | D1 projects + the post manifest |
 | `/blogs`, `/blogs/:slug` | 308 | redirect to `/blog…` |
 
 The split is the point: **anything reading D1 must be dynamic**, and anything
 prerendered must not touch the database or the filesystem at request time. CI
 asserts the first three stay `ƒ`.
 
-`/admin` has no route yet. `src/middleware.ts` confines it to
+**Only the apex is meant to be indexed.** Every page sets `alternates.canonical`
+against `metadataBase`, and middleware adds `x-robots-tag: noindex` on any host
+that is not `codewithshayy.com`, so `www` and the workers.dev subdomain do not
+become duplicates. There is deliberately no `www` → apex redirect: it is the
+stronger signal but breaks existing links.
+
+`robots.txt` must be served by the worker. With no origin robots, Cloudflare
+injects a default content-signals policy that neither disallows `/admin` nor
+names a sitemap.
+
+`/admin` lives at `src/app/admin/`. `src/middleware.ts` confines it to
 `admin.codewithshayy.com` and 404s it everywhere else.
 
 ## Data access

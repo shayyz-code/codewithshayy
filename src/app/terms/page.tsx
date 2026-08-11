@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import HoverWords from "@/ui/HoverWords"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/terms" },
   title: "Terms — Code w/ Shayy",
   description: "The terms for using this site.",
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import HoverWords from "@/ui/HoverWords"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/privacy" },
   title: "Privacy — Code w/ Shayy",
   description: "What this site collects, which is almost nothing.",
 }

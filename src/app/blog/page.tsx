@@ -7,6 +7,7 @@ import BlogIndex from "@/ui/Blog/BlogIndex"
 // filesystem, which does not exist inside the worker.
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/blog" },
   title: "Blog — Code w/ Shayy",
   description: "Notes on things I am building and learning.",
 }
