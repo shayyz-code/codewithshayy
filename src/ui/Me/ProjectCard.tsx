@@ -14,6 +14,9 @@ export default function ProjectCard({ data }: { data: Project }) {
             alt={`${data.title} preview`}
             width={250}
             height={250}
+            // Cloudflare Images answers 403 "Blocked" for the 1 MB, 190-frame
+            // rangoon-academy GIF, so animated sources skip the optimizer.
+            unoptimized={data.mediaKey.toLowerCase().endsWith(".gif")}
             className="transition-all ease-out transform group-hover:scale-110"
           />
         ) : (
