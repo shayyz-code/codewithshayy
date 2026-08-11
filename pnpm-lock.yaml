@@ -20,6 +20,9 @@ importers:
       framer-motion:
         specifier: ^11.4.0
         version: 11.18.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      jose:
+        specifier: ^6.2.8
+        version: 6.2.8
       next:
         specifier: 16.3.0
         version: 16.3.0(@babel/core@7.29.0(supports-color@10.2.2))(@types/node@20.19.37)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -2917,6 +2920,9 @@ packages:
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
+
+  jose@6.2.8:
+    resolution: {integrity: sha512-Bsdjwm3Qsd/P0jR+BHDe3LytDfY7WBq2HmCCLIwuVRHMuEC9ae7/R474GIUdF1NgCyZjzVo/A9DOiOBtXq8ZoQ==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -6942,6 +6948,8 @@ snapshots:
       '@isaacs/cliui': 9.0.0
 
   jiti@2.7.0: {}
+
+  jose@6.2.8: {}
 
   js-tokens@4.0.0: {}
 
