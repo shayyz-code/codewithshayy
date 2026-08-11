@@ -159,7 +159,18 @@ correctly but entirely unstyled.
 blocks at the edge, so a request without a valid session never reaches the
 worker.
 
-`src/middleware.ts` verifies the JWT Access issues — signature against
+`src/middleware.ts` also confines the admin to that one hostname: `/admin*` on any
+other host rewrites to the 404 page (not 401 — a 401 confirms an admin exists),
+and non-admin paths on the admin host 301 to the apex so there is no auth-walled
+duplicate of the public site. `localhost` and `*.workers.dev` count as
+admin-capable so local preview exercises the same path.
+
+**Host cannot be spoofed in local preview.** Wrangler pins the request host to
+the first configured route, so `curl -H "Host: admin.…"` still arrives as
+`codewithshayy.com`. The admin-host branch is only verifiable against the
+deployed hostname.
+
+It verifies the JWT Access issues — signature against
 Cloudflare's rotating public keys, plus issuer and audience — rather than just
 checking the header exists, which anyone can forge with `curl -H`. The team
 domain and AUD tag are hard-coded there; neither is a secret, and middleware
