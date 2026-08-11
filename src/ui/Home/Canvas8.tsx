@@ -20,7 +20,7 @@ export default function Canvas8() {
         <p className="font-burbankmedium">
           We have been there, and we know what slows people down. That&apos;s
           why every course is designed to help you learn faster and skip the
-          common mistakes. Instead of spinning your wheels, you'll be up and
+          common mistakes. Instead of spinning your wheels, you&apos;ll be up and
           running with real projects in no time.
         </p>
       </motion.div>

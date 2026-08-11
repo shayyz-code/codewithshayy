@@ -24,7 +24,6 @@ type TProps = {
 
 export function ThemeProvider({ children }: TProps) {
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(true)
-  useEffect(() => initialThemeHandler())
 
   function isLocalStorageEmpty(): boolean {
     return !localStorage.getItem("isDarkTheme")
@@ -47,6 +46,12 @@ export function ThemeProvider({ children }: TProps) {
       }
     }
   }
+
+  // Declared after initialThemeHandler so the effect isn't reading a binding
+  // before its declaration. The empty dep array is also a fix: without it this
+  // re-ran on every render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => initialThemeHandler(), [])
 
   function toggleThemeHandler(): void {
     const isDarkTheme: boolean = JSON.parse(

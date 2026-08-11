@@ -10,16 +10,15 @@ Package manager is **pnpm**.
 pnpm dev          # next dev
 pnpm build        # next build
 pnpm start        # next start (needs a prior build)
-pnpm lint         # BROKEN — see below
+pnpm lint         # eslint .
+pnpm typecheck    # tsc --noEmit
 ```
 
-`pnpm lint` currently fails. The script still calls `next lint`, which was **removed in Next.js 16**, and there is no `eslint.config.*` or `.eslintrc*` anywhere in the repo despite `eslint` and `eslint-config-next` being installed. Until that's fixed, the only automated check is:
+`lint` + `typecheck` are the only automated checks — there are no tests and no CI. Both pass clean on `main`; keep them that way.
 
-```bash
-npx tsc --noEmit  # passes as of this writing
-```
+ESLint uses flat config in `eslint.config.mjs`. `eslint-config-next` ships a native flat-config array as of Next 15, so **no `@eslint/eslintrc` / `FlatCompat` shim is needed** — importing `eslint-config-next/core-web-vitals` pulls in the base `next` config and `next/typescript` too.
 
-There are no tests and no CI.
+**If pnpm refuses to run any script** with `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`: `node_modules/` is owned by `root` from an earlier `sudo pnpm install`, so pnpm's dependency-status check can't reinstall. Fix with `sudo rm -rf node_modules && pnpm install`. Until then, `npx eslint .` and `npx tsc --noEmit` run the same checks directly.
 
 ## Layout conventions
 
