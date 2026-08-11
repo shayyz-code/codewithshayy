@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import Link from "next/link"
 import type { Project } from "@/data/projects"
-import Projects from "../Me/Projects"
+import ProjectGrid from "../sections/ProjectGrid"
 
 export default function ProjectsIndex({ projects }: { projects: Project[] }) {
   return (
@@ -29,7 +29,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
       </motion.header>
 
       {projects.length > 0 ? (
-        <Projects projects={projects} />
+        <ProjectGrid projects={projects} />
       ) : (
         <p className="font-burbankmedium">Nothing here yet.</p>
       )}

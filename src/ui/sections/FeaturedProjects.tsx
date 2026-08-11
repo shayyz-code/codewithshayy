@@ -1,24 +1,25 @@
 "use client"
 
-import { motion } from "framer-motion"
-import PrimaryBtn from "../PrimaryBtn"
 import Link from "next/link"
+import { motion } from "framer-motion"
 import type { Project } from "@/data/projects"
-import Projects from "./Projects"
+import Band from "./Band"
+import ProjectGrid from "./ProjectGrid"
+import PrimaryBtn from "../PrimaryBtn"
 
-export default function Canvas3({ projects }: { projects: Project[] }) {
+// Was Me/Canvas3, imported by Home across the feature boundary. Both / and /me
+// render it, so it belongs to neither.
+export default function FeaturedProjects({
+  projects,
+}: {
+  projects: Project[]
+}) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      transition={{ delay: 0.5 }}
-      className="px-5 py-16 md:py-10 relative border-y-8 border-black flex flex-col items-center justify-center gap-16"
-    >
+    <Band className="px-5 py-16 md:py-10 flex-col gap-16">
       <motion.div
         initial={{ y: -50, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
         transition={{ duration: 1.5, type: "spring" }}
-        className=""
       >
         <h2 className="font-burbankblack text-3xl md:text-4xl text-center uppercase tracking-wider">
           Projects
@@ -33,19 +34,20 @@ export default function Canvas3({ projects }: { projects: Project[] }) {
           </Link>
         </p>
       </motion.div>
+
       <motion.div
         initial={{ opacity: 0, y: 100 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.5, type: "spring" }}
         className="flex gap-5 flex-wrap justify-center md:flex-nowrap items-center"
       >
-        <Projects projects={projects} />
+        <ProjectGrid projects={projects} />
       </motion.div>
+
       <motion.div
         initial={{ y: 50, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
         transition={{ duration: 1.5, type: "spring" }}
-        className=""
       >
         <PrimaryBtn
           href="https://github.com/shayyz-code?tab=repositories"
@@ -54,6 +56,6 @@ export default function Canvas3({ projects }: { projects: Project[] }) {
           See GitHub
         </PrimaryBtn>
       </motion.div>
-    </motion.div>
+    </Band>
   )
 }
