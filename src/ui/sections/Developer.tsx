@@ -16,6 +16,7 @@ export default function Developer({ size = "md" }: { size?: "md" | "lg" }) {
     <Band align="end" className={`px-10 ${lg ? "py-20" : "py-16"}`}>
       <Image
         src="/bg4.webp"
+        unoptimized
         fill={true}
         alt="bg"
         style={{ objectFit: "cover" }}
@@ -35,6 +36,7 @@ export default function Developer({ size = "md" }: { size?: "md" | "lg" }) {
       <SlideIn className="bg-primary px-4 py-2 font-burbankblack text-lg md:text-2xl">
         <Image
           src="/developer.webp"
+          unoptimized
           alt="photo of developer"
           width={200}
           height={200}
