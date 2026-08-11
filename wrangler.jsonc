@@ -41,9 +41,14 @@
     }
   ],
 
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "codewithshayy-media"
+    }
+  ],
+
   "observability": {
     "enabled": true
   }
-
-  // R2 (binding: MEDIA) is added by the media PR.
 }

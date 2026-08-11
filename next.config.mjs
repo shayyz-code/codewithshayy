@@ -3,16 +3,10 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare"
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    remotePatterns: [
-      // Firebase Storage still holds the project images. Removed once the
-      // migration has copied them into R2 and rewritten the rows.
-      {
-        protocol: "https",
-        hostname: "firebasestorage.googleapis.com",
-        port: "",
-        pathname: "/v0/b/minicoders-bff8f.appspot.com/**",
-      },
-    ],
+    // R2 media is resized by the /media route through the IMAGES binding.
+    // See image-loader.ts for why /_next/image cannot do it here.
+    loader: "custom",
+    loaderFile: "./image-loader.ts",
   },
 }
 
