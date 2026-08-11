@@ -107,6 +107,23 @@ Three columns are nullable because the data needs them to be — **render them c
 
 Still true, and worth keeping in mind before adding any Firebase back: `firebase/firestore` pulls in `protobufjs`, which calls `new Function` **at import time**. Workers forbids it — `EvalError: Code generation from strings disallowed for this context`. Because OpenNext bundles every route into one worker, module-scope `initializeApp()` took down `/privacy` and `/terms` too, and merely *importing* the module server-side was enough to break it.
 
+### Two markdown renderers, on purpose
+
+There are two paths and they cannot be merged. `@next/mdx` is a build-time
+loader for files on disk; it cannot compile a string that arrives from D1.
+
+| content | renderer | when |
+|---|---|---|
+| `content/posts/*.mdx` | `@next/mdx` + `rehype-pretty-code` | build |
+| `projects.body_md` | `react-markdown` + `remark-gfm` | request |
+
+`src/ui/markdownComponents.tsx` is the shared element map, so both produce
+identical markup. Style markdown there, not in either caller.
+
+The runtime path has no Shiki deliberately: highlighting per request needs a
+WASM or JS regex engine in the worker, and project write-ups are prose. Fenced
+code still gets the styled panel, just uncoloured.
+
 ### Blog: files, and the two traps that come with them
 
 Posts are `content/posts/*.mdx`. `src/data/posts.ts` is the read seam, mirroring

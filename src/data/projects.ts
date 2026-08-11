@@ -13,6 +13,10 @@ export type Project = {
   repoUrl: string | null
   /** R2 object key, null when there is no image — a placeholder renders. */
   mediaKey: string | null
+  /** Long-form write-up as markdown. Null until authored. */
+  bodyMd: string | null
+  role: string | null
+  year: string | null
   tags: string[]
 }
 
@@ -29,6 +33,9 @@ function toProject(row: ProjectWithTags): Project {
     siteUrl: row.siteUrl,
     repoUrl: row.repoUrl,
     mediaKey: row.mediaKey,
+    bodyMd: row.bodyMd,
+    role: row.role,
+    year: row.year,
     tags: row.projectTags.map((pt) => pt.tag.name),
   }
 }
