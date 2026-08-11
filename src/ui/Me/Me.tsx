@@ -5,21 +5,16 @@ import Canvas5 from "./Canvas5"
 import Canvas8 from "./Canvas8"
 import Contact from "./Contact"
 import { motion } from "framer-motion"
-import dynamic from "next/dynamic"
+import Canvas3 from "./Canvas3"
+import type { Project } from "@/data/projects"
 
-// ssr: false keeps the Firestore/protobufjs import out of the server bundle.
-// See ProjectsSection for why that matters on Workers.
-const ProjectsSection = dynamic(() => import("./ProjectsSection"), {
-  ssr: false,
-})
-
-export default function Me() {
+export default function Me({ projects }: { projects: Project[] }) {
   return (
     <section className="flex flex-col mb-16">
       <Developer />
       <Canvas5 />
       <Canvas8 />
-      <ProjectsSection />
+      <Canvas3 projects={projects} />
 
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}

@@ -32,10 +32,18 @@
     "binding": "IMAGES"
   },
 
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "codewithshayy",
+      "database_id": "f2a44f72-49f7-49d0-a7b0-91b4012bd8c2",
+      "migrations_dir": "migrations"
+    }
+  ],
+
   "observability": {
     "enabled": true
   }
 
-  // D1 (binding: DB) and R2 (binding: MEDIA) are added by the schema and
-  // media PRs respectively.
+  // R2 (binding: MEDIA) is added by the media PR.
 }

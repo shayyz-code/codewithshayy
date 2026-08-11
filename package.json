@@ -11,11 +11,17 @@
     "typecheck": "tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "wrangler d1 migrations apply codewithshayy --local",
+    "db:migrate:remote": "wrangler d1 migrations apply codewithshayy --remote",
+    "db:seed": "node scripts/build-seed.mjs > seeds/seed.sql && wrangler d1 execute codewithshayy --local --file seeds/seed.sql",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@designbycode/tailwindcss-text-stroke": "^1.2.1",
     "@opennextjs/cloudflare": "^1.20.2",
+    "drizzle-orm": "0.45.2",
     "firebase": "^10.13.1",
     "framer-motion": "^11.4.0",
     "next": "16.3.0",
@@ -26,6 +32,7 @@
     "@types/node": "^20",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "drizzle-kit": "0.31.10",
     "eslint": "^9.7",
     "eslint-config-next": "16.3.0",
     "postcss": "^8",
