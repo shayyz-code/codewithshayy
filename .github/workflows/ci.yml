@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch makes the in-flight run irrelevant.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: lint, types, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build | tee build.log
+
+      # The highest-value assertion here. A route that reads D1 must be
+      # dynamic: getCloudflareContext resolves to *local* bindings during
+      # static generation, so a prerendered data route bakes whatever database
+      # the build machine had into the deployed output. Nothing surfaces that
+      # until production serves empty data.
+      #
+      # Written so that missing output fails too — if the build format ever
+      # changes, this must break loudly rather than pass vacuously.
+      - name: Assert D1 routes are dynamic
+        run: |
+          for route in / /me /projects; do
+            if ! grep -qE "^[├└┌│][^/]*ƒ ${route}\$" build.log; then
+              echo "::error::${route} is not marked ƒ (Dynamic) in the build output."
+              echo "Either force-dynamic was dropped, or the build output format changed."
+              grep -E '^[├└┌│]' build.log || true
+              exit 1
+            fi
+          done
+          echo "/, /me and /projects are all dynamic"
+
+  worker:
+    name: workerd smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Bundles for workerd. This is where Workers-only failures appear —
+      # `next build` compiles code that the runtime then refuses to execute.
+      - name: Build worker
+        run: pnpm exec opennextjs-cloudflare build
+
+      # Local D1 needs no Cloudflare credentials. Without the schema every
+      # data route 500s with "no such table: projects", so this is not
+      # optional setup.
+      - name: Set up local D1
+        run: |
+          pnpm exec wrangler d1 migrations apply codewithshayy --local
+          pnpm exec wrangler d1 execute codewithshayy --local --file seeds/ci.sql
+
+      - name: Smoke test
+        run: ./scripts/smoke.sh 8788

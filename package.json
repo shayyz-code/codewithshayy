@@ -3,6 +3,10 @@
   "version": "2.1.0",
   "author": "Shayy <aungminkhant.shay@gmail.com>",
   "private": true,
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "node scripts/generate-posts-manifest.mjs && next dev",
     "build": "node scripts/generate-posts-manifest.mjs && next build",

@@ -42,8 +42,10 @@ next-env.d.ts
 /.open-next/
 /.wrangler/
 
-# Generated seed data (derived from the gitignored .archive/)
-/seeds/
+# Generated seed data (derived from the gitignored .archive/). ci.sql is a
+# committed fixture, not generated, so it is excepted.
+/seeds/*
+!/seeds/ci.sql
 
 # Generated from content/posts by scripts/generate-posts-manifest.mjs
 src/data/posts.generated.ts
