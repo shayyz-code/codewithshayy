@@ -8,11 +8,12 @@
     "node": ">=20.9.0"
   },
   "scripts": {
+    "postinstall": "node scripts/generate-posts-manifest.mjs",
     "dev": "node scripts/generate-posts-manifest.mjs && next dev",
     "build": "node scripts/generate-posts-manifest.mjs && next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node scripts/generate-posts-manifest.mjs && tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
