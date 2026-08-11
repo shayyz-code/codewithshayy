@@ -1,24 +1,90 @@
-[![Next](https://img.shields.io/badge/NextJs-000000?logo=next.js&logoColor=white&style=for-the-badge)](https://www.nextjs.org)
+![Next.js](https://img.shields.io/badge/Next.js%2016-000000?logo=next.js&logoColor=white&style=for-the-badge)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Firebase](https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)
+![Cloudflare](https://img.shields.io/badge/Cloudflare%20Workers-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind%20v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 
 # Code w/ Shayy
 
-Welcome to **Code w/ Shayy**, my portfolio.
+My portfolio — projects I have built, and notes on things I am learning.
+Live at **[codewithshayy.com](https://codewithshayy.com)**.
 
-## Tech Stacks
+## Stack
 
-For this lightweight webapp, I used:
+- **Next.js 16** (App Router) on **Cloudflare Workers** via
+  [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare)
+- **Tailwind v4** — theme in CSS via `@theme`, no `tailwind.config.ts`
+- **D1** + **Drizzle** for projects, **R2** for images
+- **MDX** for blog posts, highlighted at build with `rehype-pretty-code`
+- **Cloudflare Access** in front of `/admin`
 
-- **NextJS 14** (Upgraded to 16)
-- **Firebase**
+## Running locally
 
-Notes: NextJS will be replaced with Astro in the coming update.
+Node and pnpm versions are pinned in `.nvmrc` and `package.json`.
 
-## Contributing
+```bash
+pnpm install
+pnpm db:migrate     # apply the schema to a local D1
+pnpm db:seed        # optional — needs a local .archive/ export
+pnpm dev
+```
 
-If you have suggestions or want to help fix some errors on **Code w/ Shayy**, feel free to submit a pull request or issue.
+`pnpm dev` runs Next with Cloudflare bindings attached, so D1 and R2 work
+locally without touching the real database.
+
+### The check that matters
+
+```bash
+pnpm preview        # bundle for workerd and serve it
+./scripts/smoke.sh  # 23 assertions against every route
+```
+
+`pnpm build` passing does not mean the app works. Production runs on `workerd`,
+which forbids things Node allows — every serious bug in this project's history
+compiled cleanly and failed only under the real runtime. `pnpm preview` is the
+honest check, and CI runs both on every push.
+
+Errors in the worker do not print to stdout. They go to a local observability
+store; `CLAUDE.md` has the query.
+
+## Content
+
+| what | where | how it is edited |
+|---|---|---|
+| Projects | D1 (`projects`, `tags`, `project_tags`) | `/admin`, or SQL until that is built |
+| Project write-ups | `projects.body_md`, markdown | as above |
+| Images | R2, keyed by `media_key` | uploaded, then served via `/media/<key>` |
+| Blog posts | `content/posts/*.mdx` | an editor, then a commit |
+
+Posts are files rather than rows on purpose: a draft is an unmerged branch,
+history is `git log`, and there is no write endpoint to secure. The trade is that
+publishing needs a deploy.
+
+## Schema changes
+
+```bash
+# edit src/data/schema.ts, then
+pnpm db:generate         # writes migrations/*.sql — never hand-edit those
+pnpm db:migrate          # apply locally
+pnpm db:migrate:remote   # apply to the real database
+```
+
+## Deploy
+
+```bash
+pnpm deploy
+```
+
+Deploys are manual and so are remote migrations — a schema change should not
+land without someone watching. One worker serves the apex, `www`, the
+Access-gated admin hostname, and a `workers.dev` subdomain; wrangler owns their
+DNS records.
+
+## Notes
+
+Architecture, runtime constraints, and the traps that are easy to re-discover
+are in [`CLAUDE.md`](./CLAUDE.md). It is written for Claude Code but reads fine
+for anyone.
 
 ## Contact
 
-Have any questions? Reach out at [aungminkhant.shay@gmail.com](mailto:aungminkhant.shay@gmail.com) or follow me on social media!
+[aungminkhant.shay@gmail.com](mailto:aungminkhant.shay@gmail.com)

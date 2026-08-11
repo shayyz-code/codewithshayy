@@ -20,7 +20,8 @@ pnpm cf-typegen   # regenerate cloudflare-env.d.ts from wrangler.jsonc
 **`pnpm build` passing does not mean the app works.** Production runs on Cloudflare Workers via `@opennextjs/cloudflare`, and `workerd` forbids things Node allows. Always finish with `pnpm preview`. Errors there do **not** appear on stdout — query them:
 
 ```bash
-curl -s -X POST localhost:8771/cdn-cgi/local/explorer/api/local/observability/query \
+# $PORT is whatever `preview --port` was given
+curl -s -X POST localhost:$PORT/cdn-cgi/local/explorer/api/local/observability/query \
   -H 'Content-Type: application/json' \
   -d '{"sql":"SELECT substr(message,1,300) FROM logs WHERE level=\"error\" ORDER BY ts_ms DESC LIMIT 5"}'
 ```
@@ -44,7 +45,18 @@ There are no unit tests. Both jobs pass clean on `main`; keep them that way.
 
 ESLint uses flat config in `eslint.config.mjs`. `eslint-config-next` ships a native flat-config array as of Next 15, so **no `@eslint/eslintrc` / `FlatCompat` shim is needed** — importing `eslint-config-next/core-web-vitals` pulls in the base `next` config and `next/typescript` too.
 
-**If pnpm refuses to run any script** with `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`: `node_modules/` is owned by `root` from an earlier `sudo pnpm install`, so pnpm's dependency-status check can't reinstall. Fix with `sudo rm -rf node_modules && pnpm install`. Until then, `npx eslint .` and `npx tsc --noEmit` run the same checks directly.
+Node and pnpm are pinned — `.nvmrc`, plus `packageManager` and `engines` in
+`package.json`. A locally upgraded pnpm will warn about the mismatch with
+`packageManager`; that is the pin doing its job, not a problem.
+
+<details>
+<summary>Troubleshooting: pnpm refuses to run any script</summary>
+
+`ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` means `node_modules/` is owned by
+`root` from an earlier `sudo pnpm install`, so pnpm's dependency-status check
+cannot reinstall. Fix with `sudo rm -rf node_modules && pnpm install`. Until
+then, `npx eslint .` and `npx tsc --noEmit` run the same checks directly.
+</details>
 
 ## Deployment
 
@@ -69,6 +81,27 @@ the workers.dev subdomain, which 404s every route on it.
 rejects `runtime: "edge"` in a proxy config, so there is no working
 combination. `src/middleware.ts` stays until OpenNext supports it.
 
+## Conventions
+
+**Commits** are Conventional Commits — `feat:`, `fix:`, `chore:`, `docs:`,
+`refactor:`, `ci:`, with `!` for breaking changes. One small PR per change,
+rebase-merged onto `main`. File an issue before starting work; the PR closes it.
+
+**Issues and PRs are records of the change, not messages to a reviewer.** No
+second person, no narration of how the work felt, no conversational asides.
+
+```
+no    "You asked for…"  "Your photo was missing"  "Say the word and…"
+no    "I nearly shipped…"  "my assumption was wrong"
+yes   "public/ held developer.PNG while git tracked developer.png;
+       the request 400d."
+```
+
+Keep every measurement, error string and verification result — that is the part
+worth having in the history. Recommendations and open questions belong in
+conversation with the author instead. `.github/PULL_REQUEST_TEMPLATE.md` and
+`.github/ISSUE_TEMPLATE/` carry the format.
+
 ## Layout conventions
 
 **Routes are thin wrappers.** A `src/app/<route>/page.tsx` does nothing but render one component from `src/ui/`:
@@ -82,9 +115,35 @@ export default function PageMe() {
 
 All real markup lives in `src/ui/<Feature>/<Feature>.tsx`. When changing what a page looks like, edit the `src/ui/` component, not the route file.
 
-Sections within a feature are named `Canvas<N>` (`Canvas3`, `Canvas5`, `Canvas8`…). The numbers are historical and carry no meaning — they're not ordered and there are gaps.
+`src/ui/Me/` still has `Canvas3`, `Canvas5`, `Canvas8`. Those numbers are
+historical and carry no meaning — not ordered, with gaps. **Do not add more.**
+Everything written since uses descriptive names (`Hero`, `Developer`,
+`StayTuned`, `BlogIndex`, `ProjectDetail`), and the remaining `Canvas*` files are
+candidates for renaming whenever they are next touched.
 
 **Path aliases:** `@/*` → `./src/*`, `$/*` → `./public/*`.
+
+### Routes
+
+| route | rendering | reads |
+|---|---|---|
+| `/` | `ƒ` dynamic | D1 projects |
+| `/me` | `ƒ` dynamic | D1 projects |
+| `/projects` | `ƒ` dynamic | D1 projects |
+| `/projects/[slug]` | `ƒ` dynamic | D1 project + `body_md` |
+| `/blog` | `○` static | the generated post manifest |
+| `/blog/[slug]` | `●` SSG | `content/posts/*.mdx` |
+| `/rss.xml` | `○` static | the generated post manifest |
+| `/media/[...key]` | `ƒ` dynamic | R2, resized via `IMAGES` |
+| `/privacy`, `/terms` | `○` static | nothing |
+| `/blogs`, `/blogs/:slug` | 308 | redirect to `/blog…` |
+
+The split is the point: **anything reading D1 must be dynamic**, and anything
+prerendered must not touch the database or the filesystem at request time. CI
+asserts the first three stay `ƒ`.
+
+`/admin` has no route yet. `src/middleware.ts` confines it to
+`admin.codewithshayy.com` and 404s it everywhere else.
 
 ## Data access
 
@@ -110,7 +169,20 @@ pnpm db:studio         # browse the data
 
 **Drizzle's `with` clause must be written inline** at each call site. Hoisting it into a shared const or helper widens the literal `true` to `boolean`, and the relational types reject it.
 
-Three columns are nullable because the data needs them to be — **render them conditionally**: `siteUrl` (not every project has a site), `repoUrl` (two repos are private and one doesn't exist; a private repo 404s for visitors), `mediaKey` (one project has no image, and shows a titled placeholder). This replaced a hardcoded `github.com/shayyz-code/<slug>` template that produced dead links for 3 of 6 projects.
+Six columns are nullable because the data needs them to be — **render every one
+conditionally**:
+
+| column | why it is null |
+|---|---|
+| `siteUrl` | not every project has a live site |
+| `repoUrl` | two repos are private, one does not exist; a private repo 404s for visitors |
+| `mediaKey` | one project has no image, and renders a titled placeholder |
+| `bodyMd` | the long-form write-up, absent until authored — falls back to a short line |
+| `role` | shown as `role · year` when either is present |
+| `year` | as above |
+
+`repoUrl` replaced a hardcoded `github.com/shayyz-code/<slug>` template that
+produced dead links for 3 of 6 projects.
 
 `mediaKey` stores an R2 object key, never an absolute URL.
 
@@ -176,16 +248,18 @@ and non-admin paths on the admin host 301 to the apex so there is no auth-walled
 duplicate of the public site. `localhost` and `*.workers.dev` count as
 admin-capable so local preview exercises the same path.
 
+The middleware verifies the JWT that Access issues — signature against
+Cloudflare's rotating public keys, plus issuer and audience — rather than merely
+checking that the header is present, which anyone can forge with `curl -H`. The
+team domain and AUD tag are hard-coded there; neither is a secret, and
+middleware runs before bindings resolve so they cannot come from
+`wrangler.jsonc` vars.
+
 **Host cannot be spoofed in local preview.** Wrangler pins the request host to
 the first configured route, so `curl -H "Host: admin.…"` still arrives as
 `codewithshayy.com`. The admin-host branch is only verifiable against the
-deployed hostname.
-
-It verifies the JWT Access issues — signature against
-Cloudflare's rotating public keys, plus issuer and audience — rather than just
-checking the header exists, which anyone can forge with `curl -H`. The team
-domain and AUD tag are hard-coded there; neither is a secret, and middleware
-runs before bindings resolve so they cannot come from `wrangler.jsonc` vars.
+deployed hostname — `localhost` and `*.workers.dev` are treated as
+admin-capable so local preview exercises the token path at all.
 
 Rejections log to the observability store with a reason. `signature
 verification failed` means a forged token; anything mentioning fetch means the
@@ -193,9 +267,25 @@ certs endpoint is unreachable, which would lock out real users too.
 
 ### Images
 
-The default `next/image` optimizer does not run on Workers; optimization goes through the `IMAGES` binding in `wrangler.jsonc`. Cloudflare Images returns **403 `Blocked`** for the 1 MB animated `rangoon-academy.gif` — keep that in mind when the migration copies images into R2; it should be re-encoded as a static image.
+The default `next/image` optimizer does not run on Workers. Two paths replace it:
 
-**Known-broken image:** `/developer.png` 400s because `public/` actually holds `developer.PNG` (fails on macOS too). Not yet fixed.
+- **R2 media** is resized inside `src/app/media/[...key]/route.ts` via the
+  `IMAGES` binding, and `image-loader.ts` points `next/image` at
+  `/media/<key>?w=N`. Optimizing through `/_next/image` does not work here —
+  the optimizer fetches the source URL, and `global_fetch_strictly_public`
+  sends that self-fetch out to the public internet, where it fails with
+  `"url" parameter is valid but upstream response is invalid`.
+- **Files in `public/`** pass through the loader untouched, so they are served
+  at their committed size. Keep them small; a 4 MB PNG here is 4 MB on the
+  wire. They are webp at sane dimensions for that reason.
+
+Cloudflare Images returns **403 `Blocked`** for `rangoon-academy.gif` — 1 MB and
+190 frames, so it cannot be flattened without losing the animation. GIF and SVG
+skip the transform and stream through unchanged.
+
+When uploading to R2, always pass `--content-type`. Without it R2 stores no
+`httpMetadata`, `writeHttpMetadata()` emits nothing, and the object is served
+with no `Content-Type` at all.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
