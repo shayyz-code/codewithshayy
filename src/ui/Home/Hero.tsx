@@ -9,6 +9,7 @@ export default function Hero() {
     <div className="relative p-10 md:px-16 py-28 md:py-40 mb-2 bg-primary">
       {/* <Image
         src="/logo.webp"
+        unoptimized
         alt="comic bg"
         fill
         style={{ objectFit: "cover" }}
@@ -24,6 +25,7 @@ export default function Hero() {
         >
           <Image
             src="/logo.webp"
+            unoptimized
             alt="poster image of event"
             width={600}
             height={600}

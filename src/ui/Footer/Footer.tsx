@@ -61,6 +61,7 @@ export default function Footer() {
       >
         <Image
           src="/logo.webp"
+          unoptimized
           alt="logo"
           width={50}
           height={50}

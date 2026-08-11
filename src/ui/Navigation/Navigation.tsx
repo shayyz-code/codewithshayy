@@ -18,6 +18,7 @@ export default function Navigation() {
           <h1 className="flex items-center justify-center text-xl px-4 uppercase text-center">
             <Image
               src="/logo.webp"
+              unoptimized
               alt="logo picture"
               width={100}
               height={100}
