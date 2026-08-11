@@ -148,6 +148,26 @@ expect_body /projects/ci-fixture-bare "A longer write-up is coming"
 # Blog code blocks are highlighted at build; the CSS variables prove it ran.
 expect_body /blog/hello "--shiki-light"
 
+echo "indexability"
+expect /robots.txt 200
+expect /sitemap.xml 200
+# The worker must serve robots itself; without it Cloudflare injects a default
+# that neither disallows /admin nor names a sitemap.
+expect_body /robots.txt "Disallow: /admin"
+expect_body /robots.txt "Sitemap: https://codewithshayy.com/sitemap.xml"
+# Dynamic, so it must reflect D1 rather than a build-time snapshot.
+expect_body /sitemap.xml "/projects/ci-fixture-full"
+# published = 0 must not be advertised to crawlers.
+if curl -s --max-time 30 "$BASE/sitemap.xml" | grep -qF -- "ci-fixture-draft"; then
+  echo "  FAIL  /sitemap.xml                 lists an unpublished project"
+  FAILED=1
+else
+  echo "  ok    /sitemap.xml                 excludes unpublished"
+fi
+# Canonical names the apex, so the other two hostnames are not indexed as
+# duplicates of it.
+expect_body /projects '<link rel="canonical" href="https://codewithshayy.com/projects"'
+
 echo "worker error log"
 ERRORS=$(curl -s -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \
   -H 'Content-Type: application/json' \

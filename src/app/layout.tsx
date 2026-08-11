@@ -20,6 +20,10 @@ const fontBurbankMedium = Kanit({
 export const metadata: Metadata = {
   title: "Code w/ Shayy",
   metadataBase: new URL("https://codewithshayy.com"),
+  // Three hostnames serve this worker. Without a canonical, all three are
+  // equally eligible to be indexed; relative values resolve against
+  // metadataBase, so each route only needs its own path.
+  alternates: { canonical: "/" },
   description: "Software engineer. I build things with Rust, Go and TypeScript — and write about it.",
   keywords:
     "Shayy, Aung Min Khant, software engineer, portfolio, Rust, Go, TypeScript, React, Next.js, Myanmar developer",

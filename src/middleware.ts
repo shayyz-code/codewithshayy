@@ -50,6 +50,16 @@ function bypassForLocalDev() {
   )
 }
 
+// Three hostnames serve this worker with identical content. Canonical tags name
+// the apex, and this stops the other two being indexed independently — without
+// redirecting, so existing links to www keep working.
+function withIndexingPolicy(response: NextResponse, host: string) {
+  if (host !== PUBLIC_HOST) {
+    response.headers.set("x-robots-tag", "noindex")
+  }
+  return response
+}
+
 export async function middleware(request: NextRequest) {
   const host = request.headers.get("host") ?? ""
   const { pathname, search } = request.nextUrl
@@ -77,8 +87,8 @@ export async function middleware(request: NextRequest) {
       301,
     )
   } else {
-    // Public request on a public host: nothing to do.
-    return NextResponse.next()
+    // Public request on a public host.
+    return withIndexingPolicy(NextResponse.next(), host)
   }
 
   // Access sends the token as a header on every request, and as a cookie on
