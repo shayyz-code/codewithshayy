@@ -50,5 +50,9 @@
 
   "observability": {
     "enabled": true
-  }
+  },
+
+  "routes": [
+    { "pattern": "admin.codewithshayy.com", "custom_domain": true }
+  ]
 }

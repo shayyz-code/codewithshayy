@@ -84,6 +84,23 @@ Three columns are nullable because the data needs them to be — **render them c
 
 Still true, and worth keeping in mind before adding any Firebase back: `firebase/firestore` pulls in `protobufjs`, which calls `new Function` **at import time**. Workers forbids it — `EvalError: Code generation from strings disallowed for this context`. Because OpenNext bundles every route into one worker, module-scope `initializeApp()` took down `/privacy` and `/terms` too, and merely *importing* the module server-side was enough to break it.
 
+### Admin is behind Cloudflare Access
+
+`/admin/*` is protected by a Cloudflare Access application on
+`admin.codewithshayy.com`, configured in the Zero Trust dashboard. Access
+blocks at the edge, so a request without a valid session never reaches the
+worker.
+
+`src/middleware.ts` verifies the JWT Access issues — signature against
+Cloudflare's rotating public keys, plus issuer and audience — rather than just
+checking the header exists, which anyone can forge with `curl -H`. The team
+domain and AUD tag are hard-coded there; neither is a secret, and middleware
+runs before bindings resolve so they cannot come from `wrangler.jsonc` vars.
+
+Rejections log to the observability store with a reason. `signature
+verification failed` means a forged token; anything mentioning fetch means the
+certs endpoint is unreachable, which would lock out real users too.
+
 ### Images
 
 The default `next/image` optimizer does not run on Workers; optimization goes through the `IMAGES` binding in `wrangler.jsonc`. Cloudflare Images returns **403 `Blocked`** for the 1 MB animated `rangoon-academy.gif` — keep that in mind when the migration copies images into R2; it should be re-encoded as a static image.
