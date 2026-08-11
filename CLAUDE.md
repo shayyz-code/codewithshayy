@@ -35,6 +35,29 @@ ESLint uses flat config in `eslint.config.mjs`. `eslint-config-next` ships a nat
 
 **If pnpm refuses to run any script** with `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`: `node_modules/` is owned by `root` from an earlier `sudo pnpm install`, so pnpm's dependency-status check can't reinstall. Fix with `sudo rm -rf node_modules && pnpm install`. Until then, `npx eslint .` and `npx tsc --noEmit` run the same checks directly.
 
+## Deployment
+
+Four hostnames, all the same worker:
+
+```
+codewithshayy.com          apex, the live site
+www.codewithshayy.com      same content
+admin.codewithshayy.com    behind Cloudflare Access
+codewithshayy.<sub>.workers.dev
+```
+
+All are `custom_domain: true` routes, so wrangler owns the DNS records — there
+is no other host and no separate DNS to keep in sync. Cloudflare's certificate
+covers `*.codewithshayy.com`.
+
+`workers_dev: true` is set explicitly. Declaring `routes` otherwise disables
+the workers.dev subdomain, which 404s every route on it.
+
+`next build` warns that the `middleware` convention is deprecated in favour of
+`proxy`. **Do not migrate**: OpenNext rejects a Node-runtime proxy, and Next
+rejects `runtime: "edge"` in a proxy config, so there is no working
+combination. `src/middleware.ts` stays until OpenNext supports it.
+
 ## Layout conventions
 
 **Routes are thin wrappers.** A `src/app/<route>/page.tsx` does nothing but render one component from `src/ui/`:
