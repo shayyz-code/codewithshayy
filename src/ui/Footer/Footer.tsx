@@ -60,7 +60,7 @@ export default function Footer() {
         className="flex justify-center my-6 transition ease-out transform rotate-1  hover:scale-110"
       >
         <Image
-          src="/logo.jpg"
+          src="/logo.webp"
           alt="logo"
           width={50}
           height={50}

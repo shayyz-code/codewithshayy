@@ -8,7 +8,7 @@ export default function Hero() {
   return (
     <div className="relative p-10 md:px-16 py-28 md:py-40 mb-2 bg-primary">
       {/* <Image
-        src="/logo.jpg"
+        src="/logo.webp"
         alt="comic bg"
         fill
         style={{ objectFit: "cover" }}
@@ -23,7 +23,7 @@ export default function Hero() {
           className="flex justify-center md:justify-end items-center md:h-full md:absolute md:top-0 md:right-0"
         >
           <Image
-            src="/logo.jpg"
+            src="/logo.webp"
             alt="poster image of event"
             width={600}
             height={600}

@@ -12,7 +12,7 @@ export default function Canvas4() {
       className="px-10 py-20 relative border-y-8 border-black flex items-center justify-end"
     >
       <Image
-        src="/bg4.jpg"
+        src="/bg4.webp"
         fill={true}
         alt="bg"
         style={{ objectFit: "cover" }}
@@ -35,7 +35,7 @@ export default function Canvas4() {
         className="bg-primary px-4 py-2 font-burbankblack text-lg md:text-2xl"
       >
         <Image
-          src="/developer.png"
+          src="/developer.webp"
           alt="photo of developer"
           width={200}
           height={200}

@@ -17,7 +17,7 @@ export default function Navigation() {
         <Link href="/" className="group flex items-center cursor-pointer">
           <h1 className="flex items-center justify-center text-xl px-4 uppercase text-center">
             <Image
-              src="/logo.jpg"
+              src="/logo.webp"
               alt="logo picture"
               width={100}
               height={100}
