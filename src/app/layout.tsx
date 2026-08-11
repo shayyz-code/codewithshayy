@@ -1,11 +1,9 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
 import { Kanit } from "next/font/google"
 import "./globals.css"
 import Navigation from "@/ui/Navigation/Navigation"
 import Footer from "@/ui/Footer/Footer"
-import { ThemeProvider } from "@/context/themeContext"
-import Head from "next/head"
 
 const fontBurbankBlack = Kanit({
   weight: "600",
@@ -21,25 +19,25 @@ const fontBurbankMedium = Kanit({
 
 export const metadata: Metadata = {
   title: "Code w/ Shayy",
-  metadataBase: new URL("https://codewithshayy.online"),
-  description: "No Filler, Just Code. We offer courses on Coding and Maths.",
+  metadataBase: new URL("https://codewithshayy.com"),
+  description: "Software engineer. I build things with Rust, Go and TypeScript — and write about it.",
   keywords:
-    "Web Development, HTML, CSS, JavaScript, TypeScript, React, Next.js, Node.js, coding courses, full stack development, hands-on learning, coding myanmar",
-  authors: [{ name: "Shayy", url: "https://codewithshayy.online/me" }],
+    "Shayy, Aung Min Khant, software engineer, portfolio, Rust, Go, TypeScript, React, Next.js, Myanmar developer",
+  authors: [{ name: "Shayy", url: "https://codewithshayy.com/me" }],
   icons: {
     icon: "/favicon.ico", // Path to your favicon
   },
   openGraph: {
     type: "website",
-    url: "https://codewithshayy.online",
+    url: "https://codewithshayy.com",
     title: "Code w/ Shayy",
-    description: "No Filler, Just Code. We offer courses on Coding and Maths.",
+    description: "Software engineer. I build things with Rust, Go and TypeScript — and write about it.",
     images: [
       {
-        url: "/logo.jpg", // Path to Open Graph image
-        width: 800,
-        height: 600,
-        alt: "Code w/ Shayy Open Graph Image",
+        url: "/logo.webp", // Path to Open Graph image
+        width: 512,
+        height: 512,
+        alt: "Code w/ Shayy",
       },
     ],
   },
@@ -47,10 +45,31 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@codewithshayy", // Twitter handle
     title: "Code w/ Shayy",
-    description: "No Filler, Just Code. We offer courses on Coding and Maths.",
-    images: ["/logo.jpg"], // Path to Twitter image
+    description: "Software engineer. I build things with Rust, Go and TypeScript — and write about it.",
+    images: ["/logo.webp"], // Path to Twitter image
   },
 }
+
+// Replaces the <meta name="viewport"> that was inside a next/head element —
+// a no-op in the App Router. maximum-scale/user-scalable are deliberately
+// dropped: they blocked pinch-zoom, which people rely on to read.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+}
+
+// Runs before first paint so the page never flashes light before the stored
+// preference is applied. Inlined rather than imported because it has to
+// execute ahead of hydration.
+const THEME_SCRIPT = `
+(function () {
+  try {
+    var stored = localStorage.getItem("isDarkTheme");
+    if (stored === null) { stored = "true"; localStorage.setItem("isDarkTheme", "true"); }
+    if (JSON.parse(stored)) document.body.classList.add("dark");
+  } catch (e) {}
+})();
+`
 
 export default function RootLayout({
   children,
@@ -58,35 +77,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ThemeProvider>
-      <html lang="en">
-        <Head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-          />
-          <link rel="icon" href="/favicon.ico" sizes="any" />
-          <link
-            rel="icon"
-            href="/icon?<generated>"
-            type="image/<generated>"
-            sizes="<generated>"
-          />
-          <link
-            rel="apple-touch-icon"
-            href="/apple-icon?<generated>"
-            type="image/<generated>"
-            sizes="<generated>"
-          />
-        </Head>
-        <body
-          className={`${fontBurbankBlack.variable} ${fontBurbankMedium.variable} overflow-y-scroll overflow-x-hidden`}
-        >
-          <Navigation />
-          {children}
-          <Footer />
-        </body>
-      </html>
-    </ThemeProvider>
+    <html lang="en">
+      <body
+        className={`${fontBurbankBlack.variable} ${fontBurbankMedium.variable} overflow-y-scroll overflow-x-hidden`}
+      >
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <Navigation />
+        {children}
+        <Footer />
+      </body>
+    </html>
   )
 }
