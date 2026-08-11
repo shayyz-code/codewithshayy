@@ -65,6 +65,11 @@ expect_body() {
     printf '  ok    %-28s contains %q\n' "$path" "$needle"
   else
     printf '  FAIL  %-28s missing %q\n' "$path" "$needle"
+    # Dump what actually came back. A bare "missing" leaves the next reader
+    # guessing whether the page 500d, rendered a fallback, or changed shape.
+    printf '        got (first 400 chars of body):\n'
+    curl -s --max-time 30 "$BASE$path" | tr -d '\n' | cut -c1-400 | sed 's/^/        /'
+    printf '\n'
     FAILED=1
   fi
 }
@@ -81,9 +86,19 @@ expect /projects/ci-fixture-bare 200
 expect /projects/ci-fixture-draft 404
 expect /projects/does-not-exist 404
 
-echo "admin is confined to the admin hostname"
-expect /admin 404
-expect /admin/dashboard 404
+# The admin's expected status depends on whether the local bypass is active.
+# .dev.vars is read by local wrangler and never uploaded, so CI and the deployed
+# worker always take the 404 branch. Asserting a single value would make this
+# test either wrong locally or vacuous in CI.
+if [[ -f .dev.vars ]] && grep -q '^ADMIN_LOCAL_BYPASS=1' .dev.vars 2>/dev/null; then
+  echo "admin (local bypass active via .dev.vars)"
+  expect /admin 200
+  expect /admin/new 200
+else
+  echo "admin is confined to the admin hostname"
+  expect /admin 404
+  expect /admin/dashboard 404
+fi
 
 echo "redirects"
 expect /blogs 308
