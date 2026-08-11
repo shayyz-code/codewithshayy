@@ -22,7 +22,6 @@
     "@designbycode/tailwindcss-text-stroke": "^1.2.1",
     "@opennextjs/cloudflare": "^1.20.2",
     "drizzle-orm": "0.45.2",
-    "firebase": "^10.13.1",
     "framer-motion": "^11.4.0",
     "next": "16.3.0",
     "react": "19.2.4",
