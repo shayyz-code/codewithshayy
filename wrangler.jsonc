@@ -52,7 +52,19 @@
     "enabled": true
   },
 
+  // Declaring routes turns the workers.dev subdomain off unless it is asked
+  // for explicitly, which silently 404s every public route.
+  "workers_dev": true,
+
+  // custom_domain: true makes wrangler create and manage the DNS record for
+  // each hostname, which is what the site needs now that the previous host and
+  // its DNS are gone.
+  //
+  // admin.codewithshayy.com is the same worker behind a Cloudflare Access
+  // application; Access covers that hostname, not the apex.
   "routes": [
+    { "pattern": "codewithshayy.com", "custom_domain": true },
+    { "pattern": "www.codewithshayy.com", "custom_domain": true },
     { "pattern": "admin.codewithshayy.com", "custom_domain": true }
   ]
 }
