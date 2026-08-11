@@ -35,10 +35,33 @@ function isAdminHost(host: string) {
   )
 }
 
+function bypassForLocalDev() {
+  // The admin cannot be exercised locally otherwise: Access issues the token,
+  // and there is no Access in front of localhost. Two independent signals, both
+  // impossible in the deployed worker:
+  //
+  //   NODE_ENV      is "production" in any next build, including preview
+  //   .dev.vars     is read only by local wrangler and never uploaded on deploy
+  //
+  // Anything reachable in production still requires a verified Access JWT.
+  return (
+    process.env.NODE_ENV === "development" ||
+    process.env.ADMIN_LOCAL_BYPASS === "1"
+  )
+}
+
 export async function middleware(request: NextRequest) {
   const host = request.headers.get("host") ?? ""
   const { pathname, search } = request.nextUrl
   const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/")
+
+  // Local development short-circuits both the host confinement and the token
+  // check. Wrangler pins the request host to the first configured route, so
+  // even `preview` arrives as codewithshayy.com and would otherwise 404 the
+  // admin before any of this is reachable.
+  if (isAdminPath && bypassForLocalDev()) {
+    return NextResponse.next()
+  }
 
   if (isAdminPath) {
     // 404 rather than 401 off the admin host. A 401 confirms to anyone probing

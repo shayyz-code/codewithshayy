@@ -49,3 +49,7 @@ next-env.d.ts
 
 # Generated from content/posts by scripts/generate-posts-manifest.mjs
 src/data/posts.generated.ts
+
+# wrangler local-only vars — never uploaded on deploy
+.dev.vars
+.dev.vars.*
