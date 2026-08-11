@@ -43,7 +43,11 @@ const withMDX = createMDX({
   },
 })
 
-// Makes Cloudflare bindings available during `next dev`.
-initOpenNextCloudflareForDev()
+// Makes Cloudflare bindings available during `next dev`. Guarded, because it
+// starts miniflare — a production build has no use for that, and it made the
+// build depend on wrangler state that CI does not have.
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev()
+}
 
 export default withMDX(nextConfig)

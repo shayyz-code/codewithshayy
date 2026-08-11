@@ -29,7 +29,18 @@ The store lives in `.wrangler/` and **persists across restarts**, so filter by `
 
 Run `pnpm cf-typegen` after every `wrangler.jsonc` binding change, or `env.X` will typecheck against a binding that doesn't exist at runtime.
 
-`lint` + `typecheck` are the only automated checks — there are no tests and no CI. Both pass clean on `main`; keep them that way.
+CI runs on every push and PR (`.github/workflows/ci.yml`): lint, typecheck and
+`next build` in one job, then a second that bundles for workerd, sets up a local
+D1 from `seeds/ci.sql`, and runs `scripts/smoke.sh` against every route. No
+secrets needed — workerd, miniflare and local D1 all run unauthenticated.
+
+Two assertions there are load-bearing. The build output must mark `/`, `/me` and
+`/projects` as `ƒ (Dynamic)`; a regression to `○ (Static)` bakes the build
+machine's database into the deploy and nothing surfaces it until production
+serves empty data. And the smoke test catches what `next build` cannot — a
+filesystem read on a dynamic route compiles cleanly and 500s under workerd.
+
+There are no unit tests. Both jobs pass clean on `main`; keep them that way.
 
 ESLint uses flat config in `eslint.config.mjs`. `eslint-config-next` ships a native flat-config array as of Next 15, so **no `@eslint/eslintrc` / `FlatCompat` shim is needed** — importing `eslint-config-next/core-web-vitals` pulls in the base `next` config and `next/typescript` too.
 
@@ -185,3 +196,13 @@ certs endpoint is unreachable, which would lock out real users too.
 The default `next/image` optimizer does not run on Workers; optimization goes through the `IMAGES` binding in `wrangler.jsonc`. Cloudflare Images returns **403 `Blocked`** for the 1 MB animated `rangoon-academy.gif` — keep that in mind when the migration copies images into R2; it should be re-encoded as a static image.
 
 **Known-broken image:** `/developer.png` 400s because `public/` actually holds `developer.PNG` (fails on macOS too). Not yet fixed.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
