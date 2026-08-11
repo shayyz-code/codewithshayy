@@ -78,7 +78,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {/* suppressHydrationWarning because THEME_SCRIPT adds the `dark` class
+          before React hydrates, so body's className legitimately differs from
+          what the server rendered. Without it React reports a mismatch it
+          "won't patch up", which leaves the tree partially hydrated and breaks
+          interactivity — server-action forms silently stop submitting. */}
       <body
+        suppressHydrationWarning
         className={`${fontBurbankBlack.variable} ${fontBurbankMedium.variable} overflow-y-scroll overflow-x-hidden`}
       >
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
