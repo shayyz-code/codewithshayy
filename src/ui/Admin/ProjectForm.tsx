@@ -1,5 +1,7 @@
 import Link from "next/link"
 import type { AdminProject } from "@/data/admin-projects"
+import BodyEditor from "./BodyEditor"
+import MediaField from "./MediaField"
 
 // Shared by /admin/new and /admin/[id]. A server component: the form posts
 // straight to a server action, so there is no client state to manage and no
@@ -70,13 +72,7 @@ export default function ProjectForm({
           hint="comma separated, lowercased on save"
         />
 
-        <Area
-          name="bodyMd"
-          label="Write-up"
-          defaultValue={project?.bodyMd ?? ""}
-          rows={16}
-          hint="markdown — headings, lists, links and fenced code all render"
-        />
+        <BodyEditor name="bodyMd" defaultValue={project?.bodyMd ?? ""} />
 
         <label className="flex items-center gap-2 font-burbankmedium">
           <input
@@ -105,6 +101,21 @@ export default function ProjectForm({
           )}
         </div>
       </form>
+
+      {/* After the form, not inside it: nested forms are invalid HTML. Only on
+          edit, since the object key is derived from a slug that must exist. */}
+      {project && (
+        <MediaField
+          id={project.id}
+          mediaKey={project.mediaKey}
+          title={project.title}
+        />
+      )}
+      {!project && (
+        <p className="font-burbankmedium text-sm opacity-60">
+          Save the project first to add an image.
+        </p>
+      )}
     </section>
   )
 }

@@ -283,7 +283,18 @@ Cloudflare Images returns **403 `Blocked`** for `rangoon-academy.gif` — 1 MB a
 190 frames, so it cannot be flattened without losing the animation. GIF and SVG
 skip the transform and stream through unchanged.
 
-When uploading to R2, always pass `--content-type`. Without it R2 stores no
+Admin uploads go through `src/data/admin-media.ts`. The key embeds a hash of
+the content — `projects/<slug>-<hash8>.<ext>` — because `/media` serves objects
+as `immutable, max-age=31536000`. Reusing a key for new bytes would leave the
+old image cached for a year. Replacing deletes the previous object, but only
+when no other row still points at it, since identical bytes dedupe to one key.
+
+`GET /media/<key>?w=N` **500s under `next dev`** with `DevalueError: Cannot
+stringify arbitrary non-POJOs` at `writeHttpMetadata`. That is the miniflare R2
+shim, not the route — the same request is fine under `pnpm preview` and in
+production. Do not chase it.
+
+When uploading to R2 by hand, always pass `--content-type`. Without it R2 stores no
 `httpMetadata`, `writeHttpMetadata()` emits nothing, and the object is served
 with no `Content-Type` at all.
 
