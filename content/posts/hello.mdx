@@ -1,0 +1,71 @@
+---
+title: This blog runs on files, not a database
+date: 2026-08-11
+summary: Why posts here are .mdx files in a git repo, and what that buys.
+tags: [meta, cloudflare, next]
+---
+
+Every other piece of content on this site lives in a database. Projects are rows
+in Cloudflare D1, their images are objects in R2, and the pages that show them
+are rendered per request. Posts are the exception: they are files in the same
+repository as the code.
+
+## Why not the database
+
+The site already had the pieces for a database-backed blog — a D1 binding, an
+admin route behind Cloudflare Access, an R2 bucket for uploads. Using them would
+have meant building a markdown editor, a preview pane, a draft toggle, and an
+image uploader before writing a single word.
+
+Files skip all of it:
+
+- A draft is a branch nobody has merged.
+- History is `git log`, with no audit table to design.
+- Publishing is a push, and rolling back is a revert.
+- Nothing to secure, because there is no write endpoint.
+
+The trade is real. Publishing needs a deploy rather than a text box, so I cannot
+fix a typo from my phone. For something I write on a whim, that is a fair price.
+
+## What a post looks like
+
+Frontmatter, then prose. Code blocks are highlighted at build time, so the
+worker ships plain HTML with no highlighter in the bundle:
+
+```rust
+fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {
+    if a.len() > b.len() { a } else { b }
+}
+```
+
+The same pipeline handles Go:
+
+```go
+func Sum(xs []int) (total int) {
+    for _, x := range xs {
+        total += x
+    }
+    return
+}
+```
+
+…and TypeScript, which is what most of this site is written in:
+
+```ts
+export async function listPosts(): Promise<Post[]> {
+  return readdirSync(POSTS_DIR)
+    .filter((f) => /\.mdx?$/.test(f))
+    .map(parse)
+    .sort((a, b) => b.date.localeCompare(a.date))
+}
+```
+
+## The one constraint
+
+Blog routes have to stay static. The function above reads the filesystem, and a
+Cloudflare Worker does not have one — it works only because it runs while the
+site is being built, never while it is being served.
+
+That is the opposite of the project pages, which must be dynamic so they read
+the real database instead of baking in whatever was on my laptop at build time.
+Two kinds of content, two opposite rules, one codebase.
