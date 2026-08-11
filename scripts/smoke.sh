@@ -59,20 +59,48 @@ expect() {
 }
 
 # expect_body <path> <substring>
+#
+# Retries, because responses are streamed and a cold worker has been observed
+# delivering only the document head before the body arrives — which reads as a
+# missing needle even though the page is correct. A genuine miss fails all three
+# attempts; the byte count is reported so truncation stays distinguishable from
+# absence.
 expect_body() {
-  local path="$1" needle="$2"
-  if curl -s --max-time 30 "$BASE$path" | grep -qF -- "$needle"; then
-    printf '  ok    %-28s contains %q\n' "$path" "$needle"
-  else
-    printf '  FAIL  %-28s missing %q\n' "$path" "$needle"
-    # Dump what actually came back. A bare "missing" leaves the next reader
-    # guessing whether the page 500d, rendered a fallback, or changed shape.
-    printf '        got (first 400 chars of body):\n'
-    curl -s --max-time 30 "$BASE$path" | tr -d '\n' | cut -c1-400 | sed 's/^/        /'
-    printf '\n'
-    FAILED=1
-  fi
+  local path="$1" needle="$2" body size
+  body=$(mktemp)
+
+  for attempt in 1 2 3; do
+    curl -s --max-time 30 "$BASE$path" >"$body"
+    if grep -qF -- "$needle" "$body"; then
+      size=$(wc -c <"$body" | tr -d ' ')
+      if [[ "$attempt" == "1" ]]; then
+        printf '  ok    %-28s contains %q\n' "$path" "$needle"
+      else
+        printf '  ok    %-28s contains %q (attempt %s, %sB)\n' \
+          "$path" "$needle" "$attempt" "$size"
+      fi
+      rm -f "$body"
+      return 0
+    fi
+    sleep 2
+  done
+
+  size=$(wc -c <"$body" | tr -d ' ')
+  printf '  FAIL  %-28s missing %q after 3 attempts (last body %sB)\n' \
+    "$path" "$needle" "$size"
+  printf '        got (first 400 chars):\n'
+  tr -d '\n' <"$body" | cut -c1-400 | sed 's/^/        /'
+  printf '\n'
+  rm -f "$body"
+  FAILED=1
 }
+
+# Warm every route first. The first request to a route under workerd is the
+# slowest, and a cold streamed response is what produced head-only bodies.
+for p in / /me /projects /blog /blog/hello /rss.xml /privacy /terms \
+         /projects/ci-fixture-full /projects/ci-fixture-bare; do
+  curl -s -o /dev/null --max-time 30 "$BASE$p"
+done
 
 echo "public routes"
 for p in / /me /projects /blog /privacy /terms; do expect "$p" 200; done
