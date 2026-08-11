@@ -33,3 +33,35 @@ body.dark {
   color: rgb(255, 255, 255);
   background: rgb(0, 0, 0);
 }
+
+/* rehype-pretty-code emits both themes as custom properties on every token;
+   these rules are what actually paints them. Without this, code blocks render
+   with no highlighting at all even though the markup is correct. */
+[data-rehype-pretty-code-figure] code {
+  display: grid;
+  white-space: pre;
+}
+
+[data-rehype-pretty-code-figure] span[data-line] {
+  padding-inline: 0.25rem;
+}
+
+[data-rehype-pretty-code-figure] span {
+  color: var(--shiki-light);
+}
+
+body.dark [data-rehype-pretty-code-figure] span {
+  color: var(--shiki-dark);
+}
+
+/* Set by the `title` on a code fence, e.g. ```ts title="posts.ts" */
+[data-rehype-pretty-code-title] {
+  font-family: var(--font-burbankmedium);
+  font-size: 0.75rem;
+  border: 4px solid black;
+  border-bottom: 0;
+  padding: 0.25rem 0.75rem;
+  background: var(--color-primary);
+  color: white;
+  width: fit-content;
+}

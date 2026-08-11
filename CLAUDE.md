@@ -107,6 +107,34 @@ Three columns are nullable because the data needs them to be — **render them c
 
 Still true, and worth keeping in mind before adding any Firebase back: `firebase/firestore` pulls in `protobufjs`, which calls `new Function` **at import time**. Workers forbids it — `EvalError: Code generation from strings disallowed for this context`. Because OpenNext bundles every route into one worker, module-scope `initializeApp()` took down `/privacy` and `/terms` too, and merely *importing* the module server-side was enough to break it.
 
+### Blog: files, and the two traps that come with them
+
+Posts are `content/posts/*.mdx`. `src/data/posts.ts` is the read seam, mirroring
+`src/data/projects.ts`. Frontmatter needs `title` and `date`; `draft: true` keeps
+a post out of the build.
+
+**Nothing may read the filesystem at runtime.** A worker has no filesystem, and
+marking a route static is *not* enough — OpenNext still invokes the server
+function for App Router pages, so `readdirSync` fails with
+`no such file or directory, readdir '/bundle/content/posts'`. The post list is
+therefore generated into `src/data/posts.generated.ts` (gitignored) by
+`scripts/generate-posts-manifest.mjs`, which `pnpm build` and `pnpm dev` both
+run. `gray-matter` is a devDependency for the same reason.
+
+**Prerendered pages need an incremental cache.** They are written to
+`.open-next/cache`, not the assets directory, so without one every SSG route
+404s with `Internal: NoFallbackError`. `open-next.config.ts` uses
+`staticAssetsIncrementalCache` — correct while content only changes on deploy;
+switch to `r2IncrementalCache` if on-demand revalidation is ever wanted.
+
+MDX plugins in `next.config.mjs` are named as **strings**, not imported.
+Turbopack serialises loader options and rejects function references
+(`does not have serializable options`).
+
+`rehype-pretty-code` emits `--shiki-light`/`--shiki-dark` on every token; the
+rules in `globals.css` are what paint them. Remove those and code renders
+correctly but entirely unstyled.
+
 ### Admin is behind Cloudflare Access
 
 `/admin/*` is protected by a Cloudflare Access application on

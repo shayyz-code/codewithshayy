@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Generated seed data (derived from the gitignored .archive/)
 /seeds/
+
+# Generated from content/posts by scripts/generate-posts-manifest.mjs
+src/data/posts.generated.ts

@@ -4,8 +4,8 @@
   "author": "Shayy <aungminkhant.shay@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/generate-posts-manifest.mjs && next dev",
+    "build": "node scripts/generate-posts-manifest.mjs && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -16,9 +16,12 @@
     "db:migrate": "wrangler d1 migrations apply codewithshayy --local",
     "db:migrate:remote": "wrangler d1 migrations apply codewithshayy --remote",
     "db:seed": "node scripts/build-seed.mjs > seeds/seed.sql && wrangler d1 execute codewithshayy --local --file seeds/seed.sql",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "posts:manifest": "node scripts/generate-posts-manifest.mjs"
   },
   "dependencies": {
+    "@mdx-js/react": "3.1.1",
+    "@next/mdx": "16.3.0",
     "@opennextjs/cloudflare": "^1.20.2",
     "@tailwindcss/postcss": "^4.3.3",
     "drizzle-orm": "0.45.2",
@@ -29,6 +32,8 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@mdx-js/loader": "^3.1.1",
+    "@types/mdx": "^2.0.14",
     "@types/node": "^20",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
@@ -36,9 +41,14 @@
     "eslint": "^9.7",
     "eslint-config-next": "16.3.0",
     "postcss": "^8",
+    "rehype-pretty-code": "0.14.5",
+    "remark-frontmatter": "5.0.0",
+    "remark-mdx-frontmatter": "5.2.0",
+    "shiki": "4.4.3",
     "tailwindcss": "^4.3.3",
     "typescript": "^5",
-    "wrangler": "^4.120.0"
+    "wrangler": "^4.120.0",
+    "gray-matter": "4.0.3"
   },
   "overrides": {
     "@types/react": "19.2.14",

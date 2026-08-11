@@ -1,4 +1,6 @@
 import codebracketsquare from "../icons/codebracketsquare"
+import rectanglestack from "../icons/rectanglestack"
+import star from "../icons/star"
 
 interface IHrefs {
   href: string
@@ -6,10 +8,17 @@ interface IHrefs {
   icon: React.ReactElement
 }
 
-// The /blogs, /projects and /enroll entries were commented out here and their
-// routes are now deleted. Projects and Blog get re-added once each has a real
-// route again.
 const hrefs: IHrefs[] = [
+  {
+    href: "/projects",
+    name: "Projects",
+    icon: star(),
+  },
+  {
+    href: "/blog",
+    name: "Blog",
+    icon: rectanglestack(),
+  },
   {
     href: "/me",
     name: "Me",
