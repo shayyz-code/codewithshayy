@@ -1,49 +1,35 @@
-/* @import url("https://fonts.cdnfonts.com/css/sf-alien-encounters"); */
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* v4 has no darkMode: "class" config. The dark class is set on <body> by the
+   inline script in the root layout, before first paint. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
-}
+@theme {
+  --color-primary: #0243fd;
+  --color-secondary: #0055ff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-rgb: 0, 0, 0;
-  }
+  --font-burbankblack: var(--font-burbankblack);
+  --font-burbankmedium: var(--font-burbankmedium);
+
+  /* Hard offset shadows, not blurs — they draw the comic-panel borders. */
+  --shadow-2xl: 0 0 100px 10px rgba(0, 0, 0, 1);
+  --shadow-3xl: -10px 10px 0 0 rgba(0, 0, 0, 1);
+  --shadow-4xl: 10px 10px 0 0 rgba(0, 0, 0, 1);
+
+  --text-btn-lg: 32px;
+  --text-btn-lg--letter-spacing: 0.1rem;
+  --text-btn-md: 24px;
+  --text-btn-md--letter-spacing: 0.1rem;
+  --text-btn-sm: 18px;
+  --text-btn-sm--letter-spacing: 0.1rem;
 }
 
 body {
-  color: rgb(--foreground-rgb);
+  color: rgb(0, 0, 0);
   background: rgb(255, 255, 255);
 }
 
-.dark {
+body.dark {
   color: rgb(255, 255, 255);
   background: rgb(0, 0, 0);
-  /* background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb)); */
-}
-
-.backdropBlur {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.wordBg {
-  font-weight: normal;
-  background: rgb(124 58 237);
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
 }

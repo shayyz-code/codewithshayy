@@ -19,8 +19,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@designbycode/tailwindcss-text-stroke": "^1.2.1",
     "@opennextjs/cloudflare": "^1.20.2",
+    "@tailwindcss/postcss": "^4.3.3",
     "drizzle-orm": "0.45.2",
     "framer-motion": "^11.4.0",
     "next": "16.3.0",
@@ -35,7 +35,7 @@
     "eslint": "^9.7",
     "eslint-config-next": "16.3.0",
     "postcss": "^8",
-    "tailwindcss": "^3.4.10",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5",
     "wrangler": "^4.120.0"
   },
