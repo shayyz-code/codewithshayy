@@ -36,6 +36,14 @@ export const projects = sqliteTable(
     siteUrl: text("site_url"),
     repoUrl: text("repo_url"),
     mediaKey: text("media_key"),
+    // The long-form write-up, rendered as markdown on the detail page. Prose
+    // rather than structured fields, because that is what a project write-up
+    // is; `role` and `year` are columns because they are the two facts uniform
+    // enough across projects to be worth querying. All nullable, so the detail
+    // page has to render without them.
+    bodyMd: text("body_md"),
+    role: text("role"),
+    year: text("year"),
     position: integer("position").notNull().default(0),
     published: integer("published", { mode: "boolean" })
       .notNull()

@@ -4,9 +4,17 @@ import Link from "next/link"
 import PrimaryBtn from "../PrimaryBtn"
 
 export default function ProjectCard({ data }: { data: Project }) {
+  const href = `/projects/${data.slug}`
+
   return (
     <article className="group flex flex-col gap-5 max-w-[380px] bg-white/75 dark:bg-black/75 border-4 border-black pb-5 hover:shadow-3xl transform transition-all ease-out overflow-hidden shadow-3xl shadow-primary">
-      <div className="w-[380px] h-[250px] overflow-y-hidden flex justify-center items-center bg-white">
+      {/* Only the image and title link through to the detail page. Wrapping the
+          whole card would nest the site and repo anchors inside it. */}
+      <Link
+        href={href}
+        aria-label={data.title}
+        className="w-[380px] h-[250px] overflow-y-hidden flex justify-center items-center bg-white"
+      >
         {data.mediaKey ? (
           <Image
             src={`/media/${data.mediaKey}`}
@@ -27,7 +35,7 @@ export default function ProjectCard({ data }: { data: Project }) {
             </span>
           </div>
         )}
-      </div>
+      </Link>
       <div className="px-5">
         <ul className="flex flex-wrap gap-x-2 text-sm">
           {data.tags.map((tag) => (
@@ -35,7 +43,14 @@ export default function ProjectCard({ data }: { data: Project }) {
           ))}
         </ul>
         <div>
-          <h2 className="font-burbankblack text-xl mb-2">{data.title}</h2>
+          <h2 className="font-burbankblack text-xl mb-2">
+            <Link
+              href={href}
+              className="hover:text-primary transition-all ease-out"
+            >
+              {data.title}
+            </Link>
+          </h2>
           {/* Both links are conditional: a missing site or a private repo used
               to render a link straight to a 404. */}
           {data.siteUrl && (
@@ -44,11 +59,16 @@ export default function ProjectCard({ data }: { data: Project }) {
             </PrimaryBtn>
           )}
           <p className="font-burbankmedium text-sm py-3">{data.description}</p>
-          {data.repoUrl && (
-            <Link className="text-sky-600" href={data.repoUrl}>
-              Github &gt;
+          <div className="flex items-center gap-4">
+            <Link className="text-sky-600" href={href}>
+              Read more &gt;
             </Link>
-          )}
+            {data.repoUrl && (
+              <Link className="text-sky-600" href={data.repoUrl}>
+                Github &gt;
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </article>
