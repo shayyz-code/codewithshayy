@@ -37,3 +37,7 @@ next-env.d.ts
 
 # One-off Firestore archives (contains PII) — keep local, back up outside the repo
 /.archive/
+
+# Cloudflare Workers build output + local wrangler/miniflare state
+/.open-next/
+/.wrangler/
