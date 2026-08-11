@@ -5,11 +5,14 @@ import { redirect } from "next/navigation"
 import {
   createProject,
   deleteProject,
+  getAdminProject,
   moveProject,
+  setMediaKey,
   setPublished,
   updateProject,
   type ProjectInput,
 } from "@/data/admin-projects"
+import { deleteMediaIfUnreferenced, putMedia } from "@/data/admin-media"
 
 // Server actions rather than route handlers: a browser cannot hold a D1 or R2
 // binding. Action POSTs target the page URL they originate from, so the
@@ -95,4 +98,38 @@ export async function moveProjectAction(id: string, direction: "up" | "down") {
   await moveProject(id, direction)
   revalidatePublic()
   revalidatePath("/admin")
+}
+
+export async function uploadMediaAction(id: string, form: FormData) {
+  const file = form.get("image")
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error("choose an image first")
+  }
+
+  const project = await getAdminProject(id)
+  if (!project) throw new Error("project not found")
+
+  const key = await putMedia(file, project.slug)
+
+  // Replacing an image leaves the old object behind otherwise. Removed only
+  // when the key changed — re-uploading identical bytes yields the same key.
+  if (project.mediaKey && project.mediaKey !== key) {
+    await deleteMediaIfUnreferenced(project.mediaKey, id)
+  }
+
+  await setMediaKey(id, key)
+  revalidatePublic(project.slug)
+  revalidatePath("/admin")
+  revalidatePath(`/admin/${id}`)
+}
+
+export async function removeMediaAction(id: string) {
+  const project = await getAdminProject(id)
+  if (!project?.mediaKey) return
+
+  await deleteMediaIfUnreferenced(project.mediaKey, id)
+  await setMediaKey(id, null)
+  revalidatePublic(project.slug)
+  revalidatePath("/admin")
+  revalidatePath(`/admin/${id}`)
 }
