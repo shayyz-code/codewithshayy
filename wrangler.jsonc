@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "codewithshayy",
+  "main": ".open-next/worker.js",
+  // Must not exceed what the installed workerd binary supports, or the local
+  // preview refuses to start.
+  "compatibility_date": "2026-08-08",
+  // nodejs_compat: the OpenNext worker needs Node built-ins.
+  // global_fetch_strictly_public: server-side fetch to our own hostname goes
+  // out over the public internet rather than looping back internally.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // Required by OpenNext so the worker can invoke itself (ISR revalidation,
+  // cache interception).
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "codewithshayy"
+    }
+  ],
+
+  // The default next/image optimizer does not run on Workers. This binding
+  // routes optimization through Cloudflare Images and needs no next.config
+  // change. Supports PNG/JPEG/WEBP/AVIF/GIF/SVG; anything else is returned
+  // unchanged.
+  "images": {
+    "binding": "IMAGES"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+
+  // D1 (binding: DB) and R2 (binding: MEDIA) are added by the schema and
+  // media PRs respectively.
+}

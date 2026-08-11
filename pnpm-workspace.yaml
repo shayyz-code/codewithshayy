@@ -1,4 +1,9 @@
 allowBuilds:
+  # esbuild + workerd link platform-specific binaries in postinstall; workerd
+  # is what `pnpm preview` runs the worker under. Left unapproved, a fresh
+  # clone gets a missing binary rather than a clear error.
+  esbuild: true
+  workerd: true
   protobufjs: true
   sharp: true
   unrs-resolver: true

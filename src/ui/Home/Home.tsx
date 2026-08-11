@@ -3,20 +3,20 @@
 import Hero from "./Hero"
 import Developer from "./Developer"
 import LookingForMaths from "./LookingForMaths"
-import { Suspense } from "react"
-import ProjectsContextProvider from "@/context/projectsContext"
-import Canvas3 from "../Me/Canvas3"
+import dynamic from "next/dynamic"
+
+// ssr: false keeps the Firestore/protobufjs import out of the server bundle.
+// See ProjectsSection for why that matters on Workers.
+const ProjectsSection = dynamic(() => import("../Me/ProjectsSection"), {
+  ssr: false,
+})
 
 export default function Home() {
   return (
     <section className="flex flex-col mb-16">
       <Hero />
       <Developer />
-      <Suspense>
-        <ProjectsContextProvider>
-          <Canvas3 />
-        </ProjectsContextProvider>
-      </Suspense>
+      <ProjectsSection />
       <LookingForMaths />
     </section>
   )

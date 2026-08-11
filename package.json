@@ -8,10 +8,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@designbycode/tailwindcss-text-stroke": "^1.2.1",
+    "@opennextjs/cloudflare": "^1.20.2",
     "firebase": "^10.13.1",
     "framer-motion": "^11.4.0",
     "next": "16.3.0",
@@ -26,7 +30,8 @@
     "eslint-config-next": "16.3.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.120.0"
   },
   "overrides": {
     "@types/react": "19.2.14",

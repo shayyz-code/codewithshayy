@@ -20,6 +20,12 @@ export default function ProjectCard({
           alt="picture of project"
           width={250}
           height={250}
+          // Cloudflare Images answers "Blocked" (403) for the 1 MB animated
+          // rangoon-academy GIF, so animated sources bypass the optimizer.
+          // Matched before the query string — Firebase Storage URLs end in
+          // ?alt=media&token=..., not the extension. Drop this once the
+          // migration re-encodes the GIF as a static image.
+          unoptimized={/\.gif(\?|$)/i.test(data.photo_url ?? "")}
           className="transition-all ease-out transform group-hover:scale-110"
         />
       </div>
