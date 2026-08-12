@@ -11,8 +11,8 @@ import {
   setPublished,
   updateProject,
   type ProjectInput,
-} from "@/data/admin-projects"
-import { deleteMediaIfUnreferenced, putMedia } from "@/data/admin-media"
+} from "@/data/projects/admin"
+import { deleteMediaIfUnreferenced, putMedia } from "@/data/projects/media"
 
 // Server actions rather than route handlers: a browser cannot hold a D1 or R2
 // binding. Action POSTs target the page URL they originate from, so the

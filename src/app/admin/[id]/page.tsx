@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getAdminProject } from "@/data/admin-projects"
+import { getAdminProject } from "@/data/projects/admin"
 import { updateProjectAction } from "../actions"
 import ProjectForm from "@/ui/Admin/ProjectForm"
 

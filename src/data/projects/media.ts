@@ -1,7 +1,7 @@
 import { and, eq, ne } from "drizzle-orm"
 import { getCloudflareContext } from "@opennextjs/cloudflare"
-import { getDb } from "./db"
-import { projects } from "./schema"
+import { getDb } from "../db"
+import { projects } from "../schema"
 
 // R2 writes for the admin. Reads happen in src/app/media/[...key]/route.ts.
 

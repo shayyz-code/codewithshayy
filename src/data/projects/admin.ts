@@ -1,7 +1,7 @@
 import { asc, eq, inArray, sql } from "drizzle-orm"
-import { getDb } from "./db"
-import { projects, projectTags, tags } from "./schema"
-import type { Project } from "./projects"
+import { getDb } from "../db"
+import { projects, projectTags, tags } from "../schema"
+import type { Project } from "."
 
 // Write side, kept separate from projects.ts so the read path stays obviously
 // read-only. Everything here is called from server actions under /admin.

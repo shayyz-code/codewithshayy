@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { listAllProjects } from "@/data/admin-projects"
+import { listAllProjects } from "@/data/projects/admin"
 import AdminList from "@/ui/Admin/AdminList"
 
 // Reads D1, so it must be dynamic for the same reason the public routes are.

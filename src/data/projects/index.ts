@@ -1,6 +1,6 @@
 import { and, asc, desc, eq } from "drizzle-orm"
-import { getDb } from "./db"
-import { projects, projectTags, tags } from "./schema"
+import { getDb } from "../db"
+import { projects, projectTags, tags } from "../schema"
 
 export type Project = {
   id: string
