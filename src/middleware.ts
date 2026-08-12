@@ -14,6 +14,7 @@ import { createRemoteJWKSet, jwtVerify } from "jose"
 // they cannot come from wrangler vars.
 const ADMIN_HOST = "admin.codewithshayy.com"
 const PUBLIC_HOST = "codewithshayy.com"
+const WWW_HOST = "www.codewithshayy.com"
 const TEAM_DOMAIN = "https://rustraccoon.cloudflareaccess.com"
 const AUD = "a6e3c4abc528973c82c6033a681707d6b5575a6c8577fd649df5f71d7710c3c0"
 
@@ -100,9 +101,9 @@ function secured(response: NextResponse, host: string) {
     "max-age=31536000; includeSubDomains",
   )
 
-  // Three hostnames serve this worker with identical content. Canonical tags
-  // name the apex; this stops the other two being indexed independently,
-  // without redirecting, so existing links to www keep working.
+  // Belt and braces on the non-apex hosts. Both now redirect, so a crawler
+  // should never render a page there — but the header costs nothing and covers
+  // the paths the matcher skips, and anything reached before a redirect lands.
   if (host !== PUBLIC_HOST) {
     response.headers.set("x-robots-tag", "noindex")
   }
@@ -131,6 +132,35 @@ export async function middleware(request: NextRequest) {
   } else if (host === ADMIN_HOST) {
     // The admin hostname serves the admin and nothing else. Without this, every
     // public page has an auth-walled duplicate at a second URL.
+    //
+    // The root is the exception, and getting it wrong made the admin
+    // unreachable from its own hostname: Access returns you to the path you
+    // started at, so typing the bare hostname lands on "/", which is not an
+    // admin path and was being sent to the public site before the admin was
+    // ever reached. Only /admin worked, and only if you typed it.
+    if (pathname === "/") {
+      return secured(
+        NextResponse.redirect(new URL("/admin", request.url), 302),
+        host,
+      )
+    }
+
+    // 302 rather than 301. This host is noindex and behind Access, so a
+    // permanent redirect buys nothing and costs a great deal — the previous
+    // 301 is cached by browsers indefinitely, which is why this fix needs a
+    // hard reload to take effect.
+    return secured(
+      NextResponse.redirect(
+        new URL(`${pathname}${search}`, `https://${PUBLIC_HOST}`),
+        302,
+      ),
+      host,
+    )
+  } else if (host === WWW_HOST) {
+    // One address for the public site. Canonical tags and x-robots-tag already
+    // stop this host being indexed; this is about not having two URLs for
+    // everything. 301 here, unlike the admin host: it is public, and the
+    // permanence is the point.
     return secured(
       NextResponse.redirect(
         new URL(`${pathname}${search}`, `https://${PUBLIC_HOST}`),
