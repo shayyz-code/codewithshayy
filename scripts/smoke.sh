@@ -246,6 +246,72 @@ fi
 # duplicates of it.
 expect_body /projects '<link rel="canonical" href="https://codewithshayy.com/projects"'
 
+echo "metadata and structured data"
+# /me had no title of its own, so it was indexed and shared under the same
+# title as the home page — the one thing a title exists to distinguish.
+expect_body /me "<title>About — Code w/ Shayy</title>"
+# A route's openGraph replaces the layout's rather than merging, so a post
+# without a cover image shipped with no og:image at all. The fallback is the
+# logo; asserting the tag is present is what stops that regressing silently.
+expect_body /blog/hello '<meta property="og:image"'
+expect_body /projects/ci-fixture-full '<meta property="og:image"'
+# JSON-LD renders, and the identity is shared rather than reinvented per page:
+# the author of a post is an @id reference to the Person emitted on / and /me.
+expect_body / '"@type":"WebSite"'
+expect_body /me '"@type":"Person"'
+expect_body /blog/hello '"@type":"BlogPosting"'
+expect_body /projects/ci-fixture-full '"@type":"CreativeWork"'
+expect_body /blog/hello '"@type":"BreadcrumbList"'
+expect_body /blog/hello '"author":{"@id":"https://codewithshayy.com/me#person"}'
+# The escaping in json-ld.tsx exists so a "</script>" in admin-authored copy
+# cannot close the block early. seeds/ci.sql puts one in this fixture's
+# description precisely so this can fail.
+#
+# Extracting the block is the whole difficulty. The HTML is minified onto a
+# handful of lines, so a greedy match runs past the block's own closing tag and
+# swallows the rest of the document — an earlier version of this check did
+# exactly that and reported a breakout that was the terminator working
+# correctly. Hence a non-greedy extract, then a real JSON parse: if the escape
+# ever fails, the block truncates at the injected tag and stops being JSON.
+LDJSON=$(curl -s -w '\n%{http_code}' --max-time 30 "$BASE/projects/ci-fixture-full")
+if [[ "$(tail -1 <<<"$LDJSON")" != "200" ]]; then
+  echo "  FAIL  /projects/ci-fixture-full   no response, JSON-LD not measured"
+  FAILED=1
+else
+  if sed '$d' <<<"$LDJSON" | python3 -c '
+import sys, re, json
+html = sys.stdin.read()
+blocks = re.findall(r"<script type=\"application/ld\+json\">(.*?)</script>", html, re.S)
+if not blocks:
+    sys.exit("no ld+json block found")
+for b in blocks:
+    json.loads(b)
+    if "<" in b:
+        sys.exit("raw < survived escaping")
+if "u003c/script" not in "".join(blocks):
+    sys.exit("fixture no longer carries markup; this check is vacuous")
+' 2>/dev/null; then
+    echo "  ok    /projects/ci-fixture-full   JSON-LD parses, markup escaped"
+  else
+    echo "  FAIL  /projects/ci-fixture-full   JSON-LD invalid or unescaped:"
+    sed '$d' <<<"$LDJSON" | python3 -c '
+import sys, re, json
+html = sys.stdin.read()
+blocks = re.findall(r"<script type=\"application/ld\+json\">(.*?)</script>", html, re.S)
+print("        blocks found:", len(blocks))
+for b in blocks:
+    try:
+        json.loads(b)
+    except Exception as e:
+        print("        parse error:", e)
+    print("        raw < present:", "<" in b)
+' 2>&1 | head -6
+    FAILED=1
+  fi
+fi
+# The docs page is only findable if it is advertised.
+expect_body /sitemap.xml "/docs"
+
 echo "worker error log"
 ERRORS=$(curl -s -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \
   -H 'Content-Type: application/json' \
