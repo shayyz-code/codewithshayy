@@ -4,6 +4,9 @@ import createMDX from "@next/mdx"
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ["ts", "tsx", "md", "mdx"],
+  // Drops the x-powered-by: Next.js response header. Version fingerprinting is
+  // free reconnaissance on a public site.
+  poweredByHeader: false,
   images: {
     // R2 media is resized by the /media route through the IMAGES binding.
     // See image-loader.ts for why /_next/image cannot do it here.
