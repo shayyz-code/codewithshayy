@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next"
-import localFont from "next/font/local"
 import { Kanit } from "next/font/google"
 import "./globals.css"
 import Navigation from "@/ui/layout/navigation"
@@ -28,9 +27,6 @@ export const metadata: Metadata = {
   keywords:
     "Shayy, Aung Min Khant, software engineer, portfolio, Rust, Go, TypeScript, React, Next.js, Myanmar developer",
   authors: [{ name: "Shayy", url: "https://codewithshayy.com/me" }],
-  icons: {
-    icon: "/favicon.ico", // Path to your favicon
-  },
   openGraph: {
     type: "website",
     url: "https://codewithshayy.com",
