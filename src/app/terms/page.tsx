@@ -70,6 +70,10 @@ export default function PageTermsAndConditions() {
             </p>
           </div>
         </div>
+        {/* Deliberately static, not read from the settings row. This route is
+            prerendered, so it cannot read D1 at request time — and the address
+            printed in a terms document should not change because someone edited
+            a CMS field. Update it here when it changes. */}
         <HoverWords>
           Questions? Email me at aungminkhant.shay@gmail.com
         </HoverWords>
