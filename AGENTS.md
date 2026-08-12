@@ -50,9 +50,16 @@ once blanked every page's copy while all of them returned 200.
 `measurement-check` exists because seven separate conclusions in one session came
 from instruments that were answering a different question than the one asked.
 
-Definitions and their pending negative tests are in `.claude/agents/README.md`.
-An agent that has not been shown to catch the thing it was written for is not yet
-evidence of anything.
+**Moving documentation counts as editing it.** Splitting the old 499-line
+`CLAUDE.md` into these files carried across five claims that commits from the
+same session had already falsified, including one that had been used to justify a
+code decision. A header-set diff guarded that split and could not have caught any
+of them: it proves nothing was *lost*, not that what moved is still *true*.
+
+Definitions live in `.claude/agents/README.md`, with each agent's negative test
+and its result. `measurement-check` has passed its own; the other three have not
+yet been run, and an agent that has not been shown to catch the thing it was
+written for is not yet evidence of anything.
 
 ## Where instructions live
 
@@ -118,9 +125,10 @@ Node and pnpm are pinned — `.nvmrc`, plus `packageManager` and `engines` in
 Four hostnames, all the same worker:
 
 ```
-codewithshayy.com          apex, the live site
-www.codewithshayy.com      same content
-admin.codewithshayy.com    behind Cloudflare Access
+codewithshayy.com          apex, the live site and the only indexed one
+www.codewithshayy.com      301 to the apex
+admin.codewithshayy.com    behind Cloudflare Access; / goes to /admin, the
+                           rest 302 to the apex
 codewithshayy.<sub>.workers.dev
 ```
 

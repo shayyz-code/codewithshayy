@@ -48,24 +48,36 @@ is trusted only after it has caught the failure it was written for.
       upload an image as the first action — and confirm it fails rather than
       passing on the 200s.
 
-- [ ] `doc-truth`: no longer needs a seeded claim. `.claude/rules/` currently
-      holds four real ones, found by reading the files rather than by the agent —
-      see the "Known-false claims" list below. It must find at least these four.
+- [ ] `doc-truth`: does not need a seeded claim. Five real ones were found by
+      reading the files — see below — and `git show` reproduces them exactly.
+      Run it against that commit's version of the docs; it must find at least
+      those five. Finding them in the *fixed* files would be a false positive and
+      means the agent is guessing.
 
-## Known-false claims, standing at the time of writing
+## The five false claims, and where to get them back
 
-Left in place deliberately until `doc-truth` has been run against them. Fixing
-them first would remove the only honest test material there is.
+Fixed in the same commit that records them. They survive in git, which is a
+better home for test material than the live docs — every one of these sat in a
+`paths:`-scoped file that loads automatically into any session touching
+`src/middleware.ts`, so leaving them in place to preserve a test meant
+re-serving, to every future session, the exact claim that had already caused one
+bad code decision.
+
+```bash
+git show 6f6d1c5:.claude/rules/security.md   # all but the last
+git show 6f6d1c5:.claude/rules/routes.md     # the www one
+```
 
 | file | claim | truth |
 |---|---|---|
 | `rules/security.md` | "middleware runs before bindings resolve so they cannot come from `wrangler.jsonc` vars" | **wrong, never true.** `src/middleware.ts:15-19` refutes it explicitly, and `allowedEmails()` reads `process.env` twenty lines below |
 | `rules/security.md` | "the Access JWT is verified but identity is only logged, not enforced" | **stale.** `4d18eea` returns 401 on a non-allowlisted email |
 | `rules/security.md` | "non-admin paths on the admin host 301 to the apex" | **stale.** 302 since `8903810` |
+| `rules/security.md` | "there are seven exits" in the middleware | **stale, and it was the enumeration that rotted.** There are ten; the three added were the admin-root redirect, the `www` redirect and the identity 401 |
 | `rules/routes.md` | "there is deliberately no `www` → apex redirect" | **stale.** `src/middleware.ts:186-197` ships one, at 301 |
 
-These came across verbatim in the 499-line CLAUDE.md split, three of them already
-falsified by commits made earlier the same session. The header-set diff that
-guarded the split could not have caught any of it: it proves nothing was *lost*,
-not that what moved is still *true*. That gap is the reason `doc-truth` exists,
-and it was sitting in the repo unnoticed while its agent went unrun.
+Four of the five are *stale* rather than *wrong* — they were true when written and
+the code moved underneath them. That is the failure mode to expect here, and it
+argues for claims that carry a way to re-derive themselves: the exit count now
+ships with the `awk | grep -c` that checks it, rather than a number to be
+believed.

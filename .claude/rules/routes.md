@@ -24,11 +24,12 @@ The split is the point: **anything reading D1 must be dynamic**, and anything
 prerendered must not touch the database or the filesystem at request time. CI
 asserts the first three stay `ƒ`.
 
-**Only the apex is meant to be indexed.** Every page sets `alternates.canonical`
-against `metadataBase`, and middleware adds `x-robots-tag: noindex` on any host
-that is not `codewithshayy.com`, so `www` and the workers.dev subdomain do not
-become duplicates. There is deliberately no `www` → apex redirect: it is the
-stronger signal but breaks existing links.
+**Only the apex is meant to be indexed**, and three mechanisms say so. Every page
+sets `alternates.canonical` against `metadataBase`; middleware adds
+`x-robots-tag: noindex` on any host that is not `codewithshayy.com`; and `www`
+**301s to the apex**, permanently, because it is public and the permanence is the
+point. The header still covers what the redirect cannot — the paths the matcher
+skips, and anything reached before the redirect lands.
 
 `robots.txt` is served by both. Cloudflare prepends a managed content-signals
 block — `Content-Signal: search=yes,ai-train=no` plus `Disallow: /` for a list of
