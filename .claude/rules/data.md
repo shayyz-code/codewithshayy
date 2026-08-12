@@ -82,11 +82,10 @@ or project write-ups, which share that element map. When adding one, match
 Tailwind's size *and* line-height pairing: `text-xl` is `1.25rem/1.75rem`, and
 setting only the size shifts the band by 2px.
 
-**Social links are deliberately still in code.** The footer is a server
-component in the root layout, so it renders on every route including the
-prerendered ones — a D1 read there runs during static generation and `/blog`
-fails to prerender outright. Moving them into the table needs the footer out of
-the root layout first.
+**The footer is not settings-driven, and cannot be** while it lives in the root
+layout — see `.claude/rules/ui.md`, which loads when you open the file itself.
+Social links stay in code for that reason, and the contact email was removed from
+the footer rather than wired up.
 
 `public/` now holds only `logo.webp` and the two manifest icons. The developer
 and background photos live in R2 and are set from the admin — there is no file
