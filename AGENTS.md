@@ -6,9 +6,8 @@ and other agents from one source without duplicating it.
 
 ## Invariants
 
-Each of these has already been violated once, and the scar is in the git
-history. They live here rather than in a path-scoped rule because you need to
-know them *before* opening the file they concern, not after.
+Each has been violated once already. They live here rather than in a path-scoped
+rule because you need them *before* opening the file they concern, not after.
 
 - **`pnpm build` passing proves almost nothing.** Production is `workerd`.
   Finish with `pnpm preview` and `./scripts/smoke.sh`.
@@ -29,7 +28,8 @@ know them *before* opening the file they concern, not after.
 - **Every exit in `src/middleware.ts` must go through `secured()`.** A bare
   return ships that path without a CSP.
 - **`public/` must hold nothing git does not track.** The build copies the
-  directory, so a local stray file gets deployed.
+  directory, so a local stray file gets deployed. `pnpm build` enforces this via
+  `scripts/check-public.sh`; a bare `next build` does not.
 - **Drizzle's `with` clause must be written inline** at each call site; hoisting
   it widens the literal `true` to `boolean` and the relational types reject it.
 
@@ -47,33 +47,22 @@ failures they catch are ones I did not know to doubt at the time.
 
 `release-verify` exists because status codes are not verification: a migration
 once blanked every page's copy while all of them returned 200.
-`measurement-check` exists because seven separate conclusions in one session came
-from instruments that were answering a different question than the one asked.
+`measurement-check` exists because seven conclusions in one session came from
+instruments answering a different question than the one asked.
 
-**Moving documentation counts as editing it.** Splitting the old 499-line
-`CLAUDE.md` into these files carried across nine claims that were false or had
-been falsified by commits from the same session, including one that had been used
-to justify a code decision. A header-set diff guarded that split and could not
-have caught any of them: it proves nothing was *lost*, not that what moved is
-still *true*.
+All four have since caught the failure they were written for, with the evidence
+in `.claude/agents/README.md`. Two rules came out of running them:
 
-**Do not run one of these agents while another mutates the working tree.** They
-share a checkout. A `doc-truth` run overlapping an `invariant-audit` negative test
-read `src/app/projects/page.tsx` with `force-dynamic` seeded out, built after the
-revert, and reconciled the two by concluding the export was redundant — writing
-that into its persistent memory, where it argued against the check defending a
-live invariant. Both observations were correct; the tree moved between them. Seed
-tests on a branch, run them one at a time, and prefer `git show <ref>:<path>` over
-the working tree when checking a doc against a specific commit.
+- **One at a time.** They share a checkout. A run whose tree changes underneath
+  it does not report the contradiction — it invents a theory that dissolves it,
+  and `doc-truth` wrote one into its memory arguing against a live invariant.
+- **`.claude/agent-memory/` is a lead, not a fact.** Tracked and shared, but
+  written without review, and it has already held a confident falsehood.
 
-Agent memory under `.claude/agent-memory/` is tracked, so it is shared and
-survives, but it is written without review. Read a memory as a lead, not a fact —
-that directory has already held a confident falsehood.
-
-Definitions live in `.claude/agents/README.md`, with each agent's negative test
-and its result. `measurement-check` has passed its own; the other three have not
-yet been run, and an agent that has not been shown to catch the thing it was
-written for is not yet evidence of anything.
+**Moving documentation counts as editing it.** The 499-line `CLAUDE.md` split
+carried across nine false claims, one of which had already been used to justify a
+code decision. The header-set diff that guarded it proves nothing was *lost*, not
+that what moved is still *true*.
 
 ## Where instructions live
 
@@ -92,11 +81,11 @@ load-bearing, not cosmetic.
 Package manager is **pnpm**.
 
 ```bash
-pnpm dev          # next dev
-pnpm build        # next build (Node — NOT what production runs)
+pnpm dev          # posts manifest, then next dev
+pnpm build        # check-public + manifest + next build (Node, NOT production)
 pnpm start        # next start (needs a prior build)
 pnpm lint         # eslint .
-pnpm typecheck    # tsc --noEmit
+pnpm typecheck    # posts manifest, then tsc --noEmit
 pnpm preview      # build the worker + run it under local workerd  <-- the real check
 pnpm deploy       # build + deploy to Cloudflare (needs auth)
 pnpm cf-typegen   # regenerate cloudflare-env.d.ts from wrangler.jsonc
@@ -189,9 +178,21 @@ conversation with the author instead. `.github/PULL_REQUEST_TEMPLATE.md` and
 | Bun or Go natively | only in Containers: Workers Paid, billed per 10ms active, one Durable Object each, scale-to-zero so cold starts |
 
 Rust is the one native option that is not JS, and `workers-rs` covers D1 and R2
-— but **not the Images binding** ([workers-rs#717](https://github.com/cloudflare/workers-rs/issues/717)),
-which `/media` depends on. That issue closing is the specific thing that would
-make a Rust rewrite viable.
+— but **not the Images binding**, which `/media` depends on.
+
+Check the capability, not the ticket:
+
+```bash
+curl -s https://raw.githubusercontent.com/cloudflare/workers-rs/main/worker/src/env.rs \
+  | grep -c 'fn images('     # 0 as of 2026-08-12
+```
+
+[workers-rs#717](https://github.com/cloudflare/workers-rs/issues/717) asked for
+it and was closed as **completed on 2025-08-04 without the binding arriving** —
+`env.rs` still exposes `d1`, `bucket`, `kv`, `ai`, `hyperdrive`, `secret_store`
+and no `images()`. An earlier version of this file said that issue closing was
+the green light for a Rust rewrite, which would have given the wrong answer for a
+year. That grep returning non-zero is the signal.
 
 ### Firebase cannot run on the server. This is not a preference.
 

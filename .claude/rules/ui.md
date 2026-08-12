@@ -5,17 +5,33 @@ paths:
 
 ## Layout conventions
 
-**Routes are thin wrappers.** A `src/app/<route>/page.tsx` does nothing but render one component from `src/ui/`:
+**A route fetches; a component renders.** `src/app/<route>/page.tsx` owns the
+data, the metadata and the `dynamic` export, then hands everything to one
+component from `src/ui/` as props:
 
 ```tsx
-// src/app/me/page.tsx
-export default function PageMe() {
-  return <main className="min-h-screen"><Me /></main>
+// src/app/me/page.tsx, abridged
+export const dynamic = "force-dynamic"
+
+export default async function PageMe() {
+  const [projects, settings] = await Promise.all([listProjects(), getSettings()])
+
+  return (
+    <main className="min-h-screen">
+      <Me projects={projects} settings={settings} bio={…} />
+    </main>
+  )
 }
 ```
 
-All real markup lives in `src/ui/`. When changing what a page looks like, edit
-the component, not the route file.
+That split is what keeps the components free of `getCloudflareContext`, so they
+stay renderable without a binding. When changing what a page *looks like*, edit
+the component; when changing what it *knows*, edit the route.
+
+**Two routes deliberately break this**: `src/app/privacy/page.tsx` (69 lines) and
+`src/app/terms/page.tsx` (79) hold their prose inline. They read no data and are
+composed once, so a `src/ui/` component would add a layer without removing one.
+Do not "fix" them by extraction — but do not treat them as the pattern either.
 
 ## `src/ui/` is grouped by role, not by page
 
@@ -29,7 +45,8 @@ sections/    the bands a screen composes — band, hero, bio, developer,
              project-grid, project-card
 screens/     the one component a route renders — home, me, blog-index,
              projects-index, project-detail
-admin/       admin-list, project-form, body-editor, media-field
+admin/       admin-list, project-form, body-editor, media-field,
+             settings-form
 icons/       one SVG component each
 ```
 

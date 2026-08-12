@@ -20,8 +20,17 @@ The default `next/image` optimizer does not run on Workers. Two paths replace it
   wire. They are webp at sane dimensions for that reason.
 
 Cloudflare Images returns **403 `Blocked`** for `rangoon-academy.gif` — 1 MB and
-190 frames, so it cannot be flattened without losing the animation. GIF and SVG
-skip the transform and stream through unchanged.
+190 frames, so it cannot be flattened without losing the animation. GIF therefore
+skips the transform and streams through unchanged: `NO_TRANSFORM` is
+`new Set(["gif"])`, and nothing else is in it.
+
+**SVG is not in that set and must never be added to it.** It is refused at both
+ends — `putMedia`'s `ALLOWED` map rejects the upload, and because SVG is absent
+from `CONTENT_TYPES` the route forces any object that reached R2 some other way
+down to `application/octet-stream`. "Skipping the transform" and "being served"
+are different things, and SVG does neither; it is the only image format that
+executes script. See `.claude/rules/security.md`, which loads alongside this file
+on any media path.
 
 Admin uploads go through `src/data/projects/media.ts`. The key embeds a hash of
 the content — `projects/<slug>-<hash8>.<ext>` — because `/media` serves objects
