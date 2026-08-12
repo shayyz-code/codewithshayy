@@ -61,7 +61,7 @@ export default function MediaField({
         <input
           type="file"
           name="image"
-          accept="image/png,image/jpeg,image/webp,image/avif,image/gif,image/svg+xml"
+          accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
           required
           className="font-burbankmedium text-sm"
         />
@@ -74,7 +74,7 @@ export default function MediaField({
       </form>
 
       <span className="text-xs font-burbankmedium opacity-60">
-        png, jpeg, webp, avif, gif or svg · 5 MB max. The key includes a content
+        png, jpeg, webp, avif or gif · 5 MB max. The key includes a content
         hash, because /media caches objects for a year as immutable — a replaced
         image needs a new key to be seen.
       </span>
