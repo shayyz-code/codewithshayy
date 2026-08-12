@@ -10,7 +10,7 @@
   "scripts": {
     "postinstall": "node scripts/generate-posts-manifest.mjs",
     "dev": "node scripts/generate-posts-manifest.mjs && next dev",
-    "build": "node scripts/generate-posts-manifest.mjs && next build",
+    "build": "./scripts/check-public.sh && node scripts/generate-posts-manifest.mjs && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "node scripts/generate-posts-manifest.mjs && tsc --noEmit",
