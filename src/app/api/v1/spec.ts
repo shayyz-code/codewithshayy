@@ -42,7 +42,10 @@ const project = {
       type: ["string", "null"],
       format: "uri",
       description:
-        "Absolute. Accepts a ?w=<px> query for a resized webp variant.",
+        "Absolute. A ?w=<px> query asks for a resized webp, but it is a request " +
+        "rather than a guarantee: GIFs are always served untransformed to keep " +
+        "their animation, and anything the resizer refuses falls back to the " +
+        "original. Read the response content-type rather than assuming webp.",
     },
     role: { type: ["string", "null"] },
     year: { type: ["string", "null"] },

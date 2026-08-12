@@ -165,6 +165,9 @@ expect_body /blog/hello "tracking-wider mt-12"
 echo "json api"
 expect /openapi.json 200
 expect /docs 200
+# /docs exists to render the spec, and a page that emits its chrome with no
+# endpoints returns 200 all the same. Assert something only the spec supplies.
+expect_body /docs "/api/v1/projects"
 expect /api/v1/projects 200
 expect /api/v1/posts 200
 # Proves D1 was read, not merely that JSON was emitted.
@@ -189,7 +192,12 @@ else
   echo "  ok    /api/v1/projects            omits the row id"
 fi
 # Media keys are meaningless off-origin, so the API publishes absolute URLs.
+# Both fields, because they are built differently: `url` is unconditional string
+# concatenation, while `image` is the one branching transform in the API —
+# rooted paths pass through, everything else is an R2 key. Asserting only `url`
+# leaves that branch free to regress to bare keys with every check still green.
 expect_body /api/v1/projects/ci-fixture-full '"url": "https://codewithshayy.com/projects/ci-fixture-full"'
+expect_body /api/v1/projects/ci-fixture-full '"image": "https://codewithshayy.com/media/projects/ci-fixture.png"'
 # Declared so a browser on another origin can consume it.
 if curl -s -I --max-time 30 "$BASE/api/v1/projects" | grep -qi 'access-control-allow-origin: \*'; then
   echo "  ok    /api/v1/projects            allows cross-origin reads"
