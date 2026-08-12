@@ -269,6 +269,61 @@ produced dead links for 3 of 6 projects.
 
 `mediaKey` stores an R2 object key, never an absolute URL.
 
+### Site content lives in a settings table
+
+Everything that used to be hardcoded copy — hero, the name band, bio, contact —
+is one row in `settings`, edited at `/admin/settings`.
+
+```
+src/data/settings.ts        getSettings()  reads + the built-in defaults
+src/data/settings-admin.ts  saveSettings() and the media-key writers
+```
+
+**The fallback is row-level, never per-column.** No row means the defaults in
+`settings.ts`, which are what the hardcoded markup used to say. A row that
+exists is authoritative, and a NULL column means *empty*. Falling back column by
+column would make a cleared field indistinguishable from an unset one — blanking
+the phone number would put the old one straight back, and clearing the contact
+details is the main thing the table is for.
+
+**Markdown renders in the route, not the section.** The sections are
+`"use client"` for framer-motion, so rendering there pulls `react-markdown` into
+the bundle for every visitor. `src/app/page.tsx` and `me/page.tsx` render it and
+pass elements down as props.
+
+The `.bio-prose` and `.hero-prose` rules in `globals.css` restore the styling the
+hardcoded markup carried — Rust-orange emphasis, the larger blue lead-in — and
+reset the element map's document spacing, since these panels are single
+paragraphs rather than articles. They are scoped so they cannot reach blog posts
+or project write-ups, which share that element map. When adding one, match
+Tailwind's size *and* line-height pairing: `text-xl` is `1.25rem/1.75rem`, and
+setting only the size shifts the band by 2px.
+
+**Social links are deliberately still in code.** The footer is a server
+component in the root layout, so it renders on every route including the
+prerendered ones — a D1 read there runs during static generation and `/blog`
+fails to prerender outright. Moving them into the table needs the footer out of
+the root layout first.
+
+Site images go through the same `putMedia` as projects, with a `site/` prefix.
+`deleteMediaIfUnreferenced` therefore checks **both** `projects` and `settings`:
+keys are content-addressed, so the same image uploaded in both places is one
+object, and checking only one table would delete something the other still uses.
+
+### Runtimes on Workers, so this is not researched twice
+
+| runtime | status |
+|---|---|
+| JS / TS, Python, Rust | native |
+| **Bun** | cannot run — Workers is workerd/V8, Bun is a separate runtime |
+| **Go** | WebAssembly only, via TinyGo |
+| Bun or Go natively | only in Containers: Workers Paid, billed per 10ms active, one Durable Object each, scale-to-zero so cold starts |
+
+Rust is the one native option that is not JS, and `workers-rs` covers D1 and R2
+— but **not the Images binding** ([workers-rs#717](https://github.com/cloudflare/workers-rs/issues/717)),
+which `/media` depends on. That issue closing is the specific thing that would
+make a Rust rewrite viable.
+
 ### Firebase cannot run on the server. This is not a preference.
 
 Still true, and worth keeping in mind before adding any Firebase back: `firebase/firestore` pulls in `protobufjs`, which calls `new Function` **at import time**. Workers forbids it — `EvalError: Code generation from strings disallowed for this context`. Because OpenNext bundles every route into one worker, module-scope `initializeApp()` took down `/privacy` and `/terms` too, and merely *importing* the module server-side was enough to break it.
