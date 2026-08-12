@@ -97,7 +97,8 @@ expect_body() {
 
 # Warm every route first. The first request to a route under workerd is the
 # slowest, and a cold streamed response is what produced head-only bodies.
-for p in / /me /projects /blog /blog/hello /rss.xml /privacy /terms \
+for p in / /me /projects /blog /blog/hello /rss.xml /privacy /terms /docs \
+         /openapi.json /api/v1/projects /api/v1/posts \
          /projects/ci-fixture-full /projects/ci-fixture-bare; do
   curl -s -o /dev/null --max-time 30 "$BASE$p"
 done
@@ -160,6 +161,62 @@ expect_body /blog/hello "--shiki-light"
 # variables come from rehype-pretty-code rather than from the map. This class
 # is emitted only by markdownComponents.h2.
 expect_body /blog/hello "tracking-wider mt-12"
+
+echo "json api"
+expect /openapi.json 200
+expect /docs 200
+expect /api/v1/projects 200
+expect /api/v1/posts 200
+# Proves D1 was read, not merely that JSON was emitted.
+expect_body /api/v1/projects '"slug": "ci-fixture-full"'
+# Unpublished must be absent from the API exactly as it is from the listing.
+if curl -s --max-time 30 "$BASE/api/v1/projects" | grep -qF -- "ci-fixture-draft"; then
+  echo "  FAIL  /api/v1/projects            exposes an unpublished project"
+  FAILED=1
+else
+  echo "  ok    /api/v1/projects            excludes unpublished"
+fi
+# A missing record is a 404 with a body, never 200 carrying null.
+expect /api/v1/projects/does-not-exist 404
+expect /api/v1/projects/ci-fixture-draft 404
+expect /api/v1/posts/does-not-exist 404
+expect_body /api/v1/projects/does-not-exist '"error": "not_found"'
+# The row id is the D1 primary key and is deliberately not published.
+if curl -s --max-time 30 "$BASE/api/v1/projects" | grep -qE '"id"[[:space:]]*:'; then
+  echo "  FAIL  /api/v1/projects            leaks the row id"
+  FAILED=1
+else
+  echo "  ok    /api/v1/projects            omits the row id"
+fi
+# Media keys are meaningless off-origin, so the API publishes absolute URLs.
+expect_body /api/v1/projects/ci-fixture-full '"url": "https://codewithshayy.com/projects/ci-fixture-full"'
+# Declared so a browser on another origin can consume it.
+if curl -s -I --max-time 30 "$BASE/api/v1/projects" | grep -qi 'access-control-allow-origin: \*'; then
+  echo "  ok    /api/v1/projects            allows cross-origin reads"
+else
+  echo "  FAIL  /api/v1/projects            missing access-control-allow-origin"
+  FAILED=1
+fi
+
+# Every path the spec documents must actually respond. This is what keeps a
+# hand-maintained spec honest: adding a path to spec.ts without a route handler
+# fails here rather than shipping a lie. {slug} is substituted with a fixture
+# that exists, since the placeholder itself is not a real record.
+echo "  ---   every documented path responds"
+DOCUMENTED=$(curl -s --max-time 30 "$BASE/openapi.json" \
+  | grep -oE '"/api/v1/[a-z{}/]+"' | tr -d '"' | sort -u)
+if [[ -z "$DOCUMENTED" ]]; then
+  echo "  FAIL  /openapi.json               documents no paths at all"
+  FAILED=1
+fi
+for p in $DOCUMENTED; do
+  case "$p" in
+    */projects/\{slug\}) probe="/api/v1/projects/ci-fixture-full" ;;
+    */posts/\{slug\})    probe="/api/v1/posts/hello" ;;
+    *)                   probe="$p" ;;
+  esac
+  expect "$probe" 200
+done
 
 echo "indexability"
 expect /robots.txt 200
