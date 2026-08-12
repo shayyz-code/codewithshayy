@@ -11,7 +11,7 @@ import {
 export default function AdminList({ projects }: { projects: AdminProject[] }) {
   return (
     <section className="px-5 py-20 max-w-4xl mx-auto flex flex-col gap-8">
-      <header className="flex items-end justify-between gap-4 border-b-4 border-black dark:border-primary pb-4">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b-4 border-black dark:border-primary pb-4">
         <div>
           <h1 className="font-display text-3xl tracking-wider uppercase">
             Projects
@@ -21,6 +21,12 @@ export default function AdminList({ projects }: { projects: AdminProject[] }) {
             {projects.filter((p) => p.published).length} published
           </p>
         </div>
+        <Link
+          href="/admin/settings"
+          className="font-body text-sm border-2 border-current px-3 py-2 hover:bg-primary hover:text-white transition-all ease-out"
+        >
+          Site settings
+        </Link>
         <Link
           href="/admin/new"
           className="font-display tracking-wider px-4 py-2 bg-primary text-white border-4 border-black hover:bg-secondary transition-all ease-out"

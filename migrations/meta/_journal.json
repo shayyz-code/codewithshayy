@@ -15,6 +15,13 @@
       "when": 1786453307922,
       "tag": "0001_closed_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786509048473,
+      "tag": "0002_tan_spyke",
+      "breakpoints": true
     }
   ]
 }

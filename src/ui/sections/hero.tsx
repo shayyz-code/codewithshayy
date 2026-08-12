@@ -4,7 +4,21 @@ import Image from "next/image"
 import PrimaryBtn from "@/ui/primitives/primary-btn"
 import { motion } from "framer-motion"
 
-export default function Hero() {
+export default function Hero({
+  eyebrow,
+  heading,
+  ctaLabel,
+  ctaHref,
+  children,
+}: {
+  eyebrow: string | null
+  /** Newline-separated; each line gets its own black-backed block. */
+  heading: string | null
+  ctaLabel: string | null
+  ctaHref: string | null
+  /** The body copy, rendered as markdown by the route. */
+  children: React.ReactNode
+}) {
   return (
     <div className="relative p-10 md:px-16 py-28 md:py-40 mb-2 bg-primary">
       {/* <Image
@@ -39,26 +53,32 @@ export default function Hero() {
           transition={{ duration: 1.5, type: "spring" }}
           className="text-white sticky z-20"
         >
-          <ul className="flex gap-2 text-xs mb-5">
-            <li className="px-2 py-1 bg-white font-body text-black">
-              Mingalabar
-            </li>
-          </ul>
-          <h2 className="font-display md:[w-500px] text-3xl md:text-5xl">
-            <div className="bg-black w-fit">Stop Scrolling.</div>
-            <div className="bg-black w-fit">Start Coding.</div>
-          </h2>
-          <p className="font-body md:w-[500px] text-base mt-5 mb-10 bg-black">
-            <span className="text-xl font-display text-primary">
-              Code w/ Shayy
-            </span>{" "}
-            is where I make coding tutorials and hacks{" "}
-            <span className="font-display">on a whim</span>. I skip the
-            fluff and focus on real-world tips.
-          </p>
-          <PrimaryBtn href="https://github.com/shayyz-code" size="md">
-            Visit GitHub
-          </PrimaryBtn>
+          {eyebrow && (
+            <ul className="flex gap-2 text-xs mb-5">
+              <li className="px-2 py-1 bg-white font-body text-black">
+                {eyebrow}
+              </li>
+            </ul>
+          )}
+          {heading && (
+            <h2 className="font-display md:[w-500px] text-3xl md:text-5xl">
+              {heading.split("\n").map((line) => (
+                <div key={line} className="bg-black w-fit">
+                  {line}
+                </div>
+              ))}
+            </h2>
+          )}
+          {children && (
+            <div className="hero-prose font-body md:w-[500px] text-base mt-5 mb-10 bg-black">
+              {children}
+            </div>
+          )}
+          {ctaLabel && ctaHref && (
+            <PrimaryBtn href={ctaHref} size="md">
+              {ctaLabel}
+            </PrimaryBtn>
+          )}
         </motion.div>
       </div>
     </div>

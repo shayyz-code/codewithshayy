@@ -65,3 +65,41 @@ body.dark [data-rehype-pretty-code-figure] span {
   color: white;
   width: fit-content;
 }
+
+/* The bio's emphasis is Rust orange — the one piece of styling the hardcoded
+   markup carried before the copy moved into the settings table. Scoped to the
+   bio so it does not reach blog posts or project write-ups, which render
+   through the same element map. */
+.bio-prose em {
+  color: #b7410e;
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+/* Markdown inside these panels should not inherit the element map's page-level
+   spacing — they are single paragraphs in a box, not a document. */
+.bio-prose p,
+.hero-prose p {
+  /* The shared element map styles markdown as a document — my-4 and
+     leading-relaxed. These panels held a single hardcoded paragraph before, so
+     both are reset to keep the bands exactly the height they were. */
+  margin: 0;
+  line-height: inherit;
+}
+
+/* The hero's lead-in used to be a larger primary-blue span, and its aside a
+   display-face run. Markdown strong/em map onto both.
+   The line-height matches Tailwind's text-xl pairing (1.25rem/1.75rem) — the
+   size alone leaves a taller line box and pushes the band 2px. */
+.hero-prose strong {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  color: var(--color-primary);
+  font-weight: inherit;
+}
+
+.hero-prose em {
+  font-family: var(--font-display);
+  font-style: normal;
+}

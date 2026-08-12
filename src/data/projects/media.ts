@@ -1,7 +1,7 @@
-import { and, eq, ne } from "drizzle-orm"
+import { and, eq, ne, or } from "drizzle-orm"
 import { getCloudflareContext } from "@opennextjs/cloudflare"
 import { getDb } from "../db"
-import { projects } from "../schema"
+import { projects, settings } from "../schema"
 
 // R2 writes for the admin. Reads happen in src/app/media/[...key]/route.ts.
 
@@ -36,7 +36,11 @@ const MAX_BYTES = 5 * 1024 * 1024
  * old image cached at the edge and in browsers for a year. Identical bytes
  * therefore also dedupe to the same key.
  */
-export async function putMedia(file: File, slug: string): Promise<string> {
+export async function putMedia(
+  file: File,
+  name: string,
+  prefix = "projects",
+): Promise<string> {
   const ext = ALLOWED[file.type]
   if (!ext) {
     throw new Error(
@@ -56,7 +60,7 @@ export async function putMedia(file: File, slug: string): Promise<string> {
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("")
 
-  const key = `projects/${slug}-${hash}.${ext}`
+  const key = `${prefix}/${name}-${hash}.${ext}`
   const { env } = getCloudflareContext()
 
   // httpMetadata is not optional. An object stored without it is served with no
@@ -70,22 +74,51 @@ export async function putMedia(file: File, slug: string): Promise<string> {
 }
 
 /**
- * Deletes an object, but only when no other project still points at it.
- * Content-addressed keys mean two projects with the same image share a key, so
- * an unconditional delete would break the other one.
+ * Deletes an object, but only when nothing else still points at it.
+ *
+ * Keys are content-addressed, so two rows with the same image share one object
+ * and an unconditional delete would break the other. That now spans two tables:
+ * the settings row holds the developer and background images, and a project can
+ * legitimately reference the same key — upload the same file in both places and
+ * they dedupe to a single object. Checking only `projects` would delete an
+ * object the settings row still uses, which shows up as a broken image on the
+ * home page rather than as an error.
+ *
+ * `exceptProjectId` is the row being changed, excluded so its own outgoing
+ * reference does not count as a reason to keep the object.
  */
 export async function deleteMediaIfUnreferenced(
   key: string,
-  exceptProjectId: string,
+  exceptProjectId?: string,
 ) {
   const db = await getDb()
-  const others = await db
+
+  const projectRefs = await db
     .select({ id: projects.id })
     .from(projects)
-    .where(and(eq(projects.mediaKey, key), ne(projects.id, exceptProjectId)))
+    .where(
+      exceptProjectId
+        ? and(eq(projects.mediaKey, key), ne(projects.id, exceptProjectId))
+        : eq(projects.mediaKey, key),
+    )
     .limit(1)
 
-  if (others.length > 0) return
+  if (projectRefs.length > 0) return
+
+  // The settings row is a singleton, so there is nothing to exclude: the caller
+  // clears or replaces the column before calling this.
+  const settingsRefs = await db
+    .select({ id: settings.id })
+    .from(settings)
+    .where(
+      or(
+        eq(settings.developerMediaKey, key),
+        eq(settings.backgroundMediaKey, key),
+      ),
+    )
+    .limit(1)
+
+  if (settingsRefs.length > 0) return
 
   const { env } = getCloudflareContext()
   await env.MEDIA.delete(key)

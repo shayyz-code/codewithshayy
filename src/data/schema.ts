@@ -95,3 +95,42 @@ export const projectTagsRelations = relations(projectTags, ({ one }) => ({
     references: [tags.id],
   }),
 }))
+
+// Site content that used to be hardcoded in components: the hero copy, the bio,
+// the contact block, and the two photographs.
+//
+// One row, fixed id. A settings table with many rows would need a "which one is
+// live" concept that nothing here wants.
+//
+// Every content column is nullable, and that is load-bearing rather than lazy:
+// NULL means *empty*, so clearing the phone number removes it from the page.
+// The built-in defaults apply only when the whole row is missing — see
+// src/data/settings.ts. Per-column fallback would make a cleared field
+// indistinguishable from an unset one, and put the old value straight back.
+export const settings = sqliteTable("settings", {
+  id: text("id").primaryKey(),
+
+  heroEyebrow: text("hero_eyebrow"),
+  /** Newline-separated; each line renders as its own black-backed block. */
+  heroHeading: text("hero_heading"),
+  heroBodyMd: text("hero_body_md"),
+  heroCtaLabel: text("hero_cta_label"),
+  heroCtaHref: text("hero_cta_href"),
+
+  /** The band over the background photo. */
+  developerTitle: text("developer_title"),
+  developerName: text("developer_name"),
+  developerBadge: text("developer_badge"),
+
+  bioMd: text("bio_md"),
+
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  contactLocation: text("contact_location"),
+
+  /** R2 object keys, same convention as projects.mediaKey. */
+  developerMediaKey: text("developer_media_key"),
+  backgroundMediaKey: text("background_media_key"),
+
+  updatedAt: text("updated_at").notNull().default(timestamp()),
+})
