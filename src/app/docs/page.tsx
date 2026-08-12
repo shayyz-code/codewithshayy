@@ -4,10 +4,12 @@ import { spec } from "../api/v1/spec"
 // Rendered on the server from the same object /openapi.json serves.
 //
 // A CDN-hosted renderer — Swagger UI, Redoc, Scalar — is not an option: the CSP
-// in src/middleware.ts is `script-src 'self'`, so our own policy blocks every one
-// of them, and the failure would be a blank page rather than an error. Vendoring
-// one into public/ would work but adds a large third-party bundle to a worker
-// already at 1.39–1.47 MiB gzip against a 3 MiB cap, to render four endpoints.
+// in src/middleware.ts is `script-src 'self' 'unsafe-inline'`, which permits an
+// inline script but no external `src`, so our own policy blocks every one of
+// them and the failure would be a blank page rather than an error. Vendoring one
+// into public/ would work but adds a large third-party bundle to a worker
+// already at 1.45 MiB gzip (`wrangler deploy --dry-run`, this branch), to render
+// four endpoints.
 //
 // A constant, like the spec: no database, no filesystem.
 export const dynamic = "force-static"
