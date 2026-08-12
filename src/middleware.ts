@@ -8,15 +8,42 @@ import { createRemoteJWKSet, jwtVerify } from "jose"
 // below is defence in depth, so a removed or misconfigured Access policy fails
 // closed rather than silently exposing the route.
 //
-// Neither constant is a secret: the AUD identifies the Access application and
-// appears in Access's own login redirect, and the team domain is a public
-// hostname. They are inline because middleware runs before bindings resolve, so
-// they cannot come from wrangler vars.
+// The AUD and team domain are inline because they are genuinely public, not
+// because they have to be: both appear in Access's own login redirect URL, which
+// anyone can see by requesting the admin host unauthenticated.
+//
+// An earlier version of this comment claimed middleware runs before bindings
+// resolve and therefore cannot read wrangler vars. That is wrong —
+// `process.env` works here, as bypassForLocalDev below has been relying on all
+// along. Anything that is actually configuration should be a secret; see
+// ADMIN_EMAILS.
 const ADMIN_HOST = "admin.codewithshayy.com"
 const PUBLIC_HOST = "codewithshayy.com"
 const WWW_HOST = "www.codewithshayy.com"
 const TEAM_DOMAIN = "https://rustraccoon.cloudflareaccess.com"
 const AUD = "a6e3c4abc528973c82c6033a681707d6b5575a6c8577fd649df5f71d7710c3c0"
+
+// Who may reach the admin, checked against the token's `email` claim.
+//
+// Comes from the ADMIN_EMAILS secret, comma separated — who may sign in is
+// configuration, not code, and it should not need a deploy to change. Set with
+//   echo "a@example.com,b@example.com" | wrangler secret put ADMIN_EMAILS
+// and locally through .dev.vars, which is wrangler's stand-in for secrets.
+//
+// This is defence in depth. Access is the gate that actually blocks at the
+// edge; this stops a widened Access policy — to a whole domain, say — from
+// silently widening the worker with it.
+//
+// The claim name was read from a real token rather than assumed. The identity
+// token carries: aud, email, exp, iat, nbf, iss, type, identity_nonce, sub,
+// country, policy_id. `email` rather than `sub` because the Access policy is
+// written in terms of email, and the two should not be able to drift apart.
+function allowedEmails() {
+  return (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+}
 
 // Fetches and caches Cloudflare's signing keys, keyed by the token's `kid`.
 // Created at module scope but does no I/O until the first verification, so it is
@@ -192,27 +219,34 @@ export async function middleware(request: NextRequest) {
       audience: AUD,
     })
 
-    // Signature, issuer and audience are checked; *identity* is not. Any token
-    // Access mints for this application is accepted, so the restriction to one
-    // person lives entirely in the Access policy — widen that policy and this
-    // widens with it, silently.
+    // Signature, issuer and audience prove the token is genuine; they say
+    // nothing about *who* it belongs to. Without this, any token Access mints
+    // for this application is accepted, so widening the Access policy would
+    // widen the worker with it, silently.
     //
-    // Logging rather than enforcing, on purpose. Access answers before the
-    // worker on the admin host, so there is no way to obtain a real token from
-    // the CLI and no way to test either branch of an allowlist before shipping
-    // one. Enforcing a claim whose name came from memory risks locking the
-    // owner out of the only write path, recoverable only by redeploy.
-    //
-    // One real login puts the claim name and value in the observability store;
-    // enforcement is a two-line follow-up once it is known.
-    console.log(
-      "access identity:",
-      JSON.stringify({
-        email: payload.email ?? null,
-        sub: payload.sub ?? null,
-        claims: Object.keys(payload),
-      }),
-    )
+    // Case-insensitive and trimmed: an address that differs only in case is the
+    // same mailbox, and that difference is not worth a lockout.
+    const email =
+      typeof payload.email === "string" ? payload.email.trim().toLowerCase() : ""
+    const allowed = allowedEmails()
+
+    // An unset secret degrades to the behaviour before this check existed —
+    // Access alone — rather than locking the only account out of the only write
+    // path. Deliberately fail-open, and loud about it: a silent lockout is
+    // worse than a logged gap on a control that is already the second of two.
+    if (allowed.length === 0) {
+      console.error(
+        "access identity check skipped: ADMIN_EMAILS is not set",
+      )
+    } else if (!allowed.includes(email)) {
+      // The address is deliberately not echoed to the client — a 401 that names
+      // who is allowed is a hint. It goes to the observability store instead.
+      console.error(
+        "access identity rejected:",
+        JSON.stringify({ email: email || null, sub: payload.sub ?? null }),
+      )
+      return secured(new NextResponse("Unauthorized", { status: 401 }), host)
+    }
   } catch (error) {
     // Goes to the Workers observability store, never to the client. Worth
     // keeping: a failure here is either a forged token or an unreachable certs
