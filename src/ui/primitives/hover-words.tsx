@@ -3,7 +3,7 @@
 // were removed.
 export default function HoverWords({ children }: { children: string }) {
   return (
-    <p className="px-10 pb-10 text-center font-burbankmedium">
+    <p className="px-10 pb-10 text-center font-body">
       {children.split(" ").map((word, index) => (
         <b key={index} className="hover:bg-secondary">{` ${word} `}</b>
       ))}

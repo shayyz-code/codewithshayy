@@ -8,8 +8,8 @@
   --color-primary: #0243fd;
   --color-secondary: #0055ff;
 
-  --font-burbankblack: var(--font-burbankblack);
-  --font-burbankmedium: var(--font-burbankmedium);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
 
   /* Hard offset shadows, not blurs — they draw the comic-panel borders. */
   --shadow-2xl: 0 0 100px 10px rgba(0, 0, 0, 1);
@@ -56,7 +56,7 @@ body.dark [data-rehype-pretty-code-figure] span {
 
 /* Set by the `title` on a code fence, e.g. ```ts title="posts.ts" */
 [data-rehype-pretty-code-title] {
-  font-family: var(--font-burbankmedium);
+  font-family: var(--font-body);
   font-size: 0.75rem;
   border: 4px solid black;
   border-bottom: 0;

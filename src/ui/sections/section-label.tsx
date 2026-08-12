@@ -7,7 +7,7 @@ import Band, { SlideIn } from "./band"
 export default function SectionLabel({ children }: { children: string }) {
   return (
     <Band className="px-10 py-8">
-      <SlideIn className="bg-primary border-4 border-black px-4 py-2 text-white font-burbankblack text-lg md:text-2xl">
+      <SlideIn className="bg-primary border-4 border-black px-4 py-2 text-white font-display text-lg md:text-2xl">
         {children}
       </SlideIn>
     </Band>

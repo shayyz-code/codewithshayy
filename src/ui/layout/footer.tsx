@@ -5,7 +5,7 @@ import navLinks from "./nav-links"
 
 export default function Footer() {
   return (
-    <footer className="w-screen flex flex-col gap-4 justify-center p-5 font-burbankmedium text-sm text-center">
+    <footer className="w-screen flex flex-col gap-4 justify-center p-5 font-body text-sm text-center">
       <p className="">
         Find an issue with this page?{" "}
         <Link
@@ -18,7 +18,7 @@ export default function Footer() {
         Need help? Email{" "}
         <Link
           href="mailto:aungminkhant.shay@gmail.com"
-          className="font-burbankblack text-base tracking-widest hover:text-blue-500 transition-all ease-out"
+          className="font-display text-base tracking-widest hover:text-blue-500 transition-all ease-out"
         >
           aungminkhant.shay@gmail.com
         </Link>
@@ -33,7 +33,7 @@ export default function Footer() {
           </li>
         ))}
       </ul>
-      <div className="font-burbankblack text-xl uppercase tracking-wider">
+      <div className="font-display text-xl uppercase tracking-wider">
         Helpful Links
       </div>
       <ul className="flex items-center justify-center divide-x-2 divide-black dark:divide-white">

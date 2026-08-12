@@ -4,16 +4,16 @@ import "./globals.css"
 import Navigation from "@/ui/layout/navigation"
 import Footer from "@/ui/layout/footer"
 
-const fontBurbankBlack = Kanit({
+const fontDisplay = Kanit({
   weight: "600",
   subsets: ["latin"],
-  variable: "--font-burbankblack",
+  variable: "--font-display",
 })
 
-const fontBurbankMedium = Kanit({
+const fontBody = Kanit({
   weight: "200",
   subsets: ["latin"],
-  variable: "--font-burbankmedium",
+  variable: "--font-body",
 })
 
 export const metadata: Metadata = {
@@ -85,7 +85,7 @@ export default function RootLayout({
           interactivity — server-action forms silently stop submitting. */}
       <body
         suppressHydrationWarning
-        className={`${fontBurbankBlack.variable} ${fontBurbankMedium.variable} overflow-y-scroll overflow-x-hidden`}
+        className={`${fontDisplay.variable} ${fontBody.variable} overflow-y-scroll overflow-x-hidden`}
       >
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <Navigation />

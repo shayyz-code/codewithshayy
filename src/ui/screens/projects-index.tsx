@@ -14,10 +14,10 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
         transition={{ duration: 1.5, type: "spring" }}
         className="flex flex-col gap-2 items-center"
       >
-        <h1 className="font-burbankblack text-3xl md:text-4xl uppercase tracking-wider">
+        <h1 className="font-display text-3xl md:text-4xl uppercase tracking-wider">
           Projects
         </h1>
-        <p className="font-burbankmedium text-center">
+        <p className="font-body text-center">
           See all my projects at{" "}
           <Link
             className="text-sky-600"
@@ -31,7 +31,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
       {projects.length > 0 ? (
         <ProjectGrid projects={projects} />
       ) : (
-        <p className="font-burbankmedium">Nothing here yet.</p>
+        <p className="font-body">Nothing here yet.</p>
       )}
     </section>
   )

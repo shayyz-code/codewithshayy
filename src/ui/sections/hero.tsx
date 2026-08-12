@@ -40,20 +40,20 @@ export default function Hero() {
           className="text-white sticky z-20"
         >
           <ul className="flex gap-2 text-xs mb-5">
-            <li className="px-2 py-1 bg-white font-burbankmedium text-black">
+            <li className="px-2 py-1 bg-white font-body text-black">
               Mingalabar
             </li>
           </ul>
-          <h2 className="font-burbankblack md:[w-500px] text-3xl md:text-5xl">
+          <h2 className="font-display md:[w-500px] text-3xl md:text-5xl">
             <div className="bg-black w-fit">Stop Scrolling.</div>
             <div className="bg-black w-fit">Start Coding.</div>
           </h2>
-          <p className="font-burbankmedium md:w-[500px] text-base mt-5 mb-10 bg-black">
-            <span className="text-xl font-burbankblack text-primary">
+          <p className="font-body md:w-[500px] text-base mt-5 mb-10 bg-black">
+            <span className="text-xl font-display text-primary">
               Code w/ Shayy
             </span>{" "}
             is where I make coding tutorials and hacks{" "}
-            <span className="font-burbankblack">on a whim</span>. I skip the
+            <span className="font-display">on a whim</span>. I skip the
             fluff and focus on real-world tips.
           </p>
           <PrimaryBtn href="https://github.com/shayyz-code" size="md">

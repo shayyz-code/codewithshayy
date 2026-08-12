@@ -30,7 +30,7 @@ export default function ProjectCard({ data }: { data: Project }) {
         ) : (
           // No image on record. A titled placeholder beats a broken image box.
           <div className="w-full h-full flex items-center justify-center bg-primary/10 px-6">
-            <span className="font-burbankblack text-center text-black tracking-wide">
+            <span className="font-display text-center text-black tracking-wide">
               {data.title}
             </span>
           </div>
@@ -43,7 +43,7 @@ export default function ProjectCard({ data }: { data: Project }) {
           ))}
         </ul>
         <div>
-          <h2 className="font-burbankblack text-xl mb-2">
+          <h2 className="font-display text-xl mb-2">
             <Link
               href={href}
               className="hover:text-primary transition-all ease-out"
@@ -58,7 +58,7 @@ export default function ProjectCard({ data }: { data: Project }) {
               Visit
             </PrimaryBtn>
           )}
-          <p className="font-burbankmedium text-sm py-3">{data.description}</p>
+          <p className="font-body text-sm py-3">{data.description}</p>
           <div className="flex items-center gap-4">
             <Link className="text-sky-600" href={href}>
               Read more &gt;

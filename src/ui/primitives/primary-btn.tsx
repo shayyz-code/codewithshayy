@@ -26,7 +26,7 @@ export default function PrimaryBtn({
             : size === "md"
             ? "w-[185px] h-[50px] text-btn-md"
             : "w-[130px] h-[30px] text-btn-sm"
-        } font-burbankblack text-black uppercase flex items-center justify-center transition ease-in-out hover:transform hover:scale-110 z-20`}
+        } font-display text-black uppercase flex items-center justify-center transition ease-in-out hover:transform hover:scale-110 z-20`}
         onClick={handleOnClick}
         type={type}
       >
@@ -44,7 +44,7 @@ export default function PrimaryBtn({
               : size === "md"
               ? "w-[185px] h-[50px] text-btn-md"
               : "w-[130px] h-[30px] text-btn-sm"
-          } font-burbankblack text-white uppercase flex items-center justify-center transition ease-in-out hover:transform hover:scale-110 z-20`}
+          } font-display text-white uppercase flex items-center justify-center transition ease-in-out hover:transform hover:scale-110 z-20`}
         >
           {children}
         </button>

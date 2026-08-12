@@ -11,7 +11,7 @@ export default function Navigation() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", duration: 1.5 }}
-      className="absolute top-0 left-0 w-full flex justify-end z-50 px-4 py-4 font-burbankblack text-lg tracking-wider"
+      className="absolute top-0 left-0 w-full flex justify-end z-50 px-4 py-4 font-display text-lg tracking-wider"
     >
       <div className="container flex items-center justify-between text-blue-gray-900 max-w-full ">
         <Link href="/" className="group flex items-center cursor-pointer">

@@ -17,15 +17,15 @@ export default function Error({
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-6 px-10">
-      <h1 className="font-burbankblack text-3xl md:text-5xl tracking-wider text-center">
+      <h1 className="font-display text-3xl md:text-5xl tracking-wider text-center">
         Something broke.
       </h1>
-      <p className="font-burbankmedium text-center">
+      <p className="font-body text-center">
         That is on me, not you.
       </p>
       <button
         onClick={reset}
-        className="font-burbankblack tracking-wider px-6 py-2 bg-primary text-white border-4 border-black shadow-4xl shadow-secondary hover:bg-secondary transition-all ease-out"
+        className="font-display tracking-wider px-6 py-2 bg-primary text-white border-4 border-black shadow-4xl shadow-secondary hover:bg-secondary transition-all ease-out"
       >
         Try Again
       </button>

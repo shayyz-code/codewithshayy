@@ -60,10 +60,10 @@ export default async function PagePost({
                 ))}
               </ul>
             )}
-            <h1 className="font-burbankblack text-3xl md:text-4xl tracking-wider mt-1">
+            <h1 className="font-display text-3xl md:text-4xl tracking-wider mt-1">
               {post.title}
             </h1>
-            <time dateTime={post.date} className="font-burbankmedium text-xs">
+            <time dateTime={post.date} className="font-body text-xs">
               {new Date(`${post.date}T00:00:00Z`).toLocaleDateString("en-GB", {
                 day: "numeric",
                 month: "long",
@@ -77,7 +77,7 @@ export default async function PagePost({
 
           <Link
             href="/blog"
-            className="inline-block font-burbankblack tracking-wider mt-12 text-sky-600"
+            className="inline-block font-display tracking-wider mt-12 text-sky-600"
           >
             &lt; All posts
           </Link>
