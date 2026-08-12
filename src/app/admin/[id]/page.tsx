@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getAdminProject } from "@/data/projects/admin"
 import { updateProjectAction } from "../actions"
-import ProjectForm from "@/ui/Admin/ProjectForm"
+import ProjectForm from "@/ui/admin/project-form"
 
 export const dynamic = "force-dynamic"
 

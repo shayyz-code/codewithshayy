@@ -147,6 +147,12 @@ expect_body /projects/ci-fixture-full "<h2"
 expect_body /projects/ci-fixture-bare "A longer write-up is coming"
 # Blog code blocks are highlighted at build; the CSS variables prove it ran.
 expect_body /blog/hello "--shiki-light"
+# Proves the MDX element map is wired. If mdx-components.tsx stops being found,
+# useMDXComponents never runs, MDX falls back to bare elements, and the build
+# still succeeds — the shiki assertion above would keep passing, because those
+# variables come from rehype-pretty-code rather than from the map. This class
+# is emitted only by markdownComponents.h2.
+expect_body /blog/hello "tracking-wider mt-12"
 
 echo "indexability"
 expect /robots.txt 200

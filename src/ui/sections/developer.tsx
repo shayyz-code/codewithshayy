@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import Band, { SlideIn } from "./Band"
+import Band, { SlideIn } from "./band"
 
 // The name-and-title band, over the background photo. Home and Me each had
 // their own copy of this file; the only differences were padding and type size,

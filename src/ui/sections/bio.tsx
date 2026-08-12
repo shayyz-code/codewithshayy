@@ -1,6 +1,6 @@
 "use client"
 
-import Band, { SlideIn } from "./Band"
+import Band, { SlideIn } from "./band"
 
 // Was Me/Canvas8.
 export default function Bio() {

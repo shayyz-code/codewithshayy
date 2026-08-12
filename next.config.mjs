@@ -8,7 +8,7 @@ const nextConfig = {
     // R2 media is resized by the /media route through the IMAGES binding.
     // See image-loader.ts for why /_next/image cannot do it here.
     loader: "custom",
-    loaderFile: "./image-loader.ts",
+    loaderFile: "./src/lib/image-loader.ts",
   },
   async redirects() {
     return [

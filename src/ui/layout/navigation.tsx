@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import hrefs from "./hrefs"
+import navLinks from "./nav-links"
 import { motion } from "framer-motion"
 import Image from "next/image"
 
@@ -31,7 +31,7 @@ export default function Navigation() {
         </Link>
         <div>
           <ul className="flex gap-4 mt-0 mb-0 flex-row items-center md:gap-6 bg-transparent px-4 h-12 text-black">
-            {hrefs.map((href, index) => (
+            {navLinks.map((href, index) => (
               <li
                 className="flex antialiased font-medium gap-x-2 leading-normal text-white hover:bg-black hover:scale-110 hover:tracking-widest transition-all ease-out duration-300"
                 key={index}

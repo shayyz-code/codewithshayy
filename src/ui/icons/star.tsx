@@ -1,4 +1,4 @@
-export default function star() {
+export default function Star() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

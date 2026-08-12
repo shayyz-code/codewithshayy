@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { listProjects } from "@/data/projects"
-import ProjectsIndex from "@/ui/Projects/ProjectsIndex"
+import ProjectsIndex from "@/ui/screens/projects-index"
 
 // See the note in app/page.tsx — D1 must be read at request time, not build.
 export const dynamic = "force-dynamic"

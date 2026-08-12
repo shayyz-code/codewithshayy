@@ -3,9 +3,9 @@
 import Link from "next/link"
 import { motion } from "framer-motion"
 import type { Project } from "@/data/projects"
-import Band from "./Band"
-import ProjectGrid from "./ProjectGrid"
-import PrimaryBtn from "../PrimaryBtn"
+import Band from "./band"
+import ProjectGrid from "./project-grid"
+import PrimaryBtn from "@/ui/primitives/primary-btn"
 
 // Was Me/Canvas3, imported by Home across the feature boundary. Both / and /me
 // render it, so it belongs to neither.

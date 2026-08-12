@@ -2,10 +2,9 @@
 
 import { motion } from "framer-motion"
 import type { Project } from "@/data/projects"
-import ProjectCard from "./ProjectCard"
+import ProjectCard from "./project-card"
 
-// The card grid, shared by /, /me and /projects. It lived in ui/Me/ while two
-// other features imported it across the directory boundary.
+// The card grid, rendered by /, /me and /projects.
 //
 // Purely presentational. Data is fetched in the route's server component
 // and passed down — no context, no useEffect, and no loading skeleton, because

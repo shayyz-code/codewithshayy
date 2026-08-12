@@ -1,4 +1,4 @@
-export default function facebook() {
+export default function Facebook() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

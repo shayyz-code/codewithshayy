@@ -3,7 +3,7 @@
 import { useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { markdownComponents } from "../markdownComponents"
+import { markdownComponents } from "@/ui/primitives/markdown-components"
 
 // The one client component in the admin. Everything else is a server component
 // posting to a server action; a live preview genuinely needs local state.

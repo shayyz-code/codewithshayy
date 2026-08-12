@@ -1,7 +1,7 @@
 import type { Project } from "@/data/projects"
 import Image from "next/image"
 import Link from "next/link"
-import PrimaryBtn from "../PrimaryBtn"
+import PrimaryBtn from "@/ui/primitives/primary-btn"
 
 export default function ProjectCard({ data }: { data: Project }) {
   const href = `/projects/${data.slug}`

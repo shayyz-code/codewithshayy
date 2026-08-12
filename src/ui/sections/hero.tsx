@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import PrimaryBtn from "../PrimaryBtn"
+import PrimaryBtn from "@/ui/primitives/primary-btn"
 import { motion } from "framer-motion"
 
 export default function Hero() {

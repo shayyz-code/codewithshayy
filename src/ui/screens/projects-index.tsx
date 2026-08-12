@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import Link from "next/link"
 import type { Project } from "@/data/projects"
-import ProjectGrid from "../sections/ProjectGrid"
+import ProjectGrid from "@/ui/sections/project-grid"
 
 export default function ProjectsIndex({ projects }: { projects: Project[] }) {
   return (
