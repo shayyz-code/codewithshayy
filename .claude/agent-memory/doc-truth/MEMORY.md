@@ -1,0 +1,3 @@
+- [Doc-claim rot hotspots](doc-truth-rot-hotspots.md) — claims that have gone stale before, with the command to re-derive each; check these first
+- [Verified clean 2026-08-12](doc-truth-verified-2026-08-12.md) — what was checked and how, incl. third-party claims with their verification date; carries one corrected entry, read the banner
+- [Tree contamination, 2026-08-12](doc-truth-tree-contamination.md) — how this agent recorded a false conclusion by reading a working tree that changed mid-run; pin the commit before trusting source-settled claims

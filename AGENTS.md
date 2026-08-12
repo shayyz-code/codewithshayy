@@ -51,10 +51,24 @@ once blanked every page's copy while all of them returned 200.
 from instruments that were answering a different question than the one asked.
 
 **Moving documentation counts as editing it.** Splitting the old 499-line
-`CLAUDE.md` into these files carried across five claims that commits from the
-same session had already falsified, including one that had been used to justify a
-code decision. A header-set diff guarded that split and could not have caught any
-of them: it proves nothing was *lost*, not that what moved is still *true*.
+`CLAUDE.md` into these files carried across nine claims that were false or had
+been falsified by commits from the same session, including one that had been used
+to justify a code decision. A header-set diff guarded that split and could not
+have caught any of them: it proves nothing was *lost*, not that what moved is
+still *true*.
+
+**Do not run one of these agents while another mutates the working tree.** They
+share a checkout. A `doc-truth` run overlapping an `invariant-audit` negative test
+read `src/app/projects/page.tsx` with `force-dynamic` seeded out, built after the
+revert, and reconciled the two by concluding the export was redundant — writing
+that into its persistent memory, where it argued against the check defending a
+live invariant. Both observations were correct; the tree moved between them. Seed
+tests on a branch, run them one at a time, and prefer `git show <ref>:<path>` over
+the working tree when checking a doc against a specific commit.
+
+Agent memory under `.claude/agent-memory/` is tracked, so it is shared and
+survives, but it is written without review. Read a memory as a lead, not a fact —
+that directory has already held a confident falsehood.
 
 Definitions live in `.claude/agents/README.md`, with each agent's negative test
 and its result. `measurement-check` has passed its own; the other three have not

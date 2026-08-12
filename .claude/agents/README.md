@@ -36,23 +36,88 @@ is trusted only after it has caught the failure it was written for.
       The trap only exists against **minified** HTML; against a pretty-printed
       fixture both methods agree and it would pass for the wrong reason.
 
-- [ ] `invariant-audit`: **inconclusive — the run was cut off**, not failed. It
-      had reached "confirmed the transitive reach" on a branch with
-      `force-dynamic` removed from `src/app/projects/page.tsx`, which is the
-      right line of enquiry, but it never reported. Retry needs one fix: that
-      seed was committed as `test: seed a force-dynamic violation`, and the agent
-      has `Bash`, so `git log` hands it the answer. Recommit with a message that
-      describes the change as the tidy-up it is disguised as.
+- [x] **`invariant-audit` — passed 2026-08-12.** Given a branch with
+      `force-dynamic` removed from `src/app/projects/page.tsx`, described as
+      dropping "an export that wasn't doing anything". Returned
+      `violations found`.
 
-- [ ] `release-verify`: reproduce a partial settings row locally — delete the row,
-      upload an image as the first action — and confirm it fails rather than
-      passing on the 200s.
+      It measured rather than reasoned: ran `pnpm build` on the branch and
+      reported the route table showing `○ /projects` where `ƒ` is required, then
+      ran the CI assertion from `ci.yml:51` against that log and showed it
+      failing. It traced the transitive reach — `listProjects` → `getDb()` →
+      `getCloudflareContext` + `drizzle(env.DB)` — and ruled out the page being
+      dynamic by other means by checking that `next.config.ts` enables neither
+      `cacheComponents` nor `dynamicIO`.
 
-- [ ] `doc-truth`: does not need a seeded claim. Five real ones were found by
-      reading the files — see below — and `git show` reproduces them exactly.
-      Run it against that commit's version of the docs; it must find at least
-      those five. Finding them in the *fixed* files would be a false positive and
-      means the agent is guessing.
+      It also found something this repo had not written down: the CI build job
+      has **no seeded D1**, since `seeds/ci.sql` runs in the second job, so what
+      a prerendered `/projects` bakes in is an *empty* list — 30,979 bytes of
+      HTML with no cards. And because `/projects/[slug]` stays dynamic,
+      individual project URLs keep working while only the index that links to
+      them is blank. Nothing 404s, nothing errors.
+
+      A first run was cut off by an API limit and reported nothing. The seed for
+      that attempt was committed as `test: seed a force-dynamic violation`, which
+      would have handed the agent the answer through `git log` — it has `Bash`.
+      The passing run used `refactor: drop a redundant export from the projects
+      listing`. **Seed commit messages must not name the seeded fault.**
+
+- [x] **`release-verify` — passed 2026-08-12.** Given a local `pnpm preview` with
+      the outage reproduced exactly: a settings row holding one media key and
+      twelve NULL content columns. Returned `fail`.
+
+      It reported 12 of 14 columns NULL and **0 of 12 `DEFAULTS` strings
+      rendering** on either `/` or `/me`, while every route returned 200. It
+      caught that three apparent copy hits were the footer and `<title>` rather
+      than settings — independently confirming the hardcoded footer. It found the
+      seeded media key dangling, `/media/site/developer-abc12345.webp` → 404,
+      against the `site/developer-f48be3de.webp` actually in R2.
+
+      Two things beyond the brief. It dated the row as written outside the
+      application: `updated_at` is `"1"` where all four write paths in
+      `settings-admin.ts` use `strftime`, so this was not an author clearing
+      fields through the admin — and it said plainly that this was observation,
+      not causation. And it checked the local admin bypass against the *built
+      artifact* rather than inferring, reading
+      `.open-next/middleware/handler.mjs:5034` to confirm
+      `ADMIN_LOCAL_BYPASS` is a runtime env read with no value inlined.
+
+      **It also corrected its caller.** The prompt asserted the local D1 had no
+      project rows; it has 3. That claim was made without checking, in a prompt to
+      a verification agent, which is the one place a false premise does the most
+      damage. The agent flagged it and correctly noted it did not soften the
+      verdict.
+
+      Not exercised, and it said so: the `www` and admin-host branches, since
+      wrangler pins the request host locally.
+
+- [x] **`doc-truth` — passed 2026-08-12, with one caveat that matters.** Run
+      against the docs at `6f6d1c5`, which hold five known-false claims. It found
+      all five, correctly classified four as stale and one as never-true, and
+      dated each against the commit that falsified it — establishing that
+      `8903810`, `4d18eea` and `3549ae3` all landed *before* the docs were
+      written, so the text moved verbatim and nothing re-checked it.
+
+      It then found **four more that #44 had missed**, the worst being a
+      contradiction: `media.md:24` says "GIF and SVG skip the transform and stream
+      through unchanged" while `security.md:26` says SVG is excluded. Both files
+      are `paths:`-scoped onto media code, so a session opening
+      `src/app/media/**` loads opposite instructions — and the permissive half is
+      wrong, since `NO_TRANSFORM` is `new Set(["gif"])`. It also caught that the
+      `workers-rs#717` citation has been CLOSED since 2025-08-04 while the
+      capability never arrived, so the doc's "that issue closing is the green
+      light" instruction returns the wrong answer. Tracked in #41.
+
+      **The caveat: it also recorded a confident falsehood**, and the cause was
+      the caller's. It ran concurrently with the `invariant-audit` negative test,
+      read `src/app/projects/page.tsx` while `force-dynamic` was seeded out, built
+      after the revert, and reconciled the two by concluding the export was
+      redundant — writing into its memory an argument *against* the check that
+      defends that invariant. Corrected in
+      `.claude/agent-memory/doc-truth/`, with the mechanism recorded.
+
+      **Do not run these agents concurrently.** They share a checkout, and a doc
+      checker cannot tell a mutating tree from a contradictory one.
 
 ## The five false claims, and where to get them back
 
