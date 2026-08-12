@@ -29,11 +29,15 @@ export type SiteSettings = {
 /**
  * What the site said before any of it was editable.
  *
- * Used only when the settings row is missing entirely — a fresh database, or a
- * wiped table — so the site degrades to its previous self rather than to blanks
- * or a 500.
+ * Used when the settings row is missing entirely — a fresh database, or a wiped
+ * table — so the site degrades to its previous self rather than to blanks.
+ *
+ * Exported because every path that *creates* the row must seed from these. A
+ * row containing only the column it happened to write is authoritative and
+ * blank everywhere else, which is how the hero, bio, name band and contact
+ * block once vanished from the live site after a migration wrote two columns.
  */
-const DEFAULTS: SiteSettings = {
+export const DEFAULTS: SiteSettings = {
   heroEyebrow: "Mingalabar",
   heroHeading: "Stop Scrolling.\nStart Coding.",
   heroBodyMd:
