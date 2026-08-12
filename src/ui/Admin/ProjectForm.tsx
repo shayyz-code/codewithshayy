@@ -1,5 +1,5 @@
 import Link from "next/link"
-import type { AdminProject } from "@/data/admin-projects"
+import type { AdminProject } from "@/data/projects/admin"
 import BodyEditor from "./BodyEditor"
 import MediaField from "./MediaField"
 
