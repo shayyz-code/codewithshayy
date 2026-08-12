@@ -50,6 +50,25 @@ admin/       admin-list, project-form, body-editor, media-field,
 icons/       one SVG component each
 ```
 
+## `layout/` renders on every route, including the prerendered ones
+
+**Nothing in `src/ui/layout/` may read D1.** `Navigation` and `Footer` are
+rendered by the root layout, which has no `dynamic` export, so they run during
+static generation for `/blog`, `/blog/[slug]`, `/privacy`, `/terms`, `/rss.xml`
+and `/robots.txt`. A `getSettings()` there either bakes the build machine's
+database into those pages or forces `dynamic` on the whole layout, which drops
+prerendering for all six — including the file-based blog, which exists to avoid
+database reads.
+
+That is why social links are still in code, and why the footer's contact email
+was **removed** rather than wired to the settings row: it duplicated an address
+the CMS owns, so the two drifted. Contact details live once, on `/me`, whose
+route already reads D1.
+
+This constraint used to be recorded only in `.claude/rules/data.md`, which is
+scoped to `src/data/**` — so it never loaded for anyone editing the footer, and
+was rediscovered from scratch. A rule belongs with the file it governs.
+
 **A section belongs in `sections/` whether one page uses it or three.** Being
 single-page is not what decides — `hero` and `stay-tuned` are Home-only,
 `contact` is Me-only, and all three live there. Nothing under one role
