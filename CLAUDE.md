@@ -113,26 +113,75 @@ export default function PageMe() {
 }
 ```
 
-All real markup lives in `src/ui/<Feature>/<Feature>.tsx`. When changing what a page looks like, edit the `src/ui/` component, not the route file.
+All real markup lives in `src/ui/`. When changing what a page looks like, edit
+the component, not the route file.
 
-No `Canvas<N>` files remain — the last three were renamed when they moved into
-`src/ui/sections/`. Use descriptive names.
+### `src/ui/` is grouped by role, not by page
 
-**Sections shared by more than one page live in `src/ui/sections/`**, not inside
-whichever feature happened to introduce them. `Developer`, `FeaturedProjects`,
-`SectionLabel`, `Bio`, `ProjectGrid` and `ProjectCard` are rendered by two or
-three of `/`, `/me` and `/projects`. `src/ui/<Feature>/` keeps only what that one
-page renders — `Home/Hero`, `Home/StayTuned`, `Me/Contact`.
+```
+primitives/  reusable and page-agnostic — primary-btn, markdown,
+             hover-words, markdown-components
+layout/      the shell every page shares — navigation, footer, and the two
+             link lists both render (nav-links, social-links)
+sections/    the bands a screen composes — band, hero, bio, developer,
+             contact, section-label, stay-tuned, featured-projects,
+             project-grid, project-card
+screens/     the one component a route renders — home, me, blog-index,
+             projects-index, project-detail
+admin/       admin-list, project-form, body-editor, media-field
+icons/       one SVG component each
+```
 
-`sections/Band` is the full-bleed rule-topped strip every section sits in, with
-the shared `whileInView` fade; `SlideIn` is its inner slide-from-left. Three
-copies of both existed before.
+**A section belongs in `sections/` whether one page uses it or three.** Being
+single-page is not what decides — `hero` and `stay-tuned` are Home-only,
+`contact` is Me-only, and all three live there. Nothing under one role
+directory imports from another's internals; use the alias.
 
-These are all `"use client"` for framer-motion. A section that stops being a
-client component renders permanently at `opacity: 0`, because the animations are
+`sections/band` is the full-bleed rule-topped strip every section sits in, with
+the shared `whileInView` fade; `SlideIn` is its inner slide-from-left.
+
+Sections are all `"use client"` for framer-motion. One that stops being a client
+component renders permanently at `opacity: 0`, because the animations are
 `whileInView`.
 
+### Naming
+
+**Every file and directory is kebab-case. Identifiers are not** — JavaScript has
+no kebab identifiers, so `code-bracket-square.tsx` exports `CodeBracketSquare`
+and is used as `<CodeBracketSquare />`. Name a module's main export after its
+file: `social-links.tsx` exports `socialLinks`.
+
+Icons are components, not functions returning JSX. `<Star />`, never `star()`.
+
+**Imports:** `@/…` across directories, relative only within the same directory.
+
 **Path aliases:** `@/*` → `./src/*`, `$/*` → `./public/*`.
+
+<details>
+<summary>Renaming files: the filesystem is case-insensitive</summary>
+
+`core.ignorecase` is true and `touch Foo && ls foo` succeeds, so a rename
+differing only in case can be dropped silently, or recorded as the old path with
+new contents. This is what made `/developer.png` 400 before it was fixed.
+
+Route every rename through a temp path, so no case is special:
+
+```bash
+mkdir -p "$(dirname "$new")"          # git mv will not create the target dir
+git mv "$old" "$old.__tmp__" && git mv "$old.__tmp__" "$new"
+```
+
+That still does not cover a *directory* whose name changes only in case:
+`mkdir -p src/ui/admin` resolves to an existing `src/ui/Admin`, so git records
+the new path while the working tree keeps the old one. They disagree until the
+directory is moved aside and back with plain `mv`. Harmless locally, wrong on
+CI's case-sensitive filesystem. Afterwards:
+
+```bash
+git status --short                    # expect R, not D + ??
+git ls-files | sort -f | uniq -di     # must be empty
+```
+</details>
 
 ### Routes
 
@@ -176,10 +225,18 @@ and looks like the worker's is being ignored; it is not.
 Projects live in **Cloudflare D1, read through Drizzle in server components**. Firebase is gone from this path entirely — no client-side fetching, no context provider, no loading skeleton.
 
 ```
-src/data/schema.ts    Drizzle table definitions — the source of truth
-src/data/db.ts        getDb(): Drizzle client bound to env.DB
-src/data/projects.ts  listProjects() / getProject(slug)
+src/data/schema.ts           Drizzle table definitions — the source of truth
+src/data/db.ts               getDb(): Drizzle client bound to env.DB
+src/data/posts.ts            listPosts() / getPost(slug), from the manifest
+src/data/projects/index.ts   reads  — listProjects() / getProject(slug)
+src/data/projects/admin.ts   writes — create, update, delete, reorder, publish
+src/data/projects/media.ts   R2     — putMedia, deleteMediaIfUnreferenced
 ```
+
+The read module is `index.ts` so `@/data/projects` keeps resolving to it, which
+works because `moduleResolution` is `bundler`. Both `listProjects` and
+`getProject` already exclude unpublished rows, so anything built on them — the
+public pages, the sitemap — inherits that.
 
 ```bash
 pnpm db:generate       # schema.ts -> migrations/*.sql (never hand-edit those)
@@ -226,7 +283,7 @@ loader for files on disk; it cannot compile a string that arrives from D1.
 | `content/posts/*.mdx` | `@next/mdx` + `rehype-pretty-code` | build |
 | `projects.body_md` | `react-markdown` + `remark-gfm` | request |
 
-`src/ui/markdownComponents.tsx` is the shared element map, so both produce
+`src/ui/primitives/markdown-components.tsx` is the shared element map, so both produce
 identical markup. Style markdown there, not in either caller.
 
 The runtime path has no Shiki deliberately: highlighting per request needs a
@@ -236,7 +293,7 @@ code still gets the styled panel, just uncoloured.
 ### Blog: files, and the two traps that come with them
 
 Posts are `content/posts/*.mdx`. `src/data/posts.ts` is the read seam, mirroring
-`src/data/projects.ts`. Frontmatter needs `title` and `date`; `draft: true` keeps
+`src/data/projects/index.ts`. Frontmatter needs `title` and `date`; `draft: true` keeps
 a post out of the build.
 
 **Nothing may read the filesystem at runtime.** A worker has no filesystem, and
@@ -296,7 +353,7 @@ certs endpoint is unreachable, which would lock out real users too.
 The default `next/image` optimizer does not run on Workers. Two paths replace it:
 
 - **R2 media** is resized inside `src/app/media/[...key]/route.ts` via the
-  `IMAGES` binding, and `image-loader.ts` points `next/image` at
+  `IMAGES` binding, and `src/lib/image-loader.ts` points `next/image` at
   `/media/<key>?w=N`. Optimizing through `/_next/image` does not work here —
   the optimizer fetches the source URL, and `global_fetch_strictly_public`
   sends that self-fetch out to the public internet, where it fails with
@@ -309,7 +366,7 @@ Cloudflare Images returns **403 `Blocked`** for `rangoon-academy.gif` — 1 MB a
 190 frames, so it cannot be flattened without losing the animation. GIF and SVG
 skip the transform and stream through unchanged.
 
-Admin uploads go through `src/data/admin-media.ts`. The key embeds a hash of
+Admin uploads go through `src/data/projects/media.ts`. The key embeds a hash of
 the content — `projects/<slug>-<hash8>.<ext>` — because `/media` serves objects
 as `immutable, max-age=31536000`. Reusing a key for new bytes would leave the
 old image cached for a year. Replacing deletes the previous object, but only
