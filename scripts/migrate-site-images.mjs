@@ -1,5 +1,11 @@
 // One-off: moves the committed developer and background photos into R2 and
-// points the settings row at them, so public/ can stop carrying content.
+// writes a complete settings row.
+//
+// "Complete" is the important word. An earlier version of this wrote only the
+// two media keys, which looked harmless and was not: getSettings falls back
+// row-level, so the moment a row exists it is authoritative and every column
+// left NULL renders as empty. That took the hero, the bio, the name band and
+// the contact block off the live site until the row was filled in.
 //
 // Run against the remote bucket and database before deleting the files:
 //   node scripts/migrate-site-images.mjs --remote
@@ -30,11 +36,15 @@ for (const f of files) {
   sets.push(`${f.column} = '${key}'`)
 }
 
-// The row may not exist yet, so upsert rather than update.
+// Writes the media keys only. The row must already exist and be complete —
+// setSettingsMediaKey seeds DEFAULTS when it creates one, and the admin form
+// writes every column, so the only way to get a partial row is by hand.
 console.log(
-  `npx wrangler d1 execute codewithshayy ${flag} --command "INSERT INTO settings (id, ${files
-    .map((f) => f.column)
-    .join(", ")}) VALUES ('site', ${files
-    .map((_, i) => `'${sets[i].split("'")[1]}'`)
-    .join(", ")}) ON CONFLICT(id) DO UPDATE SET ${sets.join(", ")}"`,
+  `npx wrangler d1 execute codewithshayy ${flag} --command "UPDATE settings SET ${sets.join(
+    ", ",
+  )} WHERE id = 'site'"`,
 )
+console.log(
+  `# If that reports 0 rows written, no settings row exists yet: save once in`,
+)
+console.log(`# the admin first, so the row is created complete.`)

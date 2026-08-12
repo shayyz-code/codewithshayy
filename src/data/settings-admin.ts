@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm"
 import { sql } from "drizzle-orm"
 import { getDb } from "./db"
 import { settings } from "./schema"
-import { SETTINGS_ID, type SiteSettings } from "./settings"
+import { DEFAULTS, SETTINGS_ID, type SiteSettings } from "./settings"
 
 // Write side for site settings, kept apart from settings.ts so the read path
 // stays obviously read-only — the same split as projects/index.ts and
@@ -29,17 +29,27 @@ export async function saveSettings(input: SiteSettings) {
     })
 }
 
-/** Used by the image upload, which writes one column without touching the rest. */
+/**
+ * Writes one media column without touching the rest.
+ *
+ * The insert branch seeds every other column from DEFAULTS, and that is not
+ * decoration. getSettings falls back row-level, so a row is authoritative the
+ * moment it exists — creating one with a single column would blank the hero,
+ * bio, name band and contact block. Uploading an image before ever saving the
+ * form is exactly that case, and it is a plausible first action in a fresh
+ * admin.
+ */
 export async function setSettingsMediaKey(
   field: "developerMediaKey" | "backgroundMediaKey",
   key: string | null,
 ) {
   const db = await getDb()
-  // The row may not exist yet if images are set before anything else is saved.
   await db
     .insert(settings)
-    .values({ id: SETTINGS_ID, [field]: key, updatedAt: NOW })
+    .values({ ...DEFAULTS, id: SETTINGS_ID, [field]: key, updatedAt: NOW })
     .onConflictDoUpdate({
+      // Only the media column on conflict: an existing row already holds the
+      // author's own copy and must not be reset to defaults.
       target: settings.id,
       set: { [field]: key, updatedAt: NOW },
     })

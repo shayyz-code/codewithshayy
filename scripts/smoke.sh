@@ -145,6 +145,13 @@ fi
 expect_body /projects/ci-fixture-full "<h2"
 # The bare fixture must show the fallback rather than an empty region.
 expect_body /projects/ci-fixture-bare "A longer write-up is coming"
+# Settings-driven copy actually renders. A settings row that exists but is
+# missing columns is authoritative and blank, which once took the hero, bio and
+# contact block off the live site while every route still returned 200 — status
+# codes alone do not catch it.
+expect_body / "Stop Scrolling"
+expect_body /me "Software Engineer"
+
 # Blog code blocks are highlighted at build; the CSS variables prove it ran.
 expect_body /blog/hello "--shiki-light"
 # Proves the MDX element map is wired. If mdx-components.tsx stops being found,
