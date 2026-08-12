@@ -1,22 +1,12 @@
 import type { Project } from "@/data/projects"
 import type { Post } from "@/data/posts"
+import { SITE, mediaUrl } from "@/data/urls"
 
 // Serialisation for the public API. Kept apart from src/data so the wire shape
 // can stay still while the row shape moves — the two are different contracts and
 // only one of them is a promise to strangers.
 
-export const SITE = "https://codewithshayy.com"
-
-/**
- * Absolute, because a consumer on another origin cannot resolve `/media/…`.
- *
- * Post covers are documented as "R2 key or /public path", so both are handled:
- * anything already rooted is passed through, everything else is an R2 key.
- */
-function mediaUrl(key: string | null): string | null {
-  if (!key) return null
-  return key.startsWith("/") ? `${SITE}${key}` : `${SITE}/media/${key}`
-}
+export { SITE }
 
 export type ApiProject = {
   slug: string

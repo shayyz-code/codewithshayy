@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getProject } from "@/data/projects"
 import ProjectDetail from "@/ui/screens/project-detail"
+import { projectSchema } from "@/data/structured-data"
+import JsonLd from "@/ui/primitives/json-ld"
 
 // Dynamic, not prerendered. generateStaticParams over D1 would resolve
 // getCloudflareContext to *local* bindings during static generation and bake
@@ -45,6 +47,7 @@ export default async function PageProject({
 
   return (
     <main className="min-h-screen">
+      <JsonLd data={projectSchema(project)} />
       <ProjectDetail project={project} />
     </main>
   )

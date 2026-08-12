@@ -2,6 +2,9 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getPost, listPosts } from "@/data/posts"
+import { SITE, mediaUrl } from "@/data/urls"
+import { postSchema } from "@/data/structured-data"
+import JsonLd from "@/ui/primitives/json-ld"
 
 // Every post is prerendered. See src/data/posts.ts — the filesystem reads only
 // work at build time, so this route must never become dynamic.
@@ -30,7 +33,14 @@ export async function generateMetadata({
       description: post.summary,
       publishedTime: post.date,
       url: `/blog/${post.slug}`,
-      ...(post.cover ? { images: [{ url: post.cover }] } : {}),
+      // Two bugs lived in one line here. A route's openGraph replaces the
+      // layout's rather than merging, so a post without a cover shipped with no
+      // og:image at all — verified against the live site, where /blog/hello
+      // emitted og:type and og:title and nothing else. And `cover` is
+      // documented as "R2 key or /public path", so passing it through raw
+      // resolved an R2 key to /<key> instead of /media/<key>: a 404 as the
+      // share image. mediaUrl handles the two shapes; the logo is the fallback.
+      images: [{ url: mediaUrl(post.cover) ?? `${SITE}/logo.webp` }],
     },
   }
 }
@@ -50,6 +60,7 @@ export default async function PagePost({
 
   return (
     <main className="min-h-screen">
+      <JsonLd data={postSchema(post)} />
       <article className="flex flex-col px-5 py-28 md:py-32 items-center">
         <div className="w-full max-w-2xl">
           <header className="border-b-4 border-black pb-6 mb-2">

@@ -21,6 +21,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/me`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/projects`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/blog`, changeFrequency: "weekly", priority: 0.7 },
+    // Added with the API. A documented endpoint nobody can find is a private
+    // one, and this is the page a person lands on rather than the raw spec.
+    { url: `${BASE}/docs`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${BASE}/privacy`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${BASE}/terms`, changeFrequency: "yearly", priority: 0.1 },
   ]

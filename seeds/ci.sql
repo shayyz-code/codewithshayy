@@ -11,13 +11,20 @@ DELETE FROM projects;
 INSERT INTO tags (name) VALUES ('rust'), ('ci-fixture');
 
 -- Everything populated: image, both links, a markdown body, role and year.
+--
+-- The description carries a literal </script> on purpose. It reaches the
+-- JSON-LD block in src/ui/primitives/json-ld.tsx, which escapes `<` so the
+-- string cannot close the block and turn the rest of the payload into markup.
+-- Without markup somewhere in the fixture that assertion cannot fail, and an
+-- assertion that cannot fail is not one. Descriptions are admin-authored, so
+-- this is the real input shape rather than a contrived one.
 INSERT INTO projects
   (id, slug, title, description, site_url, repo_url, media_key, body_md, role, year, position, published)
 VALUES (
   'ci-full',
   'ci-fixture-full',
   'CI Fixture (full)',
-  'Every column populated, so the detail page renders its complete layout.',
+  'Every column populated, so the detail page renders its complete layout. </script> stays inert.',
   'https://example.com',
   'https://github.com/example/repo',
   'projects/ci-fixture.png',
