@@ -6,6 +6,13 @@ import navLinks from "./nav-links"
 export default function Footer() {
   return (
     <footer className="w-screen flex flex-col gap-4 justify-center p-5 font-body text-sm text-center">
+      {/* No contact address here. This footer renders inside the root layout,
+          which six prerendered routes share — /blog, /blog/[slug], /privacy,
+          /terms, /rss.xml, /robots.txt — so reading it from the settings row
+          would mean either baking the build machine's database into those pages
+          or marking the whole layout dynamic and losing prerendering entirely.
+          Hardcoding it instead is what let the footer and the CMS drift apart.
+          Contact details live once, on /me, where the route already reads D1. */}
       <p className="">
         Find an issue with this page?{" "}
         <Link
@@ -13,14 +20,6 @@ export default function Footer() {
           className="text-sky-600 ml-2 transition-all ease-out hover:text-blue-600"
         >
           Fix it on GitHub
-        </Link>
-        <br />
-        Need help? Email{" "}
-        <Link
-          href="mailto:aungminkhant.shay@gmail.com"
-          className="font-display text-base tracking-widest hover:text-blue-500 transition-all ease-out"
-        >
-          aungminkhant.shay@gmail.com
         </Link>
       </p>
       <ul className="flex justify-center flex-wrap gap-5">
@@ -53,7 +52,10 @@ export default function Footer() {
         </li>
       </ul>
       <p className="text-xs flex justify-center items-center gap-2">
-        Copyright &copy; 2025 Code w/ Shayy
+        {/* Matches LICENSE.md, which is the copy with legal weight. Static
+            rather than derived: a prerendered route freezes whatever year it
+            was built in, so `new Date()` would drift here and not on /me. */}
+        Copyright &copy; 2026 Code w/ Shayy
       </p>
       <Link
         href="/"

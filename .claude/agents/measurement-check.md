@@ -52,6 +52,17 @@ whichever apply.
    managed block to `robots.txt`; reading only the head produced "our rules are
    overridden" when they were present below. Substitute: read the whole file, or
    grep the whole file for the specific thing claimed absent.
+8. **An empty response is not an absent string.** `scripts/smoke.sh` kills
+   `workerd` from its `EXIT` trap, so any `curl` after it returns nothing —
+   which greps identically to the string being gone. This produced "the email is
+   absent from all five pages" against a server that was not running.
+   Substitute: assert the status code in the same command
+   (`curl -s -w '%{http_code}'`), and treat `000` as *no measurement taken*
+   rather than as a zero count.
+9. **Text split across elements defeats a substring match.** `HoverWords` and
+   similar wrappers emit one span per word, so a string that renders correctly
+   can be unfindable in the HTML. Substitute: strip tags before matching, or
+   search for a single word rather than a phrase or an address.
 
 ## Method
 
