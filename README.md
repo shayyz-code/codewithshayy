@@ -85,6 +85,21 @@ Architecture, runtime constraints, and the traps that are easy to re-discover
 are in [`CLAUDE.md`](./CLAUDE.md). It is written for Claude Code but reads fine
 for anyone.
 
+## License
+
+[PolyForm Noncommercial 1.0.0](./LICENSE.md) — read, run, fork, modify and share
+it for **any noncommercial purpose**, which includes learning from it. Commercial
+use needs my permission.
+
+This is **source-available, not open source**. The OSI definition requires
+allowing commercial use, so a licence that excludes it does not qualify, and
+GitHub labels the repository accordingly. The code is public because reading real
+code that ships is more useful than reading a tutorial, not because it is free to
+build a business on.
+
+The licence covers the code. It does not cover the writing in `content/posts/`,
+the images, or the "Code w/ Shayy" name — those stay mine.
+
 ## Contact
 
 [aungminkhant.shay@gmail.com](mailto:aungminkhant.shay@gmail.com)
