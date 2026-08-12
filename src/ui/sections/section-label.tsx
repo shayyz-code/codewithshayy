@@ -1,6 +1,6 @@
 "use client"
 
-import Band, { SlideIn } from "./Band"
+import Band, { SlideIn } from "./band"
 
 // The blue label that introduces a section. Was Me/Canvas5, which hardcoded
 // "About Me"; the text is a prop so a second one does not mean a second file.

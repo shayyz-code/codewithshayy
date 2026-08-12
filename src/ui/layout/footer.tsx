@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
-import socialHrefs from "./socialHref"
-import hrefs from "../Navigation/hrefs"
+import socialLinks from "./social-links"
+import navLinks from "./nav-links"
 
 export default function Footer() {
   return (
@@ -24,12 +24,12 @@ export default function Footer() {
         </Link>
       </p>
       <ul className="flex justify-center flex-wrap gap-5">
-        {socialHrefs.map((socialHref, index) => (
+        {socialLinks.map((link, index) => (
           <li
             key={index}
             className="transform transition-all ease-out duration-300 hover:text-white dark:hover:text-secondary"
           >
-            <Link href={socialHref.href}>{socialHref.icon}</Link>
+            <Link href={link.href}>{link.icon}</Link>
           </li>
         ))}
       </ul>
@@ -37,7 +37,7 @@ export default function Footer() {
         Helpful Links
       </div>
       <ul className="flex items-center justify-center divide-x-2 divide-black dark:divide-white">
-        {hrefs.map((href, index) => (
+        {navLinks.map((href, index) => (
           <li
             key={index}
             className="px-2 transition-all ease-out hover:bg-white hover:text-black"

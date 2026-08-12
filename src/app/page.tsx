@@ -1,4 +1,4 @@
-import Home from "@/ui/Home/Home"
+import Home from "@/ui/screens/home"
 import { listProjects } from "@/data/projects"
 
 // Reads D1 at request time. Without this the route prerenders at build time,

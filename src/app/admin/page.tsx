@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { listAllProjects } from "@/data/projects/admin"
-import AdminList from "@/ui/Admin/AdminList"
+import AdminList from "@/ui/admin/admin-list"
 
 // Reads D1, so it must be dynamic for the same reason the public routes are.
 export const dynamic = "force-dynamic"

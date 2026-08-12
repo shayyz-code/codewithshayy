@@ -1,4 +1,4 @@
-export default function github() {
+export default function GitHub() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

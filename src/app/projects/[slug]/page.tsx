@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getProject } from "@/data/projects"
-import ProjectDetail from "@/ui/Projects/ProjectDetail"
+import ProjectDetail from "@/ui/screens/project-detail"
 
 // Dynamic, not prerendered. generateStaticParams over D1 would resolve
 // getCloudflareContext to *local* bindings during static generation and bake

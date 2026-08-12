@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { markdownComponents } from "./markdownComponents"
+import { markdownComponents } from "./markdown-components"
 
 // Renders markdown that arrives as a string at request time — currently
 // projects.body_md out of D1.

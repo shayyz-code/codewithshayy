@@ -1,8 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import type { Project } from "@/data/projects"
-import Markdown from "../Markdown"
-import PrimaryBtn from "../PrimaryBtn"
+import Markdown from "@/ui/primitives/markdown"
+import PrimaryBtn from "@/ui/primitives/primary-btn"
 
 // A server component: Markdown renders on the server, so react-markdown never
 // ships to the browser.

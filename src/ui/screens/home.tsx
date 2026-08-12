@@ -1,9 +1,9 @@
 "use client"
 
-import Hero from "./Hero"
-import Developer from "../sections/Developer"
-import StayTuned from "./StayTuned"
-import FeaturedProjects from "../sections/FeaturedProjects"
+import Hero from "@/ui/sections/hero"
+import Developer from "@/ui/sections/developer"
+import StayTuned from "@/ui/sections/stay-tuned"
+import FeaturedProjects from "@/ui/sections/featured-projects"
 import type { Project } from "@/data/projects"
 
 export default function Home({ projects }: { projects: Project[] }) {

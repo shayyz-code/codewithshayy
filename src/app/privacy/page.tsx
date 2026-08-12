@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import HoverWords from "@/ui/HoverWords"
+import HoverWords from "@/ui/primitives/hover-words"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/privacy" },

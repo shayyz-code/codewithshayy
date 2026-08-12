@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import Me from "@/ui/Me/Me"
+import Me from "@/ui/screens/me"
 import { listProjects } from "@/data/projects"
 
 // See the note in app/page.tsx — D1 must be read at request time, not build.

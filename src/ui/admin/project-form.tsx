@@ -1,7 +1,7 @@
 import Link from "next/link"
 import type { AdminProject } from "@/data/projects/admin"
-import BodyEditor from "./BodyEditor"
-import MediaField from "./MediaField"
+import BodyEditor from "@/ui/admin/body-editor"
+import MediaField from "@/ui/admin/media-field"
 
 // Shared by /admin/new and /admin/[id]. A server component: the form posts
 // straight to a server action, so there is no client state to manage and no

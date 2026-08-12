@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { createProjectAction } from "../actions"
-import ProjectForm from "@/ui/Admin/ProjectForm"
+import ProjectForm from "@/ui/admin/project-form"
 
 export const dynamic = "force-dynamic"
 

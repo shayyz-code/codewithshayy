@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { listPosts } from "@/data/posts"
-import BlogIndex from "@/ui/Blog/BlogIndex"
+import BlogIndex from "@/ui/screens/blog-index"
 
 // Static on purpose: posts are files in the repo, so everything resolves at
 // build time. Do not add force-dynamic here — src/data/posts.ts reads the

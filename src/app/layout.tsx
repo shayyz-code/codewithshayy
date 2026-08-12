@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
 import { Kanit } from "next/font/google"
 import "./globals.css"
-import Navigation from "@/ui/Navigation/Navigation"
-import Footer from "@/ui/Footer/Footer"
+import Navigation from "@/ui/layout/navigation"
+import Footer from "@/ui/layout/footer"
 
 const fontBurbankBlack = Kanit({
   weight: "600",

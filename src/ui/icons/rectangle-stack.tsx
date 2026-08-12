@@ -1,4 +1,4 @@
-export default function rectanglestack() {
+export default function RectangleStack() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

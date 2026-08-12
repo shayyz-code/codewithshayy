@@ -1,11 +1,11 @@
 "use client"
 
-import Developer from "../sections/Developer"
-import SectionLabel from "../sections/SectionLabel"
-import Bio from "../sections/Bio"
-import Contact from "./Contact"
+import Developer from "@/ui/sections/developer"
+import SectionLabel from "@/ui/sections/section-label"
+import Bio from "@/ui/sections/bio"
+import Contact from "@/ui/sections/contact"
 import { motion } from "framer-motion"
-import FeaturedProjects from "../sections/FeaturedProjects"
+import FeaturedProjects from "@/ui/sections/featured-projects"
 import type { Project } from "@/data/projects"
 
 export default function Me({ projects }: { projects: Project[] }) {
