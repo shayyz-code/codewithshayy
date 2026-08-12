@@ -5,14 +5,23 @@ import { projects } from "../schema"
 
 // R2 writes for the admin. Reads happen in src/app/media/[...key]/route.ts.
 
-/** Extensions the media route knows how to serve. */
+/**
+ * Extensions the media route knows how to serve.
+ *
+ * SVG is deliberately absent. It is the only image format that executes script,
+ * and /media serves it untransformed, so an uploaded SVG would run on the apex
+ * origin. Nothing in the bucket is an SVG, so excluding it costs nothing.
+ *
+ * Note this keys on `file.type`, which the browser supplies and a client can
+ * lie about. That is why the media route sends `nosniff` and a sandbox CSP —
+ * this allowlist narrows the damage rather than preventing a mislabel.
+ */
 const ALLOWED: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/webp": "webp",
   "image/avif": "avif",
   "image/gif": "gif",
-  "image/svg+xml": "svg",
 }
 
 // Cloudflare Images caps what it will transform, and a portfolio image has no
@@ -31,7 +40,7 @@ export async function putMedia(file: File, slug: string): Promise<string> {
   const ext = ALLOWED[file.type]
   if (!ext) {
     throw new Error(
-      `unsupported image type: ${file.type || "unknown"} — use png, jpeg, webp, avif, gif or svg`,
+      `unsupported image type: ${file.type || "unknown"} — use png, jpeg, webp, avif or gif`,
     )
   }
   if (file.size === 0) throw new Error("file is empty")

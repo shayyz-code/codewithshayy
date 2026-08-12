@@ -21,13 +21,20 @@ const CONTENT_TYPES: Record<string, string> = {
   gif: "image/gif",
   webp: "image/webp",
   avif: "image/avif",
-  svg: "image/svg+xml",
 }
 
 // Cloudflare Images rejects animated GIFs above its size limit — the 1 MB,
-// 190-frame rangoon-academy GIF comes back 403 "Blocked" — and SVG is not a
-// raster format. Both are served through untouched.
-const NO_TRANSFORM = new Set(["gif", "svg"])
+// 190-frame rangoon-academy GIF comes back 403 "Blocked" — so GIF streams
+// through untouched.
+//
+// SVG is no longer served as an image at all: uploads reject it, and the serve
+// list below forces any lingering .svg object to octet-stream, which nosniff
+// stops a browser from rendering.
+const NO_TRANSFORM = new Set(["gif"])
+
+// The only content types this route will hand back as-is. Everything else is
+// downgraded to application/octet-stream regardless of what R2 has stored.
+const SERVEABLE = new Set(Object.values(CONTENT_TYPES))
 
 export async function GET(
   request: Request,
@@ -50,7 +57,15 @@ export async function GET(
   object.writeHttpMetadata(headers)
   headers.set("etag", object.httpEtag)
   headers.set("cache-control", CACHE_CONTROL)
-  if (!headers.has("content-type")) {
+
+  // The stored content type is not authoritative. writeHttpMetadata replays
+  // whatever was recorded at upload, and that came from the browser's
+  // `file.type` — a client can claim anything, and objects put by hand carry
+  // whatever --content-type was passed. Anything outside the serve list becomes
+  // an octet-stream, so a stored `image/svg+xml` or `text/html` cannot be used
+  // to get script executing on this origin.
+  const declared = headers.get("content-type")?.split(";")[0].trim() ?? ""
+  if (!SERVEABLE.has(declared)) {
     headers.set("content-type", CONTENT_TYPES[ext] ?? "application/octet-stream")
   }
 

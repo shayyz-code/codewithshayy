@@ -157,10 +157,32 @@ export async function middleware(request: NextRequest) {
     // Checks the signature against Cloudflare's published keys, and that the
     // token was issued by this team for this application. Expiry is enforced by
     // jose. Presence alone proves nothing — the header is trivially forged.
-    await jwtVerify(token, JWKS, {
+    const { payload } = await jwtVerify(token, JWKS, {
       issuer: TEAM_DOMAIN,
       audience: AUD,
     })
+
+    // Signature, issuer and audience are checked; *identity* is not. Any token
+    // Access mints for this application is accepted, so the restriction to one
+    // person lives entirely in the Access policy — widen that policy and this
+    // widens with it, silently.
+    //
+    // Logging rather than enforcing, on purpose. Access answers before the
+    // worker on the admin host, so there is no way to obtain a real token from
+    // the CLI and no way to test either branch of an allowlist before shipping
+    // one. Enforcing a claim whose name came from memory risks locking the
+    // owner out of the only write path, recoverable only by redeploy.
+    //
+    // One real login puts the claim name and value in the observability store;
+    // enforcement is a two-line follow-up once it is known.
+    console.log(
+      "access identity:",
+      JSON.stringify({
+        email: payload.email ?? null,
+        sub: payload.sub ?? null,
+        claims: Object.keys(payload),
+      }),
+    )
   } catch (error) {
     // Goes to the Workers observability store, never to the client. Worth
     // keeping: a failure here is either a forged token or an unreachable certs
