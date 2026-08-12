@@ -50,10 +50,59 @@ function bypassForLocalDev() {
   )
 }
 
-// Three hostnames serve this worker with identical content. Canonical tags name
-// the apex, and this stops the other two being indexed independently — without
-// redirecting, so existing links to www keep working.
-function withIndexingPolicy(response: NextResponse, host: string) {
+// A nonce-based CSP is not possible here. /blog/[slug], /privacy, /terms,
+// /rss.xml and /robots.txt are prerendered, and a nonce baked into a cached page
+// is worse than no nonce at all — every visitor would be handed the same one.
+//
+// So script-src allows inline. That is weaker against injected script, but the
+// exposure is small: react-markdown escapes raw HTML, no page renders user
+// input, and the only inline script is the theme constant in layout.tsx. What
+// the policy does buy is real — no external script, no framing, no <base>
+// hijack, no form posting off-origin.
+//
+// Making this strict would mean generating a nonce per request and giving up
+// prerendering on those five routes.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "upgrade-insecure-requests",
+].join("; ")
+
+/**
+ * Applied to every response this middleware returns, not just the public one.
+ *
+ * There are several exits — the dev bypass, the 404 rewrite, the apex redirect,
+ * the public branch, two 401s and the admin success path. Attaching headers to
+ * only the public branch would leave /admin without frame-ancestors, which is
+ * the page clickjacking actually matters on.
+ *
+ * Note this cannot reach /media, _next/static or _next/image: the matcher
+ * excludes them. /media sets its own headers in its route handler.
+ */
+function secured(response: NextResponse, host: string) {
+  response.headers.set("content-security-policy", CSP)
+  response.headers.set("x-content-type-options", "nosniff")
+  response.headers.set("referrer-policy", "strict-origin-when-cross-origin")
+  response.headers.set(
+    "permissions-policy",
+    "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+  )
+  response.headers.set(
+    "strict-transport-security",
+    "max-age=31536000; includeSubDomains",
+  )
+
+  // Three hostnames serve this worker with identical content. Canonical tags
+  // name the apex; this stops the other two being indexed independently,
+  // without redirecting, so existing links to www keep working.
   if (host !== PUBLIC_HOST) {
     response.headers.set("x-robots-tag", "noindex")
   }
@@ -70,25 +119,28 @@ export async function middleware(request: NextRequest) {
   // even `preview` arrives as codewithshayy.com and would otherwise 404 the
   // admin before any of this is reachable.
   if (isAdminPath && bypassForLocalDev()) {
-    return NextResponse.next()
+    return secured(NextResponse.next(), host)
   }
 
   if (isAdminPath) {
     // 404 rather than 401 off the admin host. A 401 confirms to anyone probing
     // that an admin exists here; a 404 says the route does not.
     if (!isAdminHost(host)) {
-      return NextResponse.rewrite(new URL("/_not-found", request.url))
+      return secured(NextResponse.rewrite(new URL("/_not-found", request.url)), host)
     }
   } else if (host === ADMIN_HOST) {
     // The admin hostname serves the admin and nothing else. Without this, every
     // public page has an auth-walled duplicate at a second URL.
-    return NextResponse.redirect(
-      new URL(`${pathname}${search}`, `https://${PUBLIC_HOST}`),
-      301,
+    return secured(
+      NextResponse.redirect(
+        new URL(`${pathname}${search}`, `https://${PUBLIC_HOST}`),
+        301,
+      ),
+      host,
     )
   } else {
     // Public request on a public host.
-    return withIndexingPolicy(NextResponse.next(), host)
+    return secured(NextResponse.next(), host)
   }
 
   // Access sends the token as a header on every request, and as a cookie on
@@ -98,7 +150,7 @@ export async function middleware(request: NextRequest) {
     request.cookies.get("CF_Authorization")?.value
 
   if (!token) {
-    return new NextResponse("Unauthorized", { status: 401 })
+    return secured(new NextResponse("Unauthorized", { status: 401 }), host)
   }
 
   try {
@@ -117,10 +169,10 @@ export async function middleware(request: NextRequest) {
       "access jwt rejected:",
       error instanceof Error ? error.message : error,
     )
-    return new NextResponse("Unauthorized", { status: 401 })
+    return secured(new NextResponse("Unauthorized", { status: 401 }), host)
   }
 
-  return NextResponse.next()
+  return secured(NextResponse.next(), host)
 }
 
 export const config = {

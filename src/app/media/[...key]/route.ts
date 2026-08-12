@@ -54,6 +54,17 @@ export async function GET(
     headers.set("content-type", CONTENT_TYPES[ext] ?? "application/octet-stream")
   }
 
+  // This route is excluded from the middleware matcher, so it gets none of the
+  // headers set there and has to set its own.
+  //
+  // Both matter here more than anywhere else. writeHttpMetadata replays the
+  // content type recorded at upload, which came from the browser's `file.type`
+  // — client-controlled. nosniff stops a mislabelled or octet-stream object
+  // being sniffed into something executable, and the sandbox policy neuters any
+  // markup that does slip through.
+  headers.set("x-content-type-options", "nosniff")
+  headers.set("content-security-policy", "default-src 'none'; sandbox")
+
   if (!width || NO_TRANSFORM.has(ext) || !env.IMAGES) {
     return new Response(object.body, { headers })
   }
