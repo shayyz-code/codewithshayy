@@ -7,13 +7,31 @@ import Contact from "@/ui/sections/contact"
 import { motion } from "framer-motion"
 import FeaturedProjects from "@/ui/sections/featured-projects"
 import type { Project } from "@/data/projects"
+import type { SiteSettings } from "@/data/settings"
+import type { ReactNode } from "react"
 
-export default function Me({ projects }: { projects: Project[] }) {
+export default function Me({
+  projects,
+  settings,
+  bio,
+}: {
+  projects: Project[]
+  settings: SiteSettings
+  /** Rendered on the server — see the note in home.tsx. */
+  bio: ReactNode
+}) {
   return (
     <section className="flex flex-col mb-16">
-      <Developer size="lg" />
+      <Developer
+        size="lg"
+        title={settings.developerTitle}
+        name={settings.developerName}
+        badge={settings.developerBadge}
+        photoKey={settings.developerMediaKey}
+        backgroundKey={settings.backgroundMediaKey}
+      />
       <SectionLabel>About Me</SectionLabel>
-      <Bio />
+      <Bio>{bio}</Bio>
       <FeaturedProjects projects={projects} />
 
       <motion.div
@@ -33,7 +51,11 @@ export default function Me({ projects }: { projects: Project[] }) {
             ))}
         </p>
       </motion.div>
-      <Contact />
+      <Contact
+        email={settings.contactEmail}
+        phone={settings.contactPhone}
+        location={settings.contactLocation}
+      />
     </section>
   )
 }
