@@ -18,10 +18,10 @@ export default function ProjectForm({
   return (
     <section className="px-5 py-20 max-w-2xl mx-auto flex flex-col gap-6">
       <header className="flex items-center justify-between border-b-4 border-black dark:border-primary pb-4">
-        <h1 className="font-burbankblack text-2xl tracking-wider uppercase">
+        <h1 className="font-display text-2xl tracking-wider uppercase">
           {heading}
         </h1>
-        <Link href="/admin" className="text-sky-600 font-burbankmedium text-sm">
+        <Link href="/admin" className="text-sky-600 font-body text-sm">
           &lt; Cancel
         </Link>
       </header>
@@ -74,7 +74,7 @@ export default function ProjectForm({
 
         <BodyEditor name="bodyMd" defaultValue={project?.bodyMd ?? ""} />
 
-        <label className="flex items-center gap-2 font-burbankmedium">
+        <label className="flex items-center gap-2 font-body">
           <input
             type="checkbox"
             name="published"
@@ -87,14 +87,14 @@ export default function ProjectForm({
         <div className="flex items-center gap-4 pt-2">
           <button
             type="submit"
-            className="font-burbankblack tracking-wider px-6 py-2 bg-primary text-white border-4 border-black hover:bg-secondary transition-all ease-out"
+            className="font-display tracking-wider px-6 py-2 bg-primary text-white border-4 border-black hover:bg-secondary transition-all ease-out"
           >
             Save
           </button>
           {project && (
             <Link
               href={`/projects/${project.slug}`}
-              className="text-sky-600 font-burbankmedium text-sm"
+              className="text-sky-600 font-body text-sm"
             >
               View public page &gt;
             </Link>
@@ -112,7 +112,7 @@ export default function ProjectForm({
         />
       )}
       {!project && (
-        <p className="font-burbankmedium text-sm opacity-60">
+        <p className="font-body text-sm opacity-60">
           Save the project first to add an image.
         </p>
       )}
@@ -129,12 +129,12 @@ type BaseProps = {
 }
 
 const inputClass =
-  "w-full border-4 border-black dark:border-primary bg-white dark:bg-black px-3 py-2 font-burbankmedium"
+  "w-full border-4 border-black dark:border-primary bg-white dark:bg-black px-3 py-2 font-body"
 
 function Field({ name, label, defaultValue, required, hint }: BaseProps) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="font-burbankblack text-sm tracking-wide">
+      <span className="font-display text-sm tracking-wide">
         {label}
         {required && " *"}
       </span>
@@ -145,7 +145,7 @@ function Field({ name, label, defaultValue, required, hint }: BaseProps) {
         required={required}
         className={inputClass}
       />
-      {hint && <span className="text-xs font-burbankmedium opacity-60">{hint}</span>}
+      {hint && <span className="text-xs font-body opacity-60">{hint}</span>}
     </label>
   )
 }
@@ -160,7 +160,7 @@ function Area({
 }: BaseProps & { rows?: number }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="font-burbankblack text-sm tracking-wide">
+      <span className="font-display text-sm tracking-wide">
         {label}
         {required && " *"}
       </span>
@@ -171,7 +171,7 @@ function Area({
         rows={rows}
         className={`${inputClass} font-mono text-sm`}
       />
-      {hint && <span className="text-xs font-burbankmedium opacity-60">{hint}</span>}
+      {hint && <span className="text-xs font-body opacity-60">{hint}</span>}
     </label>
   )
 }

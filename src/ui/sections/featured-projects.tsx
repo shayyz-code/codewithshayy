@@ -21,10 +21,10 @@ export default function FeaturedProjects({
         whileInView={{ y: 0, opacity: 1 }}
         transition={{ duration: 1.5, type: "spring" }}
       >
-        <h2 className="font-burbankblack text-3xl md:text-4xl text-center uppercase tracking-wider">
+        <h2 className="font-display text-3xl md:text-4xl text-center uppercase tracking-wider">
           Projects
         </h2>
-        <p className="font-burbankmedium text-center">
+        <p className="font-body text-center">
           See all my projects at{" "}
           <Link
             className="text-sky-600"

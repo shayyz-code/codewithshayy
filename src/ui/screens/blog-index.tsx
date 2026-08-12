@@ -22,16 +22,16 @@ export default function BlogIndex({ posts }: { posts: Post[] }) {
         transition={{ duration: 1.5, type: "spring" }}
         className="flex flex-col gap-2 items-center"
       >
-        <h1 className="font-burbankblack text-3xl md:text-4xl uppercase tracking-wider">
+        <h1 className="font-display text-3xl md:text-4xl uppercase tracking-wider">
           Blog
         </h1>
-        <p className="font-burbankmedium text-center">
+        <p className="font-body text-center">
           Notes on things I am building and learning.
         </p>
       </motion.header>
 
       {posts.length === 0 ? (
-        <p className="font-burbankmedium">Nothing published yet.</p>
+        <p className="font-body">Nothing published yet.</p>
       ) : (
         <motion.ul
           initial={{ y: 50, opacity: 0 }}
@@ -52,17 +52,17 @@ export default function BlogIndex({ posts }: { posts: Post[] }) {
                     ))}
                   </ul>
                 )}
-                <h2 className="font-burbankblack text-xl md:text-2xl mt-1 group-hover:text-primary transition-all ease-out">
+                <h2 className="font-display text-xl md:text-2xl mt-1 group-hover:text-primary transition-all ease-out">
                   {post.title}
                 </h2>
                 <time
                   dateTime={post.date}
-                  className="font-burbankmedium text-xs"
+                  className="font-body text-xs"
                 >
                   {formatDate(post.date)}
                 </time>
                 {post.summary && (
-                  <p className="font-burbankmedium text-sm pt-3">
+                  <p className="font-body text-sm pt-3">
                     {post.summary}
                   </p>
                 )}

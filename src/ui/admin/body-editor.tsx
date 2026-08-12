@@ -25,7 +25,7 @@ export default function BodyEditor({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between">
-        <span className="font-burbankblack text-sm tracking-wide">Write-up</span>
+        <span className="font-display text-sm tracking-wide">Write-up</span>
         <div className="flex">
           <Tab active={!preview} onClick={() => setPreview(false)}>
             Edit
@@ -52,7 +52,7 @@ export default function BodyEditor({
       {preview && (
         <div className="border-4 border-black dark:border-primary px-4 py-2 min-h-[24rem]">
           {value.trim() === "" ? (
-            <p className="font-burbankmedium text-sm opacity-60">
+            <p className="font-body text-sm opacity-60">
               Nothing to preview. The public page falls back to a short line
               when this is empty.
             </p>
@@ -67,7 +67,7 @@ export default function BodyEditor({
         </div>
       )}
 
-      <span className="text-xs font-burbankmedium opacity-60">
+      <span className="text-xs font-body opacity-60">
         markdown — headings, lists, links and tables render. Fenced code gets the
         panel but no highlighting, which matches the public page.
       </span>
@@ -88,7 +88,7 @@ function Tab({
     <button
       type="button"
       onClick={onClick}
-      className={`font-burbankmedium text-xs px-3 py-1 border-2 border-current ${
+      className={`font-body text-xs px-3 py-1 border-2 border-current ${
         active ? "bg-primary text-white" : "opacity-60"
       }`}
     >

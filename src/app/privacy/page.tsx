@@ -13,7 +13,7 @@ export default function PagePrivacyPolicy() {
       <section className="flex flex-col">
         <div className="flex flex-col items-center py-28 md:py-40 gap-5">
           <div className="overflow-hidden flex flex-col gap-5 px-10 py-5 w-[350px] md:w-full md:max-w-2xl shadow-2xl shadow-orange-600 border-4 border-black">
-            <h1 className="font-burbankblack text-3xl tracking-wider text-center my-5">
+            <h1 className="font-display text-3xl tracking-wider text-center my-5">
               Privacy
             </h1>
             <p className="text-justify">

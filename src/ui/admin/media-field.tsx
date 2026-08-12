@@ -18,7 +18,7 @@ export default function MediaField({
 }) {
   return (
     <div className="flex flex-col gap-2 border-4 border-black dark:border-primary p-4">
-      <span className="font-burbankblack text-sm tracking-wide">Image</span>
+      <span className="font-display text-sm tracking-wide">Image</span>
 
       {mediaKey ? (
         <div className="flex items-start gap-4">
@@ -39,7 +39,7 @@ export default function MediaField({
             <form action={removeMediaAction.bind(null, id)}>
               <button
                 type="submit"
-                className="font-burbankmedium text-xs border-2 border-current px-2 py-1 hover:bg-red-600 hover:text-white transition-all ease-out"
+                className="font-body text-xs border-2 border-current px-2 py-1 hover:bg-red-600 hover:text-white transition-all ease-out"
               >
                 Remove image
               </button>
@@ -47,7 +47,7 @@ export default function MediaField({
           </div>
         </div>
       ) : (
-        <p className="font-burbankmedium text-sm opacity-70">
+        <p className="font-body text-sm opacity-70">
           No image. The card renders a titled placeholder instead.
         </p>
       )}
@@ -63,17 +63,17 @@ export default function MediaField({
           name="image"
           accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
           required
-          className="font-burbankmedium text-sm"
+          className="font-body text-sm"
         />
         <button
           type="submit"
-          className="font-burbankmedium text-xs border-2 border-current px-3 py-1 hover:bg-primary hover:text-white transition-all ease-out"
+          className="font-body text-xs border-2 border-current px-3 py-1 hover:bg-primary hover:text-white transition-all ease-out"
         >
           {mediaKey ? "Replace" : "Upload"}
         </button>
       </form>
 
-      <span className="text-xs font-burbankmedium opacity-60">
+      <span className="text-xs font-body opacity-60">
         png, jpeg, webp, avif or gif · 5 MB max. The key includes a content
         hash, because /media caches objects for a year as immutable — a replaced
         image needs a new key to be seen.

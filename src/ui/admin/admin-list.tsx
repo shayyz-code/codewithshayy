@@ -13,24 +13,24 @@ export default function AdminList({ projects }: { projects: AdminProject[] }) {
     <section className="px-5 py-20 max-w-4xl mx-auto flex flex-col gap-8">
       <header className="flex items-end justify-between gap-4 border-b-4 border-black dark:border-primary pb-4">
         <div>
-          <h1 className="font-burbankblack text-3xl tracking-wider uppercase">
+          <h1 className="font-display text-3xl tracking-wider uppercase">
             Projects
           </h1>
-          <p className="font-burbankmedium text-sm">
+          <p className="font-body text-sm">
             {projects.length} total ·{" "}
             {projects.filter((p) => p.published).length} published
           </p>
         </div>
         <Link
           href="/admin/new"
-          className="font-burbankblack tracking-wider px-4 py-2 bg-primary text-white border-4 border-black hover:bg-secondary transition-all ease-out"
+          className="font-display tracking-wider px-4 py-2 bg-primary text-white border-4 border-black hover:bg-secondary transition-all ease-out"
         >
           + New
         </Link>
       </header>
 
       {projects.length === 0 ? (
-        <p className="font-burbankmedium">No projects yet.</p>
+        <p className="font-body">No projects yet.</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {projects.map((project, index) => (
@@ -57,27 +57,27 @@ export default function AdminList({ projects }: { projects: AdminProject[] }) {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/admin/${project.id}`}
-                    className="font-burbankblack truncate hover:text-primary transition-all ease-out"
+                    className="font-display truncate hover:text-primary transition-all ease-out"
                   >
                     {project.title}
                   </Link>
                   {!project.published && (
-                    <span className="text-xs font-burbankmedium border-2 border-current px-1 shrink-0">
+                    <span className="text-xs font-body border-2 border-current px-1 shrink-0">
                       draft
                     </span>
                   )}
                   {!project.mediaKey && (
-                    <span className="text-xs font-burbankmedium opacity-60 shrink-0">
+                    <span className="text-xs font-body opacity-60 shrink-0">
                       no image
                     </span>
                   )}
                   {!project.bodyMd && (
-                    <span className="text-xs font-burbankmedium opacity-60 shrink-0">
+                    <span className="text-xs font-body opacity-60 shrink-0">
                       no write-up
                     </span>
                   )}
                 </div>
-                <p className="font-burbankmedium text-xs opacity-70 truncate">
+                <p className="font-body text-xs opacity-70 truncate">
                   /{project.slug}
                   {project.tags.length > 0 && ` · ${project.tags.join(", ")}`}
                 </p>
@@ -86,7 +86,7 @@ export default function AdminList({ projects }: { projects: AdminProject[] }) {
               <form action={togglePublishedAction.bind(null, project.id, !project.published)}>
                 <button
                   type="submit"
-                  className="font-burbankmedium text-xs border-2 border-current px-2 py-1 hover:bg-primary hover:text-white transition-all ease-out"
+                  className="font-body text-xs border-2 border-current px-2 py-1 hover:bg-primary hover:text-white transition-all ease-out"
                 >
                   {project.published ? "Unpublish" : "Publish"}
                 </button>
@@ -98,7 +98,7 @@ export default function AdminList({ projects }: { projects: AdminProject[] }) {
               <form action={deleteProjectAction.bind(null, project.id)}>
                 <button
                   type="submit"
-                  className="font-burbankmedium text-xs border-2 border-current px-2 py-1 hover:bg-red-600 hover:text-white transition-all ease-out"
+                  className="font-body text-xs border-2 border-current px-2 py-1 hover:bg-red-600 hover:text-white transition-all ease-out"
                 >
                   Delete
                 </button>

@@ -19,13 +19,13 @@ const strip = <T,>({ node: _node, ...rest }: WithNode<T>) => rest as T
 export const markdownComponents = {
   h2: (props: ComponentProps<"h2">) => (
     <h2
-      className="font-burbankblack text-2xl md:text-3xl tracking-wider mt-12 mb-4"
+      className="font-display text-2xl md:text-3xl tracking-wider mt-12 mb-4"
       {...strip(props)}
     />
   ),
   h3: (props: ComponentProps<"h3">) => (
     <h3
-      className="font-burbankblack text-xl md:text-2xl tracking-wide mt-8 mb-3"
+      className="font-display text-xl md:text-2xl tracking-wide mt-8 mb-3"
       {...strip(props)}
     />
   ),

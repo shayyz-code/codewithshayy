@@ -20,13 +20,13 @@ export default function ProjectDetail({ project }: { project: Project }) {
               ))}
             </ul>
           )}
-          <h1 className="font-burbankblack text-3xl md:text-4xl tracking-wider mt-1">
+          <h1 className="font-display text-3xl md:text-4xl tracking-wider mt-1">
             {project.title}
           </h1>
           {meta && (
-            <p className="font-burbankmedium text-xs mt-1">{meta}</p>
+            <p className="font-body text-xs mt-1">{meta}</p>
           )}
-          <p className="font-burbankmedium mt-3">{project.description}</p>
+          <p className="font-body mt-3">{project.description}</p>
 
           {/* Both links are conditional: two repos are private and one does
               not exist, and not every project has a live site. */}
@@ -62,14 +62,14 @@ export default function ProjectDetail({ project }: { project: Project }) {
         {project.bodyMd ? (
           <Markdown>{project.bodyMd}</Markdown>
         ) : (
-          <p className="font-burbankmedium text-sm mt-10 opacity-70">
+          <p className="font-body text-sm mt-10 opacity-70">
             A longer write-up is coming.
           </p>
         )}
 
         <Link
           href="/projects"
-          className="inline-block font-burbankblack tracking-wider mt-12 text-sky-600"
+          className="inline-block font-display tracking-wider mt-12 text-sky-600"
         >
           &lt; All projects
         </Link>
