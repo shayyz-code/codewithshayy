@@ -26,19 +26,24 @@ export default function Developer({
   backgroundKey: string | null
 }) {
   const lg = size === "lg"
-  const photo = photoKey ? `/media/${photoKey}` : "/developer.webp"
-  const background = backgroundKey ? `/media/${backgroundKey}` : "/bg4.webp"
+  // Both images live in R2 now — the committed copies were removed once the
+  // settings row pointed here. With no row and no key there is nothing to
+  // render, which is why the elements below are conditional rather than falling
+  // back to a file that no longer exists.
+  const photo = photoKey ? `/media/${photoKey}` : null
+  const background = backgroundKey ? `/media/${backgroundKey}` : null
 
   return (
     <Band align="end" className={`px-10 ${lg ? "py-20" : "py-16"}`}>
-      <Image
-        src={background}
-        unoptimized={!backgroundKey}
-        fill={true}
-        alt="bg"
-        style={{ objectFit: "cover" }}
-        className="-z-50"
-      />
+      {background && (
+        <Image
+          src={background}
+          fill={true}
+          alt=""
+          style={{ objectFit: "cover" }}
+          className="-z-50"
+        />
+      )}
       <SlideIn
         className={
           lg
@@ -51,15 +56,16 @@ export default function Developer({
       </SlideIn>
 
       <SlideIn className="bg-primary px-4 py-2 font-display text-lg md:text-2xl">
-        <Image
-          src={photo}
-          unoptimized={!photoKey}
-          alt="photo of developer"
-          width={200}
-          height={200}
-          priority={true}
-          className="my-2 z-10 rounded-full"
-        />
+        {photo && (
+          <Image
+            src={photo}
+            alt="photo of developer"
+            width={200}
+            height={200}
+            priority={true}
+            className="my-2 z-10 rounded-full"
+          />
+        )}
         {badge && <p className="text-right">{badge}</p>}
       </SlideIn>
     </Band>

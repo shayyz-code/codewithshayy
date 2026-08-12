@@ -305,6 +305,10 @@ prerendered ones — a D1 read there runs during static generation and `/blog`
 fails to prerender outright. Moving them into the table needs the footer out of
 the root layout first.
 
+`public/` now holds only `logo.webp` and the two manifest icons. The developer
+and background photos live in R2 and are set from the admin — there is no file
+fallback, so with no settings row those elements simply do not render.
+
 Site images go through the same `putMedia` as projects, with a `site/` prefix.
 `deleteMediaIfUnreferenced` therefore checks **both** `projects` and `settings`:
 keys are content-addressed, so the same image uploaded in both places is one
