@@ -403,12 +403,16 @@ for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
     curl -s --max-time 30 "$BASE$1" | grep -oE 'projects/[a-z0-9-]+\.(png|jpg|webp|avif|gif)' | head -1
   }
 
+  # The Location matters as much as the status. A rejected upload redirects
+  # with 303 too, and setMediaKey runs before the revalidatePath calls inside
+  # the same try — so a throw in that tail would store the key, report the
+  # failure, and satisfy a check that only looked at "303 and a key exists".
   read -r STATUS LOCATION <<<"$(submit_upload /admin/ci-bare "$FIXTURES/ok.png")"
   KEY=$(media_key /admin/ci-bare)
-  if [[ "$STATUS" == "303" && -n "$KEY" ]]; then
+  if [[ "$STATUS" == "303" && "$LOCATION" == "/admin/ci-bare" && -n "$KEY" ]]; then
     echo "  ok    /admin/ci-bare               2 MB upload stored as $KEY"
   else
-    echo "  FAIL  /admin/ci-bare               2 MB upload got $STATUS, key '$KEY'"
+    echo "  FAIL  /admin/ci-bare               2 MB upload got $STATUS -> '$LOCATION', key '$KEY'"
     FAILED=1
   fi
 
@@ -476,6 +480,10 @@ for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
     :
   elif [[ -z "$(media_key /admin/ci-bare)" ]]; then
     echo "  ok    /admin/ci-bare               image removed, fixture back to NULL"
+    # D1 being clean says nothing about R2, and an orphan there would never
+    # surface on its own: the fixture is random bytes, so every run hashes to a
+    # different key and no later run can collide with one left behind.
+    expect "/media/$KEY" 404
   else
     echo "  FAIL  /admin/ci-bare               image not removed; D1 left dirty"
     FAILED=1

@@ -173,14 +173,17 @@ export async function removeMediaAction(id: string) {
   const back = `/admin/${id}`
 
   try {
+    // Nothing to remove is a no-op, not an early return: falling through to
+    // the redirect is what clears a stale ?error from the URL. Returning here
+    // left the previous failure on screen after a successful submit.
     const project = await getAdminProject(id)
-    if (!project?.mediaKey) return
-
-    await deleteMediaIfUnreferenced(project.mediaKey, id)
-    await setMediaKey(id, null)
-    revalidatePublic(project.slug)
-    revalidatePath("/admin")
-    revalidatePath(back)
+    if (project?.mediaKey) {
+      await deleteMediaIfUnreferenced(project.mediaKey, id)
+      await setMediaKey(id, null)
+      revalidatePublic(project.slug)
+      revalidatePath("/admin")
+      revalidatePath(back)
+    }
   } catch (error) {
     failMedia(back, error)
   }
@@ -262,11 +265,13 @@ export async function removeSettingsImageAction(field: SettingsImage) {
   try {
     const current = await getSettingsRow()
     const previous = current?.[field] ?? null
-    if (!previous) return
 
-    await setSettingsMediaKey(field, null)
-    await deleteMediaIfUnreferenced(previous)
-    revalidateSite()
+    // As above: a no-op still redirects, so a stale ?error does not survive it.
+    if (previous) {
+      await setSettingsMediaKey(field, null)
+      await deleteMediaIfUnreferenced(previous)
+      revalidateSite()
+    }
   } catch (error) {
     failMedia(back, error, { field })
   }
