@@ -37,7 +37,7 @@ Do not "fix" them by extraction — but do not treat them as the pattern either.
 
 ```
 primitives/  reusable and page-agnostic — primary-btn, markdown,
-             hover-words, markdown-components
+             hover-words, markdown-components, json-ld
 layout/      the shell every page shares — navigation, footer, and the two
              link lists both render (nav-links, social-links)
 sections/    the bands a screen composes — band, hero, bio, developer,
@@ -50,15 +50,36 @@ admin/       admin-list, project-form, body-editor, media-field,
 icons/       one SVG component each
 ```
 
+This block has gone stale on every branch that added a component — three so
+far. It is here for the *grouping rule*, not as an inventory, so check it
+rather than trusting it:
+
+```bash
+ls src/ui/*/ | sed 's/\.tsx$//'
+```
+
 ## `layout/` renders on every route, including the prerendered ones
 
 **Nothing in `src/ui/layout/` may read D1.** `Navigation` and `Footer` are
 rendered by the root layout, which has no `dynamic` export, so they run during
-static generation for `/blog`, `/blog/[slug]`, `/privacy`, `/terms`, `/rss.xml`
-and `/robots.txt`. A `getSettings()` there either bakes the build machine's
+static generation for `/blog`, `/blog/[slug]`, `/docs`, `/privacy`, `/terms`
+and `/_not-found`. A `getSettings()` there either bakes the build machine's
 database into those pages or forces `dynamic` on the whole layout, which drops
 prerendering for all six — including the file-based blog, which exists to avoid
 database reads.
+
+**Only pages are on that list.** An earlier version of it named `/rss.xml` and
+`/robots.txt`, which render no layout at all — the first is a `route.ts`, the
+second a `robots.ts` metadata route, and the footer has never run for either.
+It also predated `/docs`. Derive it rather than editing it by hand: the `○`
+and `●` rows of the build's `Route (app)` table, minus anything backed by
+`route.ts`, `robots.ts`, `sitemap.ts` or an icon file. Or measure it, which is
+what settled this:
+
+```bash
+curl -s https://codewithshayy.com/docs | grep -c "Aung Min Khant"   # 2
+curl -s https://codewithshayy.com/rss.xml | grep -c "Aung Min Khant" # 0
+```
 
 That is why social links are still in code, and why the footer's contact email
 was **removed** rather than wired to the settings row: it duplicated an address

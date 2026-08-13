@@ -38,12 +38,17 @@ excluded from both — it is the only image format that executes script. Do not
 add it back without a plan for that.
 
 **The CSP allows inline script**, which is not ideal and is deliberate.
-`/blog/[slug]`, `/privacy`, `/terms`, `/rss.xml` and `/robots.txt` are
-prerendered, and a nonce baked into a cached page is worse than none — every
-visitor receives the same one. Going strict means generating a nonce per request
-and giving up prerendering on those five routes. What the current policy still
+`/blog`, `/blog/[slug]`, `/docs`, `/privacy`, `/terms` and `/_not-found` are
+prerendered HTML, and a nonce baked into a cached page is worse than none —
+every visitor receives the same one. Going strict means generating a nonce per
+request and giving up prerendering on those six. What the current policy still
 buys: no external script, no framing, no `<base>` hijack, no off-origin form
 posts.
+
+An earlier version of that list named `/rss.xml` and `/robots.txt`. Both are
+prerendered and both get a CSP from the matcher, but neither emits a script tag
+or renders a layout, so no nonce would ever reach them — they were never part
+of this trade. See `.claude/rules/ui.md`, which derives the set.
 
 **The Access JWT is verified and the identity is enforced.** Signature, issuer
 and audience are checked, then the `email` claim is matched against the

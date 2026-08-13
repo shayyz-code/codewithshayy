@@ -7,12 +7,18 @@ export default function Footer() {
   return (
     <footer className="w-screen flex flex-col gap-4 justify-center p-5 font-body text-sm text-center">
       {/* No contact address here. This footer renders inside the root layout,
-          which six prerendered routes share — /blog, /blog/[slug], /privacy,
-          /terms, /rss.xml, /robots.txt — so reading it from the settings row
-          would mean either baking the build machine's database into those pages
-          or marking the whole layout dynamic and losing prerendering entirely.
-          Hardcoding it instead is what let the footer and the CMS drift apart.
-          Contact details live once, on /me, where the route already reads D1. */}
+          which six prerendered routes share — /blog, /blog/[slug], /docs,
+          /privacy, /terms and /_not-found — so reading it from the settings
+          row would mean either baking the build machine's database into those
+          pages or marking the whole layout dynamic and losing prerendering
+          entirely. Hardcoding it instead is what let the footer and the CMS
+          drift apart. Contact details live once, on /me, where the route
+          already reads D1.
+
+          Route handlers and metadata routes are not on that list and never
+          were: /rss.xml and /openapi.json are route.ts, /robots.txt is
+          robots.ts, and none of them renders a layout. Check by fetching one
+          and grepping for anything this file emits. */}
       <p className="">
         Find an issue with this page?{" "}
         <Link
