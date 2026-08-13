@@ -13,10 +13,15 @@ export const metadata: Metadata = {
 
 export default async function PageAdminEdit({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  // The image actions redirect back here with ?error=… when they fail. They
+  // have no other way to report: the forms are server components, and a throw
+  // renders the error boundary with the message stripped.
+  searchParams: Promise<{ error?: string }>
 }) {
-  const { id } = await params
+  const [{ id }, { error }] = await Promise.all([params, searchParams])
   const project = await getAdminProject(id)
   if (!project) notFound()
 
@@ -26,6 +31,7 @@ export default async function PageAdminEdit({
         project={project}
         action={updateProjectAction.bind(null, id)}
         heading={`Edit: ${project.title}`}
+        mediaError={error ?? null}
       />
     </main>
   )

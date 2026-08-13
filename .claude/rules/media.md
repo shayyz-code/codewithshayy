@@ -32,6 +32,20 @@ are different things, and SVG does neither; it is the only image format that
 executes script. See `.claude/rules/security.md`, which loads alongside this file
 on any media path.
 
+**Two limits apply to an upload, and only one of them can explain itself.**
+`putMedia`'s `MAX_BYTES` is 5 MB and raises a message naming the size. Next
+enforces `experimental.serverActions.bodySizeLimit` *before* the action body
+runs, so whatever it rejects arrives as a bare 500 with nothing on the page.
+That default is **1 MB**, which is under the app's own limit — a 2 MB upload
+against a form advertising 5 MB failed with `Body exceeded 1 MB limit.` in the
+worker log and silence in the browser.
+
+`next.config.mjs` now sets it to `8mb`, deliberately above `MAX_BYTES` so the
+app's message is the one that fires. Raising `MAX_BYTES` past 8 MB re-creates
+the silent failure. `scripts/smoke.sh` uploads a 2 MB image through the real
+action and asserts it lands, but **only where the admin is reachable** — CI has
+no `.dev.vars` and takes the confinement branch, so that assertion is local.
+
 Admin uploads go through `src/data/projects/media.ts`. The key embeds a hash of
 the content — `projects/<slug>-<hash8>.<ext>` — because `/media` serves objects
 as `immutable, max-age=31536000`. Reusing a key for new bytes would leave the

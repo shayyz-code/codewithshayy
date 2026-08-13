@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { removeMediaAction, uploadMediaAction } from "@/app/admin/actions"
+import FieldError from "@/ui/admin/field-error"
 
 // Its own form, outside the main one. A nested form is invalid HTML, and
 // uploading should not require the rest of the fields to be valid — nor should
@@ -11,14 +12,19 @@ export default function MediaField({
   id,
   mediaKey,
   title,
+  error = null,
 }: {
   id: string
   mediaKey: string | null
   title: string
+  /** Why the last attempt failed, from ?error. See uploadMediaAction. */
+  error?: string | null
 }) {
   return (
     <div className="flex flex-col gap-2 border-4 border-black dark:border-primary p-4">
       <span className="font-display text-sm tracking-wide">Image</span>
+
+      <FieldError message={error} />
 
       {mediaKey ? (
         <div className="flex items-start gap-4">
