@@ -13,6 +13,22 @@ const nextConfig = {
     loader: "custom",
     loaderFile: "./src/lib/image-loader.ts",
   },
+  experimental: {
+    serverActions: {
+      // Deliberately above putMedia's MAX_BYTES of 5 MB rather than equal to
+      // it. Whichever limit is lower is the one that fires, and this one has
+      // no message: Next rejects the request before the action body runs, so
+      // it surfaces as a bare 500 with nothing on the page. The default is
+      // 1 MB, so a 2 MB upload against a form advertising 5 MB failed with
+      // "Body exceeded 1 MB limit." in the worker log and silence in the
+      // browser. Keeping this above the app limit is what lets putMedia's own
+      // message be the one an admin actually sees.
+      //
+      // The gap is real rather than a byte because multipart overhead makes
+      // the body larger than the file it carries.
+      bodySizeLimit: "8mb",
+    },
+  },
   async redirects() {
     return [
       // /blogs used to render the courses page. Keep the old URL alive.

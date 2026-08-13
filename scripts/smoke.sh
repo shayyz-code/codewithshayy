@@ -10,6 +10,11 @@
 # Assumes `opennextjs-cloudflare build` has already run, and that local D1 has
 # had migrations and seeds/ci.sql applied.
 #
+# It boots the *existing* bundle and never builds one. Editing next.config.mjs
+# or any source file and running this again therefore tests the previous build
+# and reports it as a pass — which is how a deliberately broken config was
+# measured as fixed here once. Rebuild first, or run `pnpm preview`, which does.
+#
 # Usage: scripts/smoke.sh [port]
 
 set -uo pipefail
@@ -120,10 +125,12 @@ expect /projects/does-not-exist 404
 # worker always take the 404 branch. Asserting a single value would make this
 # test either wrong locally or vacuous in CI.
 if [[ -f .dev.vars ]] && grep -q '^ADMIN_LOCAL_BYPASS=1' .dev.vars 2>/dev/null; then
+  ADMIN_BYPASS=1
   echo "admin (local bypass active via .dev.vars)"
   expect /admin 200
   expect /admin/new 200
 else
+  ADMIN_BYPASS=0
   echo "admin is confined to the admin hostname"
   expect /admin 404
   expect /admin/dashboard 404
@@ -311,6 +318,171 @@ for b in blocks:
 fi
 # The docs page is only findable if it is advertised.
 expect_body /sitemap.xml "/docs"
+
+# Every assertion above is a GET, and the upload defect was invisible to all of
+# them: the framework rejects an oversized body before the action runs, so a
+# 2 MB image failed with "Body exceeded 1 MB limit." in the worker log and
+# nothing on the page while every route still returned 200.
+#
+# Replayed the way a browser without JavaScript submits — the hidden $ACTION
+# fields the form already carries, plus the file. The action id changes with
+# every build, so it is read out of the page rather than written down here.
+#
+# This can only run where the admin is reachable, which is local: CI has no
+# .dev.vars and takes the confinement branch above. Asserting 404 there is the
+# more important of the two, so it keeps the run.
+if [[ "$ADMIN_BYPASS" == "1" ]]; then
+  echo "admin image upload"
+
+  # ci-bare is seeded with media_key NULL and this block ends by removing what
+  # it uploads, so D1 and R2 finish where they started and a second run
+  # asserts the same thing as the first. Generated rather than committed:
+  # incompressible pixels, so the file is the size the name claims, and the
+  # repo stays free of an 8 MB pair of fixtures.
+  FIXTURES=$(mktemp -d)
+  python3 - "$FIXTURES" <<'PY'
+import os, struct, sys, zlib
+
+def png(path, side):
+    raw = bytearray()
+    for _ in range(side):
+        raw.append(0)                       # filter type 0
+        raw.extend(os.urandom(side * 3))
+    def chunk(tag, data):
+        body = tag + data
+        return struct.pack(">I", len(data)) + body + struct.pack(
+            ">I", zlib.crc32(body) & 0xFFFFFFFF)
+    out = (b"\x89PNG\r\n\x1a\n"
+           + chunk(b"IHDR", struct.pack(">IIBBBBB", side, side, 8, 2, 0, 0, 0))
+           + chunk(b"IDAT", zlib.compress(bytes(raw), 0))
+           + chunk(b"IEND", b""))
+    open(path, "wb").write(out)
+
+png(sys.argv[1] + "/ok.png", 840)        # ~2.0 MB: over the old framework
+                                         # limit, under the app's own
+png(sys.argv[1] + "/toobig.png", 1450)   # ~6.0 MB: over both
+PY
+
+  # The hidden fields of the form holding the file input, in document order.
+  action_fields() {
+    curl -s --max-time 30 "$BASE$1" | python3 -c '
+import sys, re, html
+doc = sys.stdin.read()
+for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
+    if "name=\"image\"" in form:
+        for inp in re.findall(r"<input[^>]*type=\"hidden\"[^>]*>", form):
+            name = re.search(r"name=\"([^\"]+)\"", inp).group(1)
+            value = re.search(r"value=\"([^\"]*)\"", inp)
+            print(name + "=" + (html.unescape(value.group(1)) if value else ""))
+        break
+'
+  }
+
+  # submit_upload <path> <file> — prints "<status> <location>". A missing form
+  # prints 000, which is no measurement rather than a failed one.
+  submit_upload() {
+    local path="$1" file="$2" args=() field out
+    while IFS= read -r field; do
+      [[ -n "$field" ]] && args+=(-F "$field")
+    done < <(action_fields "$path")
+
+    if [[ ${#args[@]} -eq 0 ]]; then
+      echo "000 no-action-fields-in-page"
+      return
+    fi
+
+    out=$(curl -s -o /dev/null -D - -w 'HTTPCODE=%{http_code}' --max-time 60 \
+      -X POST "$BASE$path" "${args[@]}" -F "image=@$file;type=image/png")
+    printf '%s %s\n' \
+      "$(grep -o 'HTTPCODE=[0-9]*' <<<"$out" | cut -d= -f2)" \
+      "$(grep -i '^location:' <<<"$out" | tr -d '\r' | sed 's/^[Ll]ocation: *//')"
+  }
+
+  # media_key <path> — the R2 key the edit page is currently showing.
+  media_key() {
+    curl -s --max-time 30 "$BASE$1" | grep -oE 'projects/[a-z0-9-]+\.(png|jpg|webp|avif|gif)' | head -1
+  }
+
+  read -r STATUS LOCATION <<<"$(submit_upload /admin/ci-bare "$FIXTURES/ok.png")"
+  KEY=$(media_key /admin/ci-bare)
+  if [[ "$STATUS" == "303" && -n "$KEY" ]]; then
+    echo "  ok    /admin/ci-bare               2 MB upload stored as $KEY"
+  else
+    echo "  FAIL  /admin/ci-bare               2 MB upload got $STATUS, key '$KEY'"
+    FAILED=1
+  fi
+
+  # The object has to come back whole. A stored-but-truncated upload would
+  # leave the key above looking perfectly correct.
+  if [[ -n "$KEY" ]]; then
+    BYTES=$(curl -s -o /dev/null -w '%{size_download}' --max-time 30 "$BASE/media/$KEY")
+    WANT=$(wc -c <"$FIXTURES/ok.png" | tr -d ' ')
+    if [[ "$BYTES" == "$WANT" ]]; then
+      echo "  ok    /media/$KEY  serves all $BYTES bytes"
+    else
+      echo "  FAIL  /media/$KEY  served $BYTES bytes, stored $WANT"
+      FAILED=1
+    fi
+  fi
+
+  # Over the app's limit: the app's own message must be what comes back, not a
+  # bare 500. Every string putMedia raises was unreachable from the browser
+  # before the actions caught them.
+  read -r STATUS LOCATION <<<"$(submit_upload /admin/ci-bare "$FIXTURES/toobig.png")"
+  if [[ "$STATUS" == "303" && "$LOCATION" == *"error=image+is+6.0+MB"* ]]; then
+    echo "  ok    /admin/ci-bare               6 MB upload refused, with the reason"
+  else
+    echo "  FAIL  /admin/ci-bare               6 MB upload got $STATUS -> '$LOCATION'"
+    FAILED=1
+  fi
+
+  # Both remaining checks compare against $KEY, so with nothing stored they
+  # compare empty to empty and pass without measuring anything. That is how a
+  # dead assertion looks from the outside, and this block reported two of them
+  # before the negative test ran: the first upload failing made the next three
+  # lines green. An unmeasured check says so rather than claiming ok.
+  if [[ -z "$KEY" ]]; then
+    echo "  ---   /admin/ci-bare               nothing stored, remaining checks not measured"
+  else
+    if [[ "$(media_key /admin/ci-bare)" == "$KEY" ]]; then
+      echo "  ok    /admin/ci-bare               refused upload left the image alone"
+    else
+      echo "  FAIL  /admin/ci-bare               refused upload changed the key"
+      FAILED=1
+    fi
+  fi
+
+  # Restores the fixture. Also the only coverage removeMediaAction has, and it
+  # deletes the R2 object too, since nothing else references the key.
+  REMOVE=$(curl -s --max-time 30 "$BASE/admin/ci-bare" | python3 -c '
+import sys, re, html
+doc = sys.stdin.read()
+for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
+    if "Remove image" in form:
+        for inp in re.findall(r"<input[^>]*type=\"hidden\"[^>]*>", form):
+            name = re.search(r"name=\"([^\"]+)\"", inp).group(1)
+            value = re.search(r"value=\"([^\"]*)\"", inp)
+            print(name + "=" + (html.unescape(value.group(1)) if value else ""))
+        break
+')
+  RM_ARGS=()
+  while IFS= read -r field; do
+    [[ -n "$field" ]] && RM_ARGS+=(-F "$field")
+  done <<<"$REMOVE"
+  [[ ${#RM_ARGS[@]} -gt 0 ]] &&
+    curl -s -o /dev/null --max-time 30 -X POST "$BASE/admin/ci-bare" "${RM_ARGS[@]}"
+
+  if [[ -z "$KEY" ]]; then
+    :
+  elif [[ -z "$(media_key /admin/ci-bare)" ]]; then
+    echo "  ok    /admin/ci-bare               image removed, fixture back to NULL"
+  else
+    echo "  FAIL  /admin/ci-bare               image not removed; D1 left dirty"
+    FAILED=1
+  fi
+
+  rm -rf "$FIXTURES"
+fi
 
 echo "worker error log"
 ERRORS=$(curl -s -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \

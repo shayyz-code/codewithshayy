@@ -6,6 +6,7 @@ import {
   saveSettingsAction,
   uploadSettingsImageAction,
 } from "@/app/admin/actions"
+import FieldError from "@/ui/admin/field-error"
 
 type Row = {
   developerMediaKey: string | null
@@ -25,9 +26,15 @@ type Row = {
 export default function SettingsForm({
   row,
   effective,
+  error = null,
+  errorField = null,
 }: {
   row: Row | null
   effective: SiteSettings
+  /** Why the last image action failed, from ?error. See failMedia. */
+  error?: string | null
+  /** Which of the two image forms it came from, so it appears under that one. */
+  errorField?: string | null
 }) {
   return (
     <section className="px-5 py-20 max-w-2xl mx-auto flex flex-col gap-6">
@@ -51,15 +58,15 @@ export default function SettingsForm({
         field="developerMediaKey"
         label="Photo of you"
         mediaKey={row?.developerMediaKey ?? null}
-        fallback="/developer.webp"
-        hint="Replaces the committed developer.webp. Served from R2 and resized, unlike the file it replaces."
+        hint="Shown on the home page and /me. Nothing renders there until one is set."
+        error={errorField === "developerMediaKey" ? error : null}
       />
       <ImageField
         field="backgroundMediaKey"
         label="Background"
         mediaKey={row?.backgroundMediaKey ?? null}
-        fallback="/bg4.webp"
-        hint="Sits behind the name band on both pages."
+        hint="Sits behind the name band on both pages, which render flat without it."
+        error={errorField === "backgroundMediaKey" ? error : null}
       />
 
       <form action={saveSettingsAction} className="flex flex-col gap-5">
@@ -194,40 +201,53 @@ function Area({ rows = 3, ...p }: FieldProps & { rows?: number }) {
   )
 }
 
+/**
+ * There is no file fallback for either of these, and this field used to claim
+ * otherwise — it pointed at /developer.webp and /bg4.webp, neither of which is
+ * in public/, so an unset image rendered as a broken one captioned
+ * "/developer.webp (built in)". The site behaves the same way: with no key the
+ * element does not render at all, which is what an empty field now says.
+ */
 function ImageField({
   field,
   label,
   mediaKey,
-  fallback,
   hint,
+  error,
 }: {
   field: "developerMediaKey" | "backgroundMediaKey"
   label: string
   mediaKey: string | null
-  fallback: string
   hint: string
+  error: string | null
 }) {
-  const src = mediaKey ? `/media/${mediaKey}` : fallback
-
   return (
     <div className="flex flex-col gap-2 border-4 border-black dark:border-primary p-4">
       <span className="font-display text-sm tracking-wide">{label}</span>
 
+      <FieldError message={error} />
+
       <div className="flex items-start gap-4">
-        <div className="border-4 border-black bg-white shrink-0">
-          <Image
-            src={src}
-            alt={label}
-            width={160}
-            height={160}
-            unoptimized={!mediaKey}
-            className="w-40 h-auto"
-          />
-        </div>
+        {mediaKey && (
+          <div className="border-4 border-black bg-white shrink-0">
+            <Image
+              src={`/media/${mediaKey}`}
+              alt={label}
+              width={160}
+              height={160}
+              unoptimized={mediaKey.toLowerCase().endsWith(".gif")}
+              className="w-40 h-auto"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-2 min-w-0">
-          <code className="text-xs font-mono break-all opacity-70">
-            {mediaKey ?? `${fallback} (built in)`}
-          </code>
+          {mediaKey ? (
+            <code className="text-xs font-mono break-all opacity-70">
+              {mediaKey}
+            </code>
+          ) : (
+            <p className="font-body text-sm opacity-70">No image set.</p>
+          )}
           {mediaKey && (
             <form action={removeSettingsImageAction.bind(null, field)}>
               <button
@@ -262,7 +282,9 @@ function ImageField({
         </button>
       </form>
 
-      <span className="text-xs font-body opacity-60">{hint}</span>
+      <span className="text-xs font-body opacity-60">
+        {hint} png, jpeg, webp, avif or gif · 5 MB max.
+      </span>
     </div>
   )
 }

@@ -10,10 +10,13 @@ export default function ProjectForm({
   project,
   action,
   heading,
+  mediaError = null,
 }: {
   project?: AdminProject
   action: (form: FormData) => void | Promise<void>
   heading: string
+  /** Read off ?error by the route. Only /admin/[id] renders the image form. */
+  mediaError?: string | null
 }) {
   return (
     <section className="px-5 py-20 max-w-2xl mx-auto flex flex-col gap-6">
@@ -109,6 +112,7 @@ export default function ProjectForm({
           id={project.id}
           mediaKey={project.mediaKey}
           title={project.title}
+          error={mediaError}
         />
       )}
       {!project && (

@@ -69,6 +69,22 @@ This constraint used to be recorded only in `.claude/rules/data.md`, which is
 scoped to `src/data/**` — so it never loaded for anyone editing the footer, and
 was rediscovered from scratch. A rule belongs with the file it governs.
 
+## Admin actions report failures through the URL, not through state
+
+The admin forms are server components, so there is no `useActionState` to
+return a message through, and a server action that throws reaches
+`src/app/error.tsx` with the message stripped in production. Every string
+`putMedia` raises was therefore unreachable from the browser: an unsupported
+type and an oversized file were both a blank 500.
+
+The media actions catch instead, and `failMedia` in `src/app/admin/actions.ts`
+redirects back with `?error=` — plus `&field=` on `/admin/settings`, which has
+two image forms. The route reads it and passes it down as a prop; `FieldError`
+renders it. A query param rather than component state because these forms work
+without JavaScript, and a no-JS submit is a full page load that discards state
+but keeps the URL. Success redirects to the clean path, which is what clears a
+stale message.
+
 **A section belongs in `sections/` whether one page uses it or three.** Being
 single-page is not what decides — `hero` and `stay-tuned` are Home-only,
 `contact` is Me-only, and all three live there. Nothing under one role
