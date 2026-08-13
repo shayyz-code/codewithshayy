@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { getSettings } from "@/data/settings"
 import { getSettingsRow } from "@/data/settings-admin"
 import SettingsForm from "@/ui/admin/settings-form"
+import { firstParam } from "@/ui/admin/field-error"
 
 export const dynamic = "force-dynamic"
 
@@ -16,12 +17,12 @@ export default async function PageAdminSettings({
   // The image actions redirect back here with ?error=… and the field it came
   // from, since there are two image forms and a message under the wrong one
   // reads as a different upload having failed.
-  searchParams: Promise<{ error?: string; field?: string }>
+  searchParams: Promise<{ error?: string | string[]; field?: string | string[] }>
 }) {
   // `row` is null until the first save; `effective` is what the site currently
   // renders. Showing the effective values as placeholders makes it obvious what
   // a blank field will fall back to, and that saving pins them.
-  const [row, effective, { error, field }] = await Promise.all([
+  const [row, effective, query] = await Promise.all([
     getSettingsRow(),
     getSettings(),
     searchParams,
@@ -32,8 +33,8 @@ export default async function PageAdminSettings({
       <SettingsForm
         row={row}
         effective={effective}
-        error={error ?? null}
-        errorField={field ?? null}
+        error={firstParam(query.error)}
+        errorField={firstParam(query.field)}
       />
     </main>
   )
