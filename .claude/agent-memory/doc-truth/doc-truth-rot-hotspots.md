@@ -24,7 +24,14 @@ reading anything else.
 | admin-host redirect status (301 → 302) | `security.md` | `8903810` | read the `NextResponse.redirect(..., N)` args |
 | whether `www` redirects to apex | `.claude/rules/routes.md` | `8903810` | `curl -s -o /dev/null -w '%{http_code} %{redirect_url}' https://www.codewithshayy.com/` |
 | SVG behaviour in `/media` (transform-skip → refused) | `.claude/rules/media.md` | `3549ae3` | `NO_TRANSFORM` set + `SERVEABLE` downgrade in `src/app/media/[...key]/route.ts` |
-| `src/ui/*` directory listings | `.claude/rules/ui.md` | `e8a09c1` added `settings-form.tsx` | `ls -R src/ui` and diff against the doc's tree block |
+| `src/ui/*` directory listings | `.claude/rules/ui.md` | `e8a09c1` `settings-form.tsx`, `c623305` `json-ld.tsx`, `3a6334a` `field-error.tsx` | `ls -R src/ui` and diff against the doc's tree block |
+| the route table | `.claude/rules/routes.md` | `43bbd83` added `/docs`, `/openapi.json`, four `/api/v1/*` and listed none of them | `git ls-tree -r HEAD --name-only \| grep -E '^src/app/.*(page\|route\|sitemap\|robots)\.'` and diff against the table |
+| the list of prerendered routes | `ui.md`, `src/ui/layout/footer.tsx`, `security.md` | `43bbd83` added `/docs`; `ui.md`'s copy also attributes layout rendering to two route handlers | `grep -rn 'force-static' src/app` plus: a `route.ts` / `robots.ts` / `sitemap.ts` renders **no** layout, so `Footer` never runs there |
 | workers-rs Images binding + issue #717 | `AGENTS.md` | issue closed 2025-08-04 while the gap remained | `gh issue view 717 --repo cloudflare/workers-rs` **and** grep `worker/src/env.rs` for an `images()` method — the issue state alone is not the fact |
 
-See [[doc-truth-verified-2026-08-12]] for what was checked clean.
+The `src/ui/*` row is no longer "has rotted once" — it has rotted on **every**
+branch that added a component, three times now. Treat any branch touching
+`src/ui/` as guaranteed to have stale tree blocks in `ui.md`.
+
+See [[doc-truth-verified-2026-08-12]] for what was checked clean, and
+[[doc-truth-third-party-pins]] for upstream facts with their version pins.

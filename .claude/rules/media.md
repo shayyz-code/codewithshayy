@@ -41,10 +41,19 @@ against a form advertising 5 MB failed with `Body exceeded 1 MB limit.` in the
 worker log and silence in the browser.
 
 `next.config.mjs` now sets it to `8mb`, deliberately above `MAX_BYTES` so the
-app's message is the one that fires. Raising `MAX_BYTES` past 8 MB re-creates
-the silent failure. `scripts/smoke.sh` uploads a 2 MB image through the real
-action and asserts it lands, but **only where the admin is reachable** — CI has
-no `.dev.vars` and takes the confinement branch, so that assertion is local.
+app's message is the one that fires. **The gap has to stay real**: the limit
+measures the whole multipart body — boundaries and the hidden `$ACTION` fields
+as well as the file — so raising `MAX_BYTES` *to* 8 MB already re-creates the
+silent failure for anything close to it, without ever reaching 8 MB of image.
+
+Changing it means changing four places: `MAX_BYTES`, the "5 MB" written into
+its own error message, and the hint under both upload forms
+(`src/ui/admin/media-field.tsx`, `src/ui/admin/settings-form.tsx`). None is
+derived from the constant.
+
+`scripts/smoke.sh` uploads a 2 MB image through the real action and asserts it
+lands, but **only where the admin is reachable** — CI has no `.dev.vars` and
+takes the confinement branch, so that assertion is local.
 
 Admin uploads go through `src/data/projects/media.ts`. The key embeds a hash of
 the content — `projects/<slug>-<hash8>.<ext>` — because `/media` serves objects

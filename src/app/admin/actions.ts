@@ -218,6 +218,12 @@ export async function saveSettingsAction(form: FormData) {
     backgroundMediaKey: nullable(form.get("backgroundMediaKey")),
   })
   revalidateSite()
+
+  // Redirects for the same reason the media actions do, even though it writes
+  // no ?error of its own. An action POST targets the URL it came from, so
+  // saving text from /admin/settings?error=… re-renders that URL and puts the
+  // failed upload's message back on screen after an unrelated success.
+  redirect("/admin/settings")
 }
 
 type SettingsImage = "developerMediaKey" | "backgroundMediaKey"

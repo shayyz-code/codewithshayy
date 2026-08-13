@@ -46,7 +46,7 @@ sections/    the bands a screen composes — band, hero, bio, developer,
 screens/     the one component a route renders — home, me, blog-index,
              projects-index, project-detail
 admin/       admin-list, project-form, body-editor, media-field,
-             settings-form
+             settings-form, field-error
 icons/       one SVG component each
 ```
 
