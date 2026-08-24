@@ -58,7 +58,7 @@ rather than trusting it:
 ls src/ui/*/ | sed 's/\.tsx$//'
 ```
 
-## `layout/` renders on every route, including the prerendered ones
+## `layout/` renders on every page, prerendered ones included
 
 **Nothing in `src/ui/layout/` may read D1.** `Navigation` and `Footer` are
 rendered by the root layout, which has no `dynamic` export, so they run during
@@ -71,15 +71,39 @@ database reads.
 **Only pages are on that list.** An earlier version of it named `/rss.xml` and
 `/robots.txt`, which render no layout at all — the first is a `route.ts`, the
 second a `robots.ts` metadata route, and the footer has never run for either.
-It also predated `/docs`. Derive it rather than editing it by hand: the `○`
-and `●` rows of the build's `Route (app)` table, minus anything backed by
-`route.ts`, `robots.ts`, `sitemap.ts` or an icon file. Or measure it, which is
-what settled this:
+It also predated `/docs`. Derive it rather than editing it by hand: the `○` and
+`●` rows of the build's `Route (app)` table, minus anything backed by
+`route.ts`, `robots.ts`, `sitemap.ts`, `manifest.ts` or an icon file. That is
+six of the twelve `○`/`●` rows removed, leaving exactly the six above.
+
+`manifest.ts` was missing from those exclusions when this recipe was first
+written, and `/manifest.webmanifest` is an `○` row, so following it returned
+seven.
+
+Or measure it — but grep for something the footer actually emits:
 
 ```bash
-curl -s https://codewithshayy.com/docs | grep -c "Aung Min Khant"   # 2
-curl -s https://codewithshayy.com/rss.xml | grep -c "Aung Min Khant" # 0
+curl -s https://codewithshayy.com/docs    | grep -c "Helpful Links"  # 1
+curl -s https://codewithshayy.com/rss.xml | grep -c "Helpful Links"  # 0
 ```
+
+This used `"Aung Min Khant"` first, which measures something else entirely: that
+string comes from the `keywords` metadata in `src/app/layout.tsx`, and metadata
+resolves through the layout hierarchy whether or not a layout *component* ever
+renders. Delete `Footer` from the root layout and the grep still returns 2. It
+agreed with the right answer, which is how a broken instrument survives being
+used. `"Code w/ Shayy"` is no better — `/rss.xml` and `/openapi.json` carry it
+as a channel title.
+
+The prerendered HTML on disk is a third instrument, and needs no network:
+
+```bash
+find .next/server/app -name '*.html' | xargs grep -lF "Helpful Links"
+```
+
+`_global-error.html` is prerendered and is deliberately not in that output: it
+replaces the root layout rather than nesting inside it, which is also why it
+has no `○` row to subtract.
 
 That is why social links are still in code, and why the footer's contact email
 was **removed** rather than wired to the settings row: it duplicated an address
