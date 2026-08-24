@@ -77,6 +77,9 @@ boot() {
 }
 
 shutdown() {
+  # Anything the worker logs on its way down lands after the phase's error
+  # check and before the next boot resets STARTED_MS, so it is attributed to
+  # neither phase. Nothing has turned up in that window yet.
   cleanup
   PREVIEW_PID=""
   # The next phase binds a different port, so this is not about the port being

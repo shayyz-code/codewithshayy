@@ -35,7 +35,7 @@ locally without touching the real database.
 
 ```bash
 pnpm preview        # bundle for workerd and serve it
-./scripts/smoke.sh  # 70 assertions against every route
+./scripts/smoke.sh  # every route, and both admin phases
 ```
 
 `pnpm build` passing does not mean the app works. Production runs on `workerd`,
