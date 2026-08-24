@@ -8,7 +8,16 @@ import { settings } from "./schema"
 /** The single settings row. */
 export const SETTINGS_ID = "site"
 
-export type SiteSettings = {
+/**
+ * The columns the settings form owns.
+ *
+ * Split from the media columns because they have different writers: this half
+ * is written wholesale by `saveSettings`, and the two media keys only ever by
+ * `setSettingsMediaKey`. Keeping them in one type is what led to the form
+ * carrying the media keys through as hidden inputs, and to a text save
+ * rendered before an upload putting the stale key back.
+ */
+export type SiteSettingsText = {
   heroEyebrow: string | null
   /** Newline-separated; each line is its own black-backed block. */
   heroHeading: string | null
@@ -22,9 +31,15 @@ export type SiteSettings = {
   contactEmail: string | null
   contactPhone: string | null
   contactLocation: string | null
+}
+
+/** R2 object keys, written only by `setSettingsMediaKey`. */
+export type SiteSettingsMedia = {
   developerMediaKey: string | null
   backgroundMediaKey: string | null
 }
+
+export type SiteSettings = SiteSettingsText & SiteSettingsMedia
 
 /**
  * What the site said before any of it was editable.

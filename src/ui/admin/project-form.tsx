@@ -2,6 +2,7 @@ import Link from "next/link"
 import type { AdminProject } from "@/data/projects/admin"
 import BodyEditor from "@/ui/admin/body-editor"
 import MediaField from "@/ui/admin/media-field"
+import FieldError from "@/ui/admin/field-error"
 
 // Shared by /admin/new and /admin/[id]. A server component: the form posts
 // straight to a server action, so there is no client state to manage and no
@@ -11,12 +12,20 @@ export default function ProjectForm({
   action,
   heading,
   mediaError = null,
+  formError = null,
 }: {
   project?: AdminProject
   action: (form: FormData) => void | Promise<void>
   heading: string
   /** Read off ?error by the route. Only /admin/[id] renders the image form. */
   mediaError?: string | null
+  /**
+   * Why the last save was rejected — a bad slug, or a URL that is not http(s).
+   * Same ?error channel as the image actions, distinguished by field=form,
+   * because a throw from a server action reaches the error boundary with its
+   * message stripped in production.
+   */
+  formError?: string | null
 }) {
   return (
     <section className="px-5 py-20 max-w-2xl mx-auto flex flex-col gap-6">
@@ -30,6 +39,7 @@ export default function ProjectForm({
       </header>
 
       <form action={action} className="flex flex-col gap-5">
+        <FieldError message={formError} />
         <Field name="title" label="Title" defaultValue={project?.title} required />
         <Field
           name="slug"

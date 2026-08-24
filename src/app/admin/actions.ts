@@ -18,37 +18,27 @@ import {
   saveSettings,
   setSettingsMediaKey,
 } from "@/data/settings-admin"
-import { getSettings } from "@/data/settings"
+import { getSettings, type SiteSettingsText } from "@/data/settings"
+import { httpUrl, linkHref, nullable, projectSlug, required } from "@/lib/form"
 
 // Server actions rather than route handlers: a browser cannot hold a D1 or R2
 // binding. Action POSTs target the page URL they originate from, so the
 // /admin/* Access policy and the middleware matcher already cover them —
 // there is no separate endpoint to secure.
 
-/** Empty form fields arrive as "", which must become NULL rather than "". */
-function nullable(value: FormDataEntryValue | null): string | null {
-  const s = typeof value === "string" ? value.trim() : ""
-  return s === "" ? null : s
-}
-
-function required(value: FormDataEntryValue | null, field: string): string {
-  const s = typeof value === "string" ? value.trim() : ""
-  if (s === "") throw new Error(`${field} is required`)
-  return s
-}
+// nullable, required, projectSlug, httpUrl and linkHref live in @/lib/form so
+// they can be tested without a D1 binding — this module is "use server", so
+// importing it drags the whole data layer in.
 
 function parse(form: FormData): ProjectInput {
-  const slug = required(form.get("slug"), "slug")
-  if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
-    throw new Error("slug must be lowercase letters, digits and hyphens")
-  }
-
   return {
-    slug,
+    slug: projectSlug(form.get("slug")),
     title: required(form.get("title"), "title"),
     description: required(form.get("description"), "description"),
-    siteUrl: nullable(form.get("siteUrl")),
-    repoUrl: nullable(form.get("repoUrl")),
+    // Scheme-checked rather than passed through. Both reach an href on the
+    // card, the detail page and the JSON API.
+    siteUrl: httpUrl(form.get("siteUrl"), "site URL"),
+    repoUrl: httpUrl(form.get("repoUrl"), "repo URL"),
     bodyMd: nullable(form.get("bodyMd")),
     role: nullable(form.get("role")),
     year: nullable(form.get("year")),
@@ -73,11 +63,14 @@ function revalidatePublic(slug?: string) {
 }
 
 /**
- * Sends a failed media action back to the page it was submitted from, with the
+ * Sends a failed action back to the page it was submitted from, with the
  * reason.
  *
  * Every message `putMedia` raises — the unsupported type, the size, the empty
- * file — was unreachable from the browser before this existed. The admin forms
+ * file — was unreachable from the browser before this existed. The same is now
+ * true of the validation in `parse`: a rejected slug or a `javascript:` URL
+ * has to come back as text on the form, not as a blank 500.
+ * The admin forms
  * are server components, so there is no `useActionState` to return a value
  * through, and an uncaught throw reaches `src/app/error.tsx` with the message
  * stripped in production. The result was a blank 500 for every cause.
@@ -90,19 +83,36 @@ function revalidatePublic(slug?: string) {
  * supplies and a client can set to anything. React escapes it on render; the
  * cap is about not putting an arbitrary-length string in the URL.
  */
-function failMedia(
+function fail(
   path: string,
   error: unknown,
   extra: Record<string, string> = {},
 ): never {
   const message =
-    error instanceof Error && error.message ? error.message : "the upload failed"
+    error instanceof Error && error.message
+      ? error.message
+      : // Reachable from parse and parseSettings too now, not only uploads, so
+        // it cannot name one of them. Only a non-Error throw gets here.
+        "the change was rejected"
   const params = new URLSearchParams({ error: message.slice(0, 160), ...extra })
   redirect(`${path}?${params}`)
 }
 
+// `field: "form"` so the route can tell a rejected field from a failed image
+// upload. /admin/[id] renders both, and a message under the wrong one reads as
+// a different thing having failed.
+const FORM = { field: "form" }
+
 export async function createProjectAction(form: FormData) {
-  const input = parse(form)
+  let input: ProjectInput
+  try {
+    input = parse(form)
+  } catch (error) {
+    // Outside the write, and `fail` redirects — so this cannot swallow the
+    // redirect's own throw the way a try around the whole body would.
+    fail("/admin/new", error, FORM)
+  }
+
   await createProject(input)
   revalidatePublic(input.slug)
   revalidatePath("/admin")
@@ -110,7 +120,13 @@ export async function createProjectAction(form: FormData) {
 }
 
 export async function updateProjectAction(id: string, form: FormData) {
-  const input = parse(form)
+  let input: ProjectInput
+  try {
+    input = parse(form)
+  } catch (error) {
+    fail(`/admin/${id}`, error, FORM)
+  }
+
   await updateProject(id, input)
   revalidatePublic(input.slug)
   revalidatePath("/admin")
@@ -160,7 +176,7 @@ export async function uploadMediaAction(id: string, form: FormData) {
     revalidatePath("/admin")
     revalidatePath(back)
   } catch (error) {
-    failMedia(back, error)
+    fail(back, error)
   }
 
   // Outside the try, because redirect signals by throwing and the catch above
@@ -185,7 +201,7 @@ export async function removeMediaAction(id: string) {
       revalidatePath(back)
     }
   } catch (error) {
-    failMedia(back, error)
+    fail(back, error)
   }
 
   redirect(back)
@@ -199,24 +215,14 @@ function revalidateSite() {
 }
 
 export async function saveSettingsAction(form: FormData) {
-  await saveSettings({
-    heroEyebrow: nullable(form.get("heroEyebrow")),
-    heroHeading: nullable(form.get("heroHeading")),
-    heroBodyMd: nullable(form.get("heroBodyMd")),
-    heroCtaLabel: nullable(form.get("heroCtaLabel")),
-    heroCtaHref: nullable(form.get("heroCtaHref")),
-    developerTitle: nullable(form.get("developerTitle")),
-    developerName: nullable(form.get("developerName")),
-    developerBadge: nullable(form.get("developerBadge")),
-    bioMd: nullable(form.get("bioMd")),
-    contactEmail: nullable(form.get("contactEmail")),
-    contactPhone: nullable(form.get("contactPhone")),
-    contactLocation: nullable(form.get("contactLocation")),
-    // Images are written by their own action; carry the current values through
-    // so saving the text does not wipe them.
-    developerMediaKey: nullable(form.get("developerMediaKey")),
-    backgroundMediaKey: nullable(form.get("backgroundMediaKey")),
-  })
+  let input: SiteSettingsText
+  try {
+    input = parseSettings(form)
+  } catch (error) {
+    fail("/admin/settings", error, FORM)
+  }
+
+  await saveSettings(input)
   revalidateSite()
 
   // Redirects for the same reason the media actions do, even though it writes
@@ -224,6 +230,33 @@ export async function saveSettingsAction(form: FormData) {
   // saving text from /admin/settings?error=… re-renders that URL and puts the
   // failed upload's message back on screen after an unrelated success.
   redirect("/admin/settings")
+}
+
+/**
+ * The text columns only.
+ *
+ * The two media columns are deliberately absent. They used to ride along as
+ * hidden inputs rendered from the current row, which stopped a text save
+ * wiping them but introduced a lost update: save text from a page that was
+ * rendered before an upload, and the stale key goes back. `setSettingsMediaKey`
+ * is the only writer of those columns now, so there is nothing to carry.
+ */
+function parseSettings(form: FormData): SiteSettingsText {
+  return {
+    heroEyebrow: nullable(form.get("heroEyebrow")),
+    heroHeading: nullable(form.get("heroHeading")),
+    heroBodyMd: nullable(form.get("heroBodyMd")),
+    heroCtaLabel: nullable(form.get("heroCtaLabel")),
+    // May be a path or an off-site URL; both are checked.
+    heroCtaHref: linkHref(form.get("heroCtaHref"), "hero CTA link"),
+    developerTitle: nullable(form.get("developerTitle")),
+    developerName: nullable(form.get("developerName")),
+    developerBadge: nullable(form.get("developerBadge")),
+    bioMd: nullable(form.get("bioMd")),
+    contactEmail: nullable(form.get("contactEmail")),
+    contactPhone: nullable(form.get("contactPhone")),
+    contactLocation: nullable(form.get("contactLocation")),
+  }
 }
 
 type SettingsImage = "developerMediaKey" | "backgroundMediaKey"
@@ -259,7 +292,7 @@ export async function uploadSettingsImageAction(
   } catch (error) {
     // `field` too: there are two image forms on this page, and an error under
     // the wrong one reads as a different upload having failed.
-    failMedia(back, error, { field })
+    fail(back, error, { field })
   }
 
   redirect(back)
@@ -279,7 +312,7 @@ export async function removeSettingsImageAction(field: SettingsImage) {
       revalidateSite()
     }
   } catch (error) {
-    failMedia(back, error, { field })
+    fail(back, error, { field })
   }
 
   redirect(back)

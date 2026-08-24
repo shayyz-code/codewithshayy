@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm"
 import { sql } from "drizzle-orm"
 import { getDb } from "./db"
 import { settings } from "./schema"
-import { DEFAULTS, SETTINGS_ID, type SiteSettings } from "./settings"
+import { DEFAULTS, SETTINGS_ID, type SiteSettingsText } from "./settings"
 
 // Write side for site settings, kept apart from settings.ts so the read path
 // stays obviously read-only — the same split as projects/index.ts and
@@ -11,18 +11,29 @@ import { DEFAULTS, SETTINGS_ID, type SiteSettings } from "./settings"
 const NOW = sql`strftime('%Y-%m-%dT%H:%M:%SZ', 'now')`
 
 /**
- * Writes the whole settings row, creating it on first save.
+ * Writes the text columns of the settings row, creating it on first save.
  *
  * An upsert rather than an update, because the row does not exist until
  * something is saved — until then the site runs on the defaults in settings.ts.
  * The first save is therefore also the moment the defaults stop applying, which
  * is what makes a cleared field stay cleared.
+ *
+ * **The insert branch spreads DEFAULTS first.** getSettings falls back
+ * row-level, so a row is authoritative the moment it exists; creating one with
+ * only the columns this form posts would blank the two media keys. Spreading
+ * DEFAULTS supplies them as null, which is what they are before an upload — and
+ * if an upload did come first, the row already exists and this takes the
+ * conflict branch instead.
+ *
+ * **The conflict branch sets only `input`.** The two media columns are absent
+ * from it deliberately: `setSettingsMediaKey` owns them, and a text save must
+ * not touch what it does not own.
  */
-export async function saveSettings(input: SiteSettings) {
+export async function saveSettings(input: SiteSettingsText) {
   const db = await getDb()
   await db
     .insert(settings)
-    .values({ id: SETTINGS_ID, ...input, updatedAt: NOW })
+    .values({ ...DEFAULTS, id: SETTINGS_ID, ...input, updatedAt: NOW })
     .onConflictDoUpdate({
       target: settings.id,
       set: { ...input, updatedAt: NOW },
