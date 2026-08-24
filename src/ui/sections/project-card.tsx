@@ -3,7 +3,14 @@ import Image from "next/image"
 import Link from "next/link"
 import PrimaryBtn from "@/ui/primitives/primary-btn"
 
-export default function ProjectCard({ data }: { data: Project }) {
+export default function ProjectCard({
+  data,
+  priority = false,
+}: {
+  data: Project
+  /** Preload this card's image. True for the first card only — see below. */
+  priority?: boolean
+}) {
   const href = `/projects/${data.slug}`
 
   return (
@@ -15,10 +22,14 @@ export default function ProjectCard({ data }: { data: Project }) {
         aria-label={data.title}
         className="w-[380px] h-[250px] overflow-y-hidden flex justify-center items-center bg-white"
       >
+        {/* priority was true on every card, which is worse than none: each one
+            emits a preload hint, and a dozen images all declared most important
+            leaves the browser to pick. Only the first card is plausibly the LCP
+            element, so ProjectGrid sets it on index 0 alone. */}
         {data.mediaKey ? (
           <Image
             src={`/media/${data.mediaKey}`}
-            priority={true}
+            priority={priority}
             alt={`${data.title} preview`}
             width={250}
             height={250}
@@ -64,9 +75,14 @@ export default function ProjectCard({ data }: { data: Project }) {
               Read more &gt;
             </Link>
             {data.repoUrl && (
-              <Link className="text-sky-600" href={data.repoUrl}>
+              <a
+                className="text-sky-600"
+                href={data.repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Github &gt;
-              </Link>
+              </a>
             )}
           </div>
         </div>

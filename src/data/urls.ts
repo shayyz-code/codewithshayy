@@ -21,3 +21,26 @@ export function mediaUrl(key: string | null | undefined): string | null {
   if (!key) return null
   return key.startsWith("/") ? `${SITE}${key}` : `${SITE}/media/${key}`
 }
+
+/**
+ * Whether an href stays on this site.
+ *
+ * Resolved through the URL parser against SITE, never by inspecting the first
+ * characters. `startsWith("/") && !startsWith("//")` looks like it covers the
+ * off-site cases and does not: `/\evil.com` passes it and resolves to
+ * `https://evil.com/`, because browsers normalise a backslash to a slash for
+ * special schemes. Measured, not assumed —
+ *   new URL("/\\evil.com", SITE).href === "https://evil.com/"
+ *
+ * Two callers, deliberately sharing one answer: `linkHref` in @/lib/form
+ * decides what may be stored, and PrimaryBtn decides what opens in a new tab.
+ * If those two disagreed, a value could be saved as internal and rendered as
+ * internal while navigating off-site.
+ */
+export function isInternalHref(href: string): boolean {
+  try {
+    return new URL(href, SITE).origin === new URL(SITE).origin
+  } catch {
+    return false
+  }
+}

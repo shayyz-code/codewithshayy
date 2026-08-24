@@ -14,12 +14,23 @@ export default function Navigation() {
       className="absolute top-0 left-0 w-full flex justify-end z-50 px-4 py-4 font-display text-lg tracking-wider"
     >
       <div className="container flex items-center justify-between text-blue-gray-900 max-w-full ">
-        <Link href="/" className="group flex items-center cursor-pointer">
-          <h1 className="flex items-center justify-center text-xl px-4 uppercase text-center">
+        {/* A span, not an h1. This renders in the root layout, so an h1 here
+            is an h1 on every page — and every page that has a heading of its
+            own then has two, which leaves a screen-reader user no way to tell
+            the site name from the page subject. The accessible name for this
+            link comes from aria-label; the image is decorative beside the
+            "w/ Shayy" text and takes an empty alt rather than describing
+            itself as a picture. */}
+        <Link
+          href="/"
+          aria-label="Code w/ Shayy — home"
+          className="group flex items-center cursor-pointer"
+        >
+          <span className="flex items-center justify-center text-xl px-4 uppercase text-center">
             <Image
               src="/logo.webp"
               unoptimized
-              alt="logo picture"
+              alt=""
               width={100}
               height={100}
               className="-z-10 filter size-12 border-4 border-black"
@@ -27,7 +38,7 @@ export default function Navigation() {
             <span className="text-white bg-black h-6 px-1 group-hover:text-primary transition-all ease-out">
               w/ Shayy
             </span>
-          </h1>
+          </span>
         </Link>
         <div>
           <ul className="flex gap-4 mt-0 mb-0 flex-row items-center md:gap-6 bg-transparent px-4 h-12 text-black">

@@ -21,15 +21,6 @@ export default function Hero({
 }) {
   return (
     <div className="relative p-10 md:px-16 py-28 md:py-40 mb-2 bg-primary">
-      {/* <Image
-        src="/logo.webp"
-        unoptimized
-        alt="comic bg"
-        fill
-        style={{ objectFit: "cover" }}
-        className="z-10"
-        priority={true}
-      /> */}
       <div className="md:relative">
         <motion.div
           initial={{ x: -200, opacity: 0 }}
@@ -37,10 +28,12 @@ export default function Hero({
           transition={{ duration: 1.5, type: "spring" }}
           className="flex justify-center md:justify-end items-center md:h-full md:absolute md:top-0 md:right-0"
         >
+          {/* Decorative — the heading beside it carries the meaning. The alt
+              read "poster image of event", left over from a different design. */}
           <Image
             src="/logo.webp"
             unoptimized
-            alt="poster image of event"
+            alt=""
             width={600}
             height={600}
             priority={true}

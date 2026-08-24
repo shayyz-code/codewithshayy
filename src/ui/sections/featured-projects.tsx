@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { motion } from "framer-motion"
 import type { Project } from "@/data/projects"
 import Band from "./band"
@@ -26,12 +25,14 @@ export default function FeaturedProjects({
         </h2>
         <p className="font-body text-center">
           See all my projects at{" "}
-          <Link
+          <a
             className="text-sky-600"
             href="https://www.github.com/shayyz-code/"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             github.com/shayyz-code
-          </Link>
+          </a>
         </p>
       </motion.div>
 
