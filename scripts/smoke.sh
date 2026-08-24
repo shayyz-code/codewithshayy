@@ -15,17 +15,29 @@
 # and reports it as a pass — which is how a deliberately broken config was
 # measured as fixed here once. Rebuild first, or run `pnpm preview`, which does.
 #
+# It boots the worker twice, on [port] and [port]+1. The admin bypass is read at
+# boot, and the two things worth asserting need opposite settings: with it off
+# /admin must 404, since the admin belongs to one hostname; with it on the
+# upload actions are reachable at all. Passing `--var ADMIN_LOCAL_BYPASS:<n>`
+# decides it, and that beats .dev.vars, so both phases run in CI and locally.
+#
+# Which branch ran used to depend on whether .dev.vars existed. CI has none, so
+# it never ran a single upload assertion — deleting the experimental block from
+# next.config.mjs, the defect they were written for, shipped green.
+#
 # Usage: scripts/smoke.sh [port]
 
 set -uo pipefail
 
 PORT="${1:-8788}"
-BASE="http://localhost:$PORT"
+BASE=""
 LOG=$(mktemp)
 FAILED=0
+PREVIEW_PID=""
 # The observability store lives in .wrangler/ and survives restarts, so any
 # query here must be time-bounded or it reports an earlier run's errors. This
-# check read 432 stale rows before it was bounded.
+# check read 432 stale rows before it was bounded. boot resets it, so each
+# phase only ever answers for its own worker.
 STARTED_MS=$(( $(date +%s) * 1000 ))
 
 cleanup() {
@@ -36,20 +48,43 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "booting worker on :$PORT"
-npx opennextjs-cloudflare preview --port "$PORT" >"$LOG" 2>&1 &
-PREVIEW_PID=$!
+# boot <port> <bypass 0|1>
+#
+# --var overrides .dev.vars, which is the whole reason both phases can run in
+# either environment. Measured rather than assumed: booted with
+# ADMIN_LOCAL_BYPASS:0 while .dev.vars said 1, and /admin came back 404 with
+# /privacy still 200 — so the override took and the worker was alive to answer.
+boot() {
+  local port="$1" bypass="$2"
+  BASE="http://localhost:$port"
+  STARTED_MS=$(( $(date +%s) * 1000 ))
 
-for _ in $(seq 1 60); do
-  sleep 2
-  curl -sf -o /dev/null "$BASE/privacy" 2>/dev/null && break
-done
+  echo "booting worker on :$port (ADMIN_LOCAL_BYPASS=$bypass)"
+  npx opennextjs-cloudflare preview --port "$port" \
+    --var "ADMIN_LOCAL_BYPASS:$bypass" >"$LOG" 2>&1 &
+  PREVIEW_PID=$!
 
-if ! curl -sf -o /dev/null "$BASE/privacy" 2>/dev/null; then
-  echo "::error::worker never became ready"
-  tail -30 "$LOG"
-  exit 1
-fi
+  for _ in $(seq 1 60); do
+    sleep 2
+    curl -sf -o /dev/null "$BASE/privacy" 2>/dev/null && break
+  done
+
+  if ! curl -sf -o /dev/null "$BASE/privacy" 2>/dev/null; then
+    echo "::error::worker never became ready on :$port"
+    tail -30 "$LOG"
+    exit 1
+  fi
+}
+
+shutdown() {
+  cleanup
+  PREVIEW_PID=""
+  # The next phase binds a different port, so this is not about the port being
+  # free — it is about the old instance no longer answering on it.
+  sleep 3
+}
+
+boot "$PORT" 0
 
 # expect <path> <status>
 expect() {
@@ -100,6 +135,28 @@ expect_body() {
   FAILED=1
 }
 
+# The worker logs errors nowhere else: they never reach stdout, only the local
+# observability store. Called once per phase, against that phase's worker and
+# bounded by that phase's start, because the store is shared on disk and a
+# single query at the end would silently drop everything phase one logged.
+error_log_check() {
+  local errors
+  errors=$(curl -s -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \
+    -H 'Content-Type: application/json' \
+    -d '{"sql":"SELECT count(*) FROM logs WHERE level=\"error\" AND ts_ms > '"$STARTED_MS"'"}' 2>/dev/null \
+    | grep -oE '\[\[[0-9]+\]\]' | grep -oE '[0-9]+' | head -1)
+  errors="${errors:-0}"
+  if [[ "$errors" == "0" ]]; then
+    echo "  ok    no errors in the observability store"
+  else
+    echo "  FAIL  $errors error(s) logged by the worker:"
+    curl -s -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \
+      -H 'Content-Type: application/json' \
+      -d '{"sql":"SELECT substr(message,1,300) FROM logs WHERE level=\"error\" AND ts_ms > '"$STARTED_MS"' ORDER BY ts_ms DESC LIMIT 5"}' 2>/dev/null
+    FAILED=1
+  fi
+}
+
 # Warm every route first. The first request to a route under workerd is the
 # slowest, and a cold streamed response is what produced head-only bodies.
 for p in / /me /projects /blog /blog/hello /rss.xml /privacy /terms /docs \
@@ -120,21 +177,14 @@ expect /projects/ci-fixture-bare 200
 expect /projects/ci-fixture-draft 404
 expect /projects/does-not-exist 404
 
-# The admin's expected status depends on whether the local bypass is active.
-# .dev.vars is read by local wrangler and never uploaded, so CI and the deployed
-# worker always take the 404 branch. Asserting a single value would make this
-# test either wrong locally or vacuous in CI.
-if [[ -f .dev.vars ]] && grep -q '^ADMIN_LOCAL_BYPASS=1' .dev.vars 2>/dev/null; then
-  ADMIN_BYPASS=1
-  echo "admin (local bypass active via .dev.vars)"
-  expect /admin 200
-  expect /admin/new 200
-else
-  ADMIN_BYPASS=0
-  echo "admin is confined to the admin hostname"
-  expect /admin 404
-  expect /admin/dashboard 404
-fi
+# Wrangler pins the request host to the first configured route, so every
+# request under preview arrives as codewithshayy.com — which is not the admin
+# host, and with the bypass off that is what /admin must 404 on. This used to
+# read .dev.vars and assert whichever answer that implied, which made it vacuous
+# in one environment and absent from the other.
+echo "admin is confined to the admin hostname"
+expect /admin 404
+expect /admin/dashboard 404
 
 echo "redirects"
 expect /blogs 308
@@ -328,10 +378,23 @@ expect_body /sitemap.xml "/docs"
 # fields the form already carries, plus the file. The action id changes with
 # every build, so it is read out of the page rather than written down here.
 #
-# This can only run where the admin is reachable, which is local: CI has no
-# .dev.vars and takes the confinement branch above. Asserting 404 there is the
-# more important of the two, so it keeps the run.
-if [[ "$ADMIN_BYPASS" == "1" ]]; then
+# Reaching the admin needs the bypass on and asserting it 404s needs it off, so
+# this is a second worker rather than a branch — and both now run everywhere.
+echo "worker error log (bypass off)"
+error_log_check
+
+shutdown
+boot "$(( PORT + 1 ))" 1
+
+echo "admin (bypass on)"
+expect /admin 200
+expect /admin/new 200
+
+# One guard rather than a wall of identical failures: everything below posts to
+# /admin/ci-bare, so if the bypass did not take, every assertion fails for the
+# same reason and none of them measures what it claims to. A skip is the thing
+# being fixed here, so this fails loudly instead.
+if [[ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE/admin/ci-bare")" == "200" ]]; then
   echo "admin image upload"
 
   # ci-bare is seeded with media_key NULL and this block ends by removing what
@@ -490,23 +553,13 @@ for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
   fi
 
   rm -rf "$FIXTURES"
-fi
-
-echo "worker error log"
-ERRORS=$(curl -s -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \
-  -H 'Content-Type: application/json' \
-  -d '{"sql":"SELECT count(*) FROM logs WHERE level=\"error\" AND ts_ms > '"$STARTED_MS"'"}' 2>/dev/null \
-  | grep -oE '\[\[[0-9]+\]\]' | grep -oE '[0-9]+' | head -1)
-ERRORS="${ERRORS:-0}"
-if [[ "$ERRORS" == "0" ]]; then
-  echo "  ok    no errors in the observability store"
 else
-  echo "  FAIL  $ERRORS error(s) logged by the worker:"
-  curl -s -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \
-    -H 'Content-Type: application/json' \
-    -d '{"sql":"SELECT substr(message,1,300) FROM logs WHERE level=\"error\" AND ts_ms > '"$STARTED_MS"' ORDER BY ts_ms DESC LIMIT 5"}' 2>/dev/null
+  echo "::error::admin unreachable with the bypass on; no upload assertion ran"
   FAILED=1
 fi
+
+echo "worker error log (bypass on)"
+error_log_check
 
 [[ "$FAILED" == "0" ]] && echo "smoke: pass" || echo "::error::smoke: fail"
 exit "$FAILED"

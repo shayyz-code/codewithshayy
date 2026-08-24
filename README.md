@@ -35,7 +35,7 @@ locally without touching the real database.
 
 ```bash
 pnpm preview        # bundle for workerd and serve it
-./scripts/smoke.sh  # 23 assertions against every route
+./scripts/smoke.sh  # 70 assertions against every route
 ```
 
 `pnpm build` passing does not mean the app works. Production runs on `workerd`,
@@ -43,8 +43,13 @@ which forbids things Node allows — every serious bug in this project's history
 compiled cleanly and failed only under the real runtime. `pnpm preview` is the
 honest check, and CI runs both on every push.
 
+`smoke.sh` boots the worker twice: once with the admin bypass off, where
+`/admin` has to 404 because the admin belongs to one hostname, and once with it
+on, where the upload actions are reachable at all. Deciding that from whether
+`.dev.vars` existed meant CI ran neither half of the pair.
+
 Errors in the worker do not print to stdout. They go to a local observability
-store; `CLAUDE.md` has the query.
+store; `AGENTS.md` has the query — `CLAUDE.md` is a one-line import of it.
 
 ## Content
 

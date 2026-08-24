@@ -106,8 +106,8 @@ Run `pnpm cf-typegen` after every `wrangler.jsonc` binding change, or `env.X` wi
 
 CI runs on every push and PR (`.github/workflows/ci.yml`): lint, typecheck and
 `next build` in one job, then a second that bundles for workerd, sets up a local
-D1 from `seeds/ci.sql`, and runs `scripts/smoke.sh` against every route. No
-secrets needed — workerd, miniflare and local D1 all run unauthenticated.
+D1 from `seeds/ci.sql`, and runs `scripts/smoke.sh` — 70 assertions, the same 70
+it runs locally. No secrets — workerd, miniflare and local D1 run unauthenticated.
 
 Two assertions there are load-bearing. The build output must mark `/`, `/me` and
 `/projects` as `ƒ (Dynamic)`; a regression to `○ (Static)` bakes the build
