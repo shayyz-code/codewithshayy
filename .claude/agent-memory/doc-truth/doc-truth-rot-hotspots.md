@@ -43,9 +43,36 @@ whether or not `Footer` renders, because the string is `keywords` metadata in
 independently of any component. It was used to settle the prerendered-set
 question and happened to agree.
 
-The `src/ui/*` row is no longer "has rotted once" — it has rotted on **every**
-branch that added a component, three times now. Treat any branch touching
-`src/ui/` as guaranteed to have stale tree blocks in `ui.md`.
+The `src/ui/*` row had rotted on **every** branch that added a component, three
+times running. On 2026-08-24 a branch added `src/ui/layout/motion-provider.tsx`
+and the block was correct — the first time it survived. One data point against
+three; keep checking it, but "guaranteed stale" is no longer the right prior.
+
+Two rows fired on that same run:
+
+- **any hand-maintained count** — `ui.md` carried `terms/page.tsx (79)` and the
+  file was 83, rotted at `5c92284`. Both integers there have since been deleted
+  rather than corrected a second time.
+- **a new one, below.**
+
+## New hotspot: "this CLI has no X command"
+
+`.claude/rules/data.md` and `scripts/backup.sh` both said *"`wrangler r2` has no
+listing command — only get, put and delete"*. `wrangler r2 bucket list` exists,
+and `backup.sh` **called `wrangler r2 bucket info` 138 lines below its own
+claim** — the file contradicted itself and neither copy noticed. The true
+statement is one word narrower: `wrangler r2 **object**` has no listing command.
+
+A capability claim about a third-party CLI is a version-pinned fact, so record
+the version and the command that derives it, never the prose alone:
+
+```bash
+pnpm exec wrangler r2 object --help    # get, put, delete           (4.125.0)
+pnpm exec wrangler r2 bucket --help    # list, info, lifecycle, …   (4.125.0)
+```
+
+Same shape as the `workers-rs` row: the answer is what the tool exposes today,
+not what you remember it exposing. See [[doc-truth-third-party-pins]].
 
 See [[doc-truth-verified-2026-08-12]] for what was checked clean, and
 [[doc-truth-third-party-pins]] for upstream facts with their version pins.

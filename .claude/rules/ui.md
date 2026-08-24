@@ -28,18 +28,22 @@ That split is what keeps the components free of `getCloudflareContext`, so they
 stay renderable without a binding. When changing what a page *looks like*, edit
 the component; when changing what it *knows*, edit the route.
 
-**Two routes deliberately break this**: `src/app/privacy/page.tsx` (69 lines) and
-`src/app/terms/page.tsx` (79) hold their prose inline. They read no data and are
+**Two routes deliberately break this**: `src/app/privacy/page.tsx` and
+`src/app/terms/page.tsx` hold their prose inline. They read no data and are
 composed once, so a `src/ui/` component would add a layer without removing one.
 Do not "fix" them by extraction — but do not treat them as the pattern either.
+
+Their line counts used to be written here — 69 and 79 — and `terms` was 83 by
+2026-08-24, having rotted at `5c92284`. The number was never the point, so it
+is gone rather than corrected a second time.
 
 ## `src/ui/` is grouped by role, not by page
 
 ```
 primitives/  reusable and page-agnostic — primary-btn, markdown,
              hover-words, markdown-components, json-ld
-layout/      the shell every page shares — navigation, footer, and the two
-             link lists both render (nav-links, social-links)
+layout/      the shell every page shares — navigation, footer, the two link
+             lists both render (nav-links, social-links), and motion-provider
 sections/    the bands a screen composes — band, hero, bio, developer,
              contact, section-label, stay-tuned, featured-projects,
              project-grid, project-card
@@ -122,12 +126,21 @@ return a message through, and a server action that throws reaches
 `putMedia` raises was therefore unreachable from the browser: an unsupported
 type and an oversized file were both a blank 500.
 
-The media actions catch instead, and `failMedia` in `src/app/admin/actions.ts`
-redirects back with `?error=` — plus `&field=` on `/admin/settings`, which has
-two image forms. The route reads it and passes it down as a prop; `FieldError`
-renders it. A query param rather than component state because these forms work
-without JavaScript, and a no-JS submit is a full page load that discards state
-but keeps the URL. Success redirects to the clean path, which is what clears a
+The actions catch instead, and `fail` in `src/app/admin/actions.ts` redirects
+back with `?error=`, and usually `&field=` as well. The field says which form
+it came from, and has three states rather than two: one of the two image fields
+on `/admin/settings`; `form` for a save rejected by the validation in
+`@/lib/form` — a bad slug, or a URL that is not http(s); or **absent**, which
+is what the image actions on `/admin/[id]` send, since that page has only one
+image form. `src/app/admin/[id]/page.tsx` therefore treats absent as the media
+case. The route reads both and passes them down as props; `FieldError` renders
+it. A
+message under the wrong form reads as a different thing having failed, which is
+what the field exists to prevent.
+
+A query param rather than component state because these forms work without
+JavaScript, and a no-JS submit is a full page load that discards state but
+keeps the URL. Success redirects to the clean path, which is what clears a
 stale message.
 
 **A section belongs in `sections/` whether one page uses it or three.** Being
@@ -138,9 +151,42 @@ directory imports from another's internals; use the alias.
 `sections/band` is the full-bleed rule-topped strip every section sits in, with
 the shared `whileInView` fade; `SlideIn` is its inner slide-from-left.
 
-Sections are all `"use client"` for framer-motion. One that stops being a client
-component renders permanently at `opacity: 0`, because the animations are
-`whileInView`.
+Sections that animate are `"use client"` for framer-motion, and one that stops
+being a client component renders permanently at `opacity: 0`, because the
+animations are `whileInView`.
+
+**Not all of them animate.** `project-card.tsx` carries no directive and uses
+no framer-motion; it reaches the client bundle transitively through
+`project-grid.tsx`, which does. The `opacity: 0` warning does not apply to it.
+This file said "Sections are all `"use client"`" until 2026-08-24, which was
+false for that one file. Check rather than counting on it:
+
+```bash
+# prints the sections that are NOT client components — the exceptions, which
+# is the answer. A count would have told you 9 of 10 and not which one.
+for f in src/ui/sections/*.tsx; do
+  head -1 "$f" | grep -q 'use client' || echo "$f"
+done
+```
+
+That `initial` state is serialised into the server-rendered HTML, so **with no
+JavaScript the page renders blank**. Two things handle it, both in
+`src/app/layout.tsx` — neither in the sections themselves:
+
+- `MotionProvider` wraps the tree with `<MotionConfig reducedMotion="user">`.
+  framer-motion then makes every `positionalKey` — width, height, top, left,
+  right, bottom and all transforms — instant, while opacity still fades. Do
+  **not** reach for `useReducedMotion()` in a section instead: it is
+  `useState(prefersReducedMotion.current)`, captured at first render, which the
+  server and the client disagree about — a hydration mismatch, and that is the
+  failure that leaves the tree partially hydrated so server-action forms
+  silently stop submitting. `reducedMotionConfig` is read in
+  `VisualElement.mount()`, client-side only, so the server output cannot depend
+  on it.
+- A `<noscript>` block forces `opacity: 1` on anything still carrying the
+  inline `opacity:0`. It cannot be a plain stylesheet rule: with JS the inline
+  value changes as the animation runs, and the attribute selector would stop
+  matching mid-fade.
 
 ## Naming
 

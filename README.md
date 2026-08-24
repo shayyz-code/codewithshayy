@@ -49,6 +49,10 @@ on, where the upload actions are reachable at all. Deciding that from whether
 `.dev.vars` existed meant CI ran the first half and never the second, and a
 local run the reverse — the two were never measured together.
 
+`pnpm test` (vitest) covers the pure functions only — the admin form helpers
+and the media-key mapping. Anything needing a D1 or R2 binding is covered by
+`smoke.sh` against a real worker instead of a mock.
+
 Errors in the worker do not print to stdout. They go to a local observability
 store; `AGENTS.md` has the query — `CLAUDE.md` is a one-line import of it.
 
@@ -71,8 +75,16 @@ publishing needs a deploy.
 # edit src/data/schema.ts, then
 pnpm db:generate         # writes migrations/*.sql — never hand-edit those
 pnpm db:migrate          # apply locally
-pnpm db:migrate:remote   # apply to the real database
+pnpm db:migrate:remote   # backs up, then applies to the real database
 ```
+
+## Backups
+
+Content lives only in production D1 — the projects, the write-ups, and every
+line of copy on the home page. `pnpm db:backup` dumps it along with the R2
+objects it references; `db:migrate:remote` runs that first, and a nightly
+workflow writes the same dump to a separate bucket. Restoring is two commands
+in a fixed order, for a reason `.claude/rules/data.md` records.
 
 ## Deploy
 

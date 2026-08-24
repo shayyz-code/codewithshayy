@@ -45,12 +45,82 @@ command named only `robots.ts` and `sitemap.ts`. `/manifest.webmanifest` is a
 live 200 and an `○` row in the build, and it had no row here because the command
 that was supposed to catch that omission shared the omission.
 
-`favicon.ico` is the one output with no row: it is served as an asset rather
-than compiled to a route, so it appears in no `Route (app)` table.
+`favicon.ico` is the one output with no row in the `Route (app)` table — but
+**not** because it is "served as an asset rather than compiled to a route",
+which this file claimed until 2026-08-24 and which is false. It *is* compiled:
+`.next/server/app/favicon.ico/route.js` exists, `app-path-routes-manifest.json`
+maps `/favicon.ico/route` → `/favicon.ico`, and it is a key in
+`prerender-manifest.json`. Only its absence from the printed table is real, and
+that is a property of Next's output formatting, not of how the file is served.
+
+Note `ui.md`'s "twelve `○`/`●` rows" arithmetic only balances while favicon has
+no row. The two files corroborate each other, which is not the same as either
+being checked — re-derive both together:
+
+```bash
+node -e "const m=require('./.next/app-path-routes-manifest.json');console.log(Object.entries(m).filter(([k])=>k.includes('favicon')))"
+```
 
 The split is the point: **anything reading D1 must be dynamic**, and anything
-prerendered must not touch the database or the filesystem at request time. CI
-asserts the first three stay `ƒ`.
+prerendered must not touch the database or the filesystem at request time.
+
+CI asserts this for **every** D1-backed route, not a hand-picked few, via
+`scripts/check-dynamic-routes.mjs`. It reads `.next/app-path-routes-manifest.json`
+and `.next/prerender-manifest.json` and requires each guarded route to be
+present in the first and absent from both keys of the second — absence alone
+proves nothing, since a renamed or deleted route is absent too. It also asserts
+that `/blog` and `/privacy` *are* prerendered: if a Next release renames those
+manifest keys the set reads empty, every "is it prerendered" test comes back
+false, and the whole check would otherwise pass while the site went static.
+
+Coverage is computed, not listed. It walks the import graph from
+`src/data/db.ts` — the one module that resolves the D1 binding — and requires
+every `src/app` route reaching it to be guarded, so a new D1-backed route
+cannot be added without the guard noticing. Type-only imports are excluded:
+they are erased at compile time, and counting them marked `/docs`,
+`/openapi.json`, `/blog/[slug]` and both `/api/v1/posts` routes as D1 readers
+because they reach `@/data/projects` for its `Project` type alone.
+
+Two narrower versions were tried first and both were wrong. A blanket
+`from "@/data/` demanded that `/blog`, `/blog/[slug]`, `/rss.xml` and both
+`/api/v1/posts` routes become dynamic — they import `@/data/posts`, which reads
+the generated manifest and no database — and marking them dynamic would have
+broken the prerendering this file protects. And a
+`from "@/data/(projects|settings)"` match is not a boundary at all: **every
+importer of `db.ts` uses a relative specifier** — `./db` from
+`src/data/settings.ts` and `settings-admin.ts`, `../db` from the three
+`src/data/projects/*` modules — so any new reader module under `src/data/`
+escapes a specifier match no matter how the alias is spelled. Walking to
+`src/data/db.ts` is what closes that.
+
+```bash
+grep -rn 'from "\.\{1,2\}/db"' src/data   # the relative imports a specifier match misses
+```
+
+Two instruments that look right and are not, both measured rather than
+reasoned about:
+
+- **`grep -rl force-dynamic src/app`** reports `/blog`, which is deliberately
+  static — `src/app/blog/page.tsx:6` carries the string inside the comment
+  *"Do not add force-dynamic here"*.
+- **The old route-table grep**, `^[├└┌│][^/]*ƒ ${route}$`, cannot be extended
+  past a literal path: `[slug]` becomes an extended-regex character class, so
+  `ƒ /projects/s` satisfies `/projects/[slug]`.
+
+The check measures whether a route is prerendered, not whether it carries the
+export, and those differ. Removing `force-dynamic` from
+`src/app/projects/page.tsx` flips it to `○` and the check rejects. Removing it
+from `src/app/projects/[slug]/page.tsx` does **not** — that route has no
+`generateStaticParams`, so there is nothing to prerender and it stays `ƒ`. The
+export there is insurance against a later `generateStaticParams`, not what
+makes it dynamic today. Both measured on a working tree whose HEAD was
+`3cc4d33` — the script itself does not exist at that commit, so there is no ref
+to check this against. Re-run them rather than trusting this paragraph:
+
+```bash
+# remove the export, rebuild, and the check must reject
+node scripts/check-dynamic-routes.mjs
+```
 
 **Only the apex is meant to be indexed**, and three mechanisms say so. Every page
 sets `alternates.canonical` against `metadataBase`; middleware adds

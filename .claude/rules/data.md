@@ -31,6 +31,65 @@ pnpm db:studio         # browse the data
 
 `seeds/` is deliberately **outside** `migrations/` — `wrangler d1 migrations apply` runs every `.sql` in that directory, and the seed opens with `DELETE FROM projects`.
 
+## Backups
+
+`db:migrate:remote` runs `scripts/backup.sh` before it applies anything, and
+`.github/workflows/backup.yml` runs it nightly into the `codewithshayy-backups`
+bucket. Content lives only in D1 — every project, every write-up, and the whole
+of the site's copy — and a migration here once blanked every page while all
+routes returned 200.
+
+**Restore is two commands, and the order is load-bearing:**
+
+```bash
+wrangler d1 execute codewithshayy --local --file <dir>/d1-schema.sql -y
+wrangler d1 execute codewithshayy --local --file <dir>/d1-data.sql   -y
+```
+
+The single-file dump `wrangler d1 export` produces by default **does not
+restore**. It writes `project_tags` before `tags`, so replaying it fails at the
+first row with `no such table: main.tags: SQLITE_ERROR`.
+
+The measured statement order is `d1_migrations, project_tags, projects, tags,
+settings, sqlite_sequence` — **not** alphabetical, which an earlier version of
+this paragraph claimed: `settings` sorts before `tags` and comes after it. The
+order the dump actually uses is not documented, so derive it rather than
+predicting it:
+
+```bash
+grep -oE '^(CREATE TABLE|INSERT INTO) .?[a-z_]+' <dir>/d1-schema.sql | uniq
+```
+
+The `PRAGMA defer_foreign_keys=TRUE` at the head of that file does not save it,
+because that pragma is cleared at the end of every transaction and the replay
+autocommits per statement. Measured in a single `sqlite3` session with the
+pragma present and `foreign_keys=ON`; whether `d1 execute --file` *additionally*
+batches was never tested, and the failure needs no such explanation.
+
+Hence `--no-data` and `--no-schema` into two files. Round-tripped **against
+local D1** on 2026-08-24: 3 projects / 2 tags / 2 project_tags out, the same
+counts and slugs back into a fresh database. The remote half has not been run.
+
+The media set is derived from D1 rather than listed from the bucket, because
+**`wrangler r2 object` has no listing command — only `get`, `put` and
+`delete`.** Note the word `object`: `wrangler r2 bucket` does have `list`, and
+also `info`, `lifecycle` and `cors`, which is why `backup.sh` can call
+`wrangler r2 bucket info` as its credentials preflight. What is missing is a
+way to enumerate the objects *inside* a bucket. Re-derive rather than trusting
+this — it has been wrong once (wrangler 4.125.0 today):
+
+```bash
+pnpm exec wrangler r2 object --help   # get, put, delete
+pnpm exec wrangler r2 bucket --help   # list, info, lifecycle, cors, …
+```
+
+That is also
+the better set: keys are content-addressed and referenced from the same two
+tables `deleteMediaIfUnreferenced` checks, so anything not named there is
+already unreferenced. A key with no object is reported as dangling and does
+**not** fail the backup — that is a property of the data, and failing on it
+would wedge `db:migrate:remote` behind a bad row that predates it.
+
 **Routes that read D1 must set `export const dynamic = "force-dynamic"`.** `getCloudflareContext({ async: true })` resolves to *local* bindings during static generation, so a prerendered route bakes your local database into the deployed output. Check the build output: data routes should be `ƒ (Dynamic)`, not `○ (Static)`.
 
 **Drizzle's `with` clause must be written inline** at each call site. Hoisting it into a shared const or helper widens the literal `true` to `boolean`, and the relational types reject it.
