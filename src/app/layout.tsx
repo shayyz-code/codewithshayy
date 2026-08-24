@@ -3,6 +3,7 @@ import { Kanit } from "next/font/google"
 import "./globals.css"
 import Navigation from "@/ui/layout/navigation"
 import Footer from "@/ui/layout/footer"
+import MotionProvider from "@/ui/layout/motion-provider"
 
 const fontDisplay = Kanit({
   weight: "600",
@@ -71,6 +72,13 @@ const THEME_SCRIPT = `
 })();
 `
 
+const NOSCRIPT_REVEAL = `
+[style*="opacity:0"] {
+  opacity: 1 !important;
+  transform: none !important;
+}
+`
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -88,9 +96,30 @@ export default function RootLayout({
         className={`${fontDisplay.variable} ${fontBody.variable} overflow-y-scroll overflow-x-hidden`}
       >
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-        <Navigation />
-        {children}
-        <Footer />
+        {/* Every section is a framer-motion client component animating from
+            `opacity: 0`, and framer-motion serialises that `initial` state
+            into the server-rendered HTML — measured, not inferred:
+            .next/server/app/privacy.html ships
+            style="opacity:0;transform:translateY(-100px)". With no JS nothing
+            ever animates it back, so the page renders blank.
+
+            That is not hypothetical here. .claude/agent-memory records that a
+            headless-browser check of /projects would have *confirmed* a false
+            "the cards are missing" claim through exactly this mechanism.
+
+            !important because the rule has to beat an inline style. Scoped to
+            noscript so it costs nothing when JS runs — and it cannot be a
+            plain stylesheet rule either, since with JS the inline value
+            changes as the animation runs and the attribute selector would
+            stop matching mid-fade. */}
+        <noscript>
+          <style>{NOSCRIPT_REVEAL}</style>
+        </noscript>
+        <MotionProvider>
+          <Navigation />
+          {children}
+          <Footer />
+        </MotionProvider>
       </body>
     </html>
   )
