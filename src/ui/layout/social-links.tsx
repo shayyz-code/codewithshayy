@@ -1,7 +1,9 @@
 // Deliberately still in code rather than in the settings table.
 //
 // The footer is a server component in the root layout, so it renders on every
-// route — including the prerendered ones. Reading D1 from here runs that query
+// page, prerendered ones included — but not on every *route*: route handlers
+// and metadata routes render no layout at all, and .claude/rules/ui.md derives
+// the set rather than restating it here. Reading D1 from here runs that query
 // during static generation: /blog fails to prerender outright, and with the
 // table present it would instead bake build-time rows into a cached page.
 // Verified by trying it; the build errors with
