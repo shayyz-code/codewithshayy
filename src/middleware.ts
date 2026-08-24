@@ -78,9 +78,16 @@ function bypassForLocalDev() {
   )
 }
 
-// A nonce-based CSP is not possible here. /blog/[slug], /privacy, /terms,
-// /rss.xml and /robots.txt are prerendered, and a nonce baked into a cached page
-// is worse than no nonce at all — every visitor would be handed the same one.
+// A nonce-based CSP is not possible here. /blog, /blog/[slug], /docs, /privacy,
+// /terms and /_not-found are prerendered HTML, and a nonce baked into a cached
+// page is worse than no nonce at all — every visitor would be handed the same
+// one.
+//
+// An earlier version of that list named /rss.xml and /robots.txt in place of
+// /blog, /docs and /_not-found. Both of those are prerendered and both get this
+// header, but neither renders a layout or emits a script tag, so no nonce would
+// ever have reached them — they were never part of this trade.
+// .claude/rules/ui.md derives the set rather than listing it by hand.
 //
 // So script-src allows inline. That is weaker against injected script, but the
 // exposure is small: react-markdown escapes raw HTML, no page renders user
@@ -89,7 +96,7 @@ function bypassForLocalDev() {
 // hijack, no form posting off-origin.
 //
 // Making this strict would mean generating a nonce per request and giving up
-// prerendering on those five routes.
+// prerendering on those six.
 const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
@@ -107,10 +114,19 @@ const CSP = [
 /**
  * Applied to every response this middleware returns, not just the public one.
  *
- * There are several exits — the dev bypass, the 404 rewrite, the apex redirect,
- * the public branch, two 401s and the admin success path. Attaching headers to
- * only the public branch would leave /admin without frame-ancestors, which is
- * the page clickjacking actually matters on.
+ * Every exit below goes through it — ten of them: three 401s, three redirects,
+ * the 404 rewrite, and three pass-throughs (the dev bypass, the public branch
+ * and the admin success path). Attaching headers to only the public branch
+ * would leave /admin without frame-ancestors, which is the page clickjacking
+ * actually matters on.
+ *
+ * That sentence said "several exits … two 401s" while there were ten and three.
+ * Count rather than trusting it:
+ *
+ *   awk '/^export async function middleware/,/^}$/' src/middleware.ts \
+ *     | grep -cE '^\s+return '            # every exit
+ *   awk '/^export async function middleware/,/^}$/' src/middleware.ts \
+ *     | grep -cE '^\s+return secured\('   # must equal it
  *
  * Note this cannot reach /media, _next/static or _next/image: the matcher
  * excludes them. /media sets its own headers in its route handler.
