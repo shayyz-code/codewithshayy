@@ -52,8 +52,15 @@ its own error message, and the hint under both upload forms
 derived from the constant.
 
 `scripts/smoke.sh` uploads a 2 MB image through the real action and asserts it
-lands, but **only where the admin is reachable** — CI has no `.dev.vars` and
-takes the confinement branch, so that assertion is local.
+lands, then a 6 MB one and asserts the app's own message is what comes back —
+**in CI as well as locally**. It boots a second worker with
+`--var ADMIN_LOCAL_BYPASS:1`, which overrides `.dev.vars`, so nothing about the
+environment decides which half of the test runs.
+
+It used to branch on whether `.dev.vars` existed, and CI has none, so CI ran no
+upload assertion at all. Deleting the `experimental` block above would have gone
+green through CI and broken every upload in production — the failure this whole
+section exists for, invisible to the test written for it.
 
 Admin uploads go through `src/data/projects/media.ts`. The key embeds a hash of
 the content — `projects/<slug>-<hash8>.<ext>` — because `/media` serves objects
