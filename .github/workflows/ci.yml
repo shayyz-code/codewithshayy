@@ -34,28 +34,33 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
 
+      # Pure functions only — the admin form helpers and the media-key
+      # mapping. Everything needing a binding is covered by the smoke test in
+      # the other job. Verified to reject: a failing assertion exits 1, and so
+      # does a run that collects no test files, so this cannot pass vacuously.
+      - run: pnpm test
+
       - name: Build
-        run: pnpm build | tee build.log
+        run: pnpm build
 
       # The highest-value assertion here. A route that reads D1 must be
       # dynamic: getCloudflareContext resolves to *local* bindings during
       # static generation, so a prerendered data route bakes whatever database
       # the build machine had into the deployed output. Nothing surfaces that
-      # until production serves empty data.
+      # until production serves empty data — every route still returns 200.
       #
-      # Written so that missing output fails too — if the build format ever
-      # changes, this must break loudly rather than pass vacuously.
+      # This reads the build manifests rather than grepping the route table.
+      # The previous version matched
+      #   ^[├└┌│][^/]*ƒ ${route}$
+      # for three literal paths, and could not be extended to the rest without
+      # breaking: `/projects/[slug]` puts `[slug]` into an extended regex as a
+      # character class, so `ƒ /projects/s` would satisfy it. It now covers
+      # every D1-backed route, and a new one that is not guarded fails the job.
+      #
+      # Negative-tested: with force-dynamic removed from
+      # src/app/projects/page.tsx the build succeeds and this step rejects.
       - name: Assert D1 routes are dynamic
-        run: |
-          for route in / /me /projects; do
-            if ! grep -qE "^[├└┌│][^/]*ƒ ${route}\$" build.log; then
-              echo "::error::${route} is not marked ƒ (Dynamic) in the build output."
-              echo "Either force-dynamic was dropped, or the build output format changed."
-              grep -E '^[├└┌│]' build.log || true
-              exit 1
-            fi
-          done
-          echo "/, /me and /projects are all dynamic"
+        run: node scripts/check-dynamic-routes.mjs
 
   worker:
     name: workerd smoke test
