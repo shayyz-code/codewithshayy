@@ -14,9 +14,10 @@ export const metadata: Metadata = {
 export default async function PageAdminSettings({
   searchParams,
 }: {
-  // The image actions redirect back here with ?error=… and the field it came
-  // from, since there are two image forms and a message under the wrong one
-  // reads as a different upload having failed.
+  // The image actions and saveSettingsAction all redirect back here with
+  // ?error=… and the field it came from — one of the two image forms, or
+  // "form" for the text form's own validation. A message under the wrong one
+  // reads as a different thing having failed.
   searchParams: Promise<{ error?: string | string[]; field?: string | string[] }>
 }) {
   // `row` is null until the first save; `effective` is what the site currently

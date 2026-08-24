@@ -17,14 +17,20 @@ export default async function PageAdminEdit({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  // The image actions redirect back here with ?error=… when they fail. They
-  // have no other way to report: the forms are server components, and a throw
-  // renders the error boundary with the message stripped.
-  searchParams: Promise<{ error?: string | string[] }>
+  // Both the image actions and updateProjectAction redirect back here with
+  // ?error=… when they fail. They have no other way to report: the forms are
+  // server components, and a throw renders the error boundary with the message
+  // stripped. `field=form` says which of the two it was — this page renders an
+  // image form and a text form, and a message under the wrong one reads as a
+  // different thing having failed.
+  searchParams: Promise<{ error?: string | string[]; field?: string | string[] }>
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams])
   const project = await getAdminProject(id)
   if (!project) notFound()
+
+  const error = firstParam(query.error)
+  const isForm = firstParam(query.field) === "form"
 
   return (
     <main className="min-h-screen">
@@ -32,7 +38,8 @@ export default async function PageAdminEdit({
         project={project}
         action={updateProjectAction.bind(null, id)}
         heading={`Edit: ${project.title}`}
-        mediaError={firstParam(query.error)}
+        mediaError={isForm ? null : error}
+        formError={isForm ? error : null}
       />
     </main>
   )

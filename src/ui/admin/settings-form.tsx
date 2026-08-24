@@ -31,9 +31,13 @@ export default function SettingsForm({
 }: {
   row: Row | null
   effective: SiteSettings
-  /** Why the last image action failed, from ?error. See failMedia. */
+  /** Why the last action failed, from ?error. See `fail` in actions.ts. */
   error?: string | null
-  /** Which of the two image forms it came from, so it appears under that one. */
+  /**
+   * Which form it came from — one of the two image fields, or "form" for the
+   * text form's own validation. A message under the wrong one reads as a
+   * different thing having failed.
+   */
   errorField?: string | null
 }) {
   return (
@@ -70,18 +74,12 @@ export default function SettingsForm({
       />
 
       <form action={saveSettingsAction} className="flex flex-col gap-5">
-        {/* The image columns are written by their own actions. Carrying them
-            through as hidden fields stops a text save from wiping them. */}
-        <input
-          type="hidden"
-          name="developerMediaKey"
-          value={row?.developerMediaKey ?? ""}
-        />
-        <input
-          type="hidden"
-          name="backgroundMediaKey"
-          value={row?.backgroundMediaKey ?? ""}
-        />
+        {/* No hidden media inputs. They used to carry the two image keys
+            through so a text save would not wipe them, which worked and cost a
+            lost update: save from a page rendered before an upload and the
+            stale key went back. saveSettings writes the text columns only now,
+            so there is nothing to carry. */}
+        <FieldError message={errorField === "form" ? error : null} />
 
         <Group title="Hero" />
         <Field name="heroEyebrow" label="Eyebrow" row={row} effective={effective} />
