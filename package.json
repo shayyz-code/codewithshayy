@@ -19,7 +19,8 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply codewithshayy --local",
-    "db:migrate:remote": "wrangler d1 migrations apply codewithshayy --remote",
+    "db:backup": "./scripts/backup.sh",
+    "db:migrate:remote": "./scripts/backup.sh && wrangler d1 migrations apply codewithshayy --remote",
     "db:seed": "node scripts/build-seed.mjs > seeds/seed.sql && wrangler d1 execute codewithshayy --local --file seeds/seed.sql",
     "db:studio": "drizzle-kit studio",
     "posts:manifest": "node scripts/generate-posts-manifest.mjs"
