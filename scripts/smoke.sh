@@ -577,6 +577,111 @@ for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
   fi
 
   rm -rf "$FIXTURES"
+
+  # ------------------------------------------------------------------ #
+  # The write boundary rejects a scheme that would execute on click.
+  #
+  # siteUrl and repoUrl are stored once and rendered as an href in four
+  # places — the card, the detail page, the JSON API and the JSON-LD — so
+  # the check belongs at the write, and this is what proves it is there.
+  #
+  # Two assertions, not one. That it is refused is half: a server action that
+  # throws reaches src/app/error.tsx with the message stripped in production,
+  # so an admin would see a blank 500 and no reason. The message has to come
+  # back on the form, which is what ?error=&field=form carries.
+  echo "admin write boundary"
+
+  # Hidden fields of the form holding the slug input — the main project form,
+  # as opposed to the image form action_fields() finds.
+  form_fields() {
+    curl -s --max-time 30 "$BASE$1" | python3 -c '
+import sys, re, html
+doc = sys.stdin.read()
+for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
+    if "name=\"slug\"" in form:
+        for inp in re.findall(r"<input[^>]*type=\"hidden\"[^>]*>", form):
+            name = re.search(r"name=\"([^\"]+)\"", inp).group(1)
+            value = re.search(r"value=\"([^\"]*)\"", inp)
+            print(name + "=" + (html.unescape(value.group(1)) if value else ""))
+        break
+'
+  }
+
+  FORM_ARGS=()
+  while IFS= read -r field; do
+    [[ -n "$field" ]] && FORM_ARGS+=(-F "$field")
+  done < <(form_fields /admin/ci-bare)
+
+  if [[ ${#FORM_ARGS[@]} -eq 0 ]]; then
+    echo "  FAIL  /admin/ci-bare               no action fields; nothing measured"
+    FAILED=1
+  else
+    XSS=$(curl -s -o /dev/null -D - -w 'HTTPCODE=%{http_code}' --max-time 30 \
+      -X POST "$BASE/admin/ci-bare" "${FORM_ARGS[@]}" \
+      -F "slug=ci-fixture-bare" \
+      -F "title=CI Fixture (bare)" \
+      -F "description=Nullable columns are all NULL, so nothing should render a dead link." \
+      -F "siteUrl=javascript:alert(1)" \
+      -F "published=on" 2>/dev/null | tr -d '\r')
+
+    LOC=$(sed -n 's/^[Ll]ocation: //p' <<<"$XSS" | tail -1)
+
+    # A successful save redirects to /admin. Anything landing there means the
+    # javascript: URL was written.
+    if [[ "$LOC" == *"/admin/ci-bare"*"error="* ]]; then
+      echo "  ok    /admin/ci-bare               javascript: URL refused"
+    else
+      echo "  FAIL  /admin/ci-bare               javascript: URL was accepted (-> ${LOC:-none})"
+      FAILED=1
+    fi
+
+    # And the reason is legible rather than a blank 500. Fetch the page the
+    # action actually redirected to, not a hand-written approximation of it —
+    # an assertion against a URL this script composed would pass even if the
+    # action redirected somewhere else entirely.
+    #
+    # Location may be absolute or path-only depending on how Next builds it, so
+    # normalise rather than assuming. An earlier version did
+    # "$BASE${LOC#*://*/}", which drops the leading slash and yields
+    # localhost:8788admin/... — that curl fails, and the check fell through to
+    # a synthetic URL and passed without ever reading the redirect.
+    case "$LOC" in
+      http*) ERR_URL="$LOC" ;;
+      /*)    ERR_URL="$BASE$LOC" ;;
+      *)     ERR_URL="$BASE/$LOC" ;;
+    esac
+
+    if [[ -z "$LOC" ]]; then
+      echo "  FAIL  /admin/ci-bare               no Location; nothing to follow"
+      FAILED=1
+    elif curl -s --max-time 30 "$ERR_URL" | grep -qF 'role="alert"'; then
+      echo "  ok    /admin/ci-bare               the refusal renders on the form"
+    else
+      echo "  FAIL  /admin/ci-bare               ?error is not rendered; a blank 500"
+      FAILED=1
+    fi
+
+    # The row must be untouched — a rejected save is not a partial save.
+    if curl -s --max-time 30 "$BASE/api/v1/projects/ci-fixture-bare" \
+         | grep -qF 'javascript:'; then
+      echo "  FAIL  /api/v1/projects            a javascript: URL reached the API"
+      FAILED=1
+    else
+      echo "  ok    /api/v1/projects            no javascript: URL stored"
+    fi
+
+    # Restore, the way the upload block does: a run that fails must still
+    # leave D1 where it started, or the next one measures the wreckage of the
+    # last. An empty siteUrl is NULL, which is what the fixture holds. This is
+    # a no-op on a passing run — nothing was written.
+    curl -s -o /dev/null --max-time 30 -X POST "$BASE/admin/ci-bare" \
+      "${FORM_ARGS[@]}" \
+      -F "slug=ci-fixture-bare" \
+      -F "title=CI Fixture (bare)" \
+      -F "description=Nullable columns are all NULL, so nothing should render a dead link." \
+      -F "siteUrl=" \
+      -F "published=on" 2>/dev/null
+  fi
 else
   echo "::error::admin unreachable with the bypass on; no upload assertion ran"
   FAILED=1

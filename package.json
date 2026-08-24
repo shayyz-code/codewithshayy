@@ -13,6 +13,7 @@
     "build": "./scripts/check-public.sh && node scripts/generate-posts-manifest.mjs && next build",
     "start": "next start",
     "lint": "eslint .",
+    "test": "vitest run",
     "typecheck": "node scripts/generate-posts-manifest.mjs && tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
