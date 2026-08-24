@@ -76,6 +76,17 @@ that what moved is still *true*.
 Do not consolidate the rules back into one file to "tidy up". The split is
 load-bearing, not cosmetic.
 
+Seven rules today: `content`, `data`, `media`, `routes`, `security`, `ui`, and
+`runtimes` — which holds the "can we write this in Rust / Bun / Go" research and
+is scoped to `wrangler.jsonc`, `open-next.config.ts` and `package.json`. It
+lived here until this file went over 200 lines. That move traded reach for
+budget: it no longer loads on every task, so if the Rust question gets
+re-researched anyway, move it back and cut something else.
+
+```bash
+ls .claude/rules/          # do not trust the list above; derive it
+```
+
 ## Commands
 
 Package manager is **pnpm**.
@@ -86,10 +97,16 @@ pnpm build        # check-public + manifest + next build (Node, NOT production)
 pnpm start        # next start (needs a prior build)
 pnpm lint         # eslint .
 pnpm typecheck    # posts manifest, then tsc --noEmit
+pnpm test         # vitest run — pure functions only, no bindings
 pnpm preview      # build the worker + run it under local workerd  <-- the real check
 pnpm deploy       # build + deploy to Cloudflare (needs auth)
 pnpm cf-typegen   # regenerate cloudflare-env.d.ts from wrangler.jsonc
+pnpm db:backup    # dump production D1 + the R2 it references into backups/
 ```
+
+`db:migrate:remote` runs `scripts/backup.sh` first: content lives only in D1, and a
+migration here once blanked every page while all routes returned 200. Restore
+order and the nightly job are in `.claude/rules/data.md`.
 
 **`pnpm build` passing does not mean the app works.** Production runs on Cloudflare Workers via `@opennextjs/cloudflare`, and `workerd` forbids things Node allows. Always finish with `pnpm preview`. Errors there do **not** appear on stdout — query them:
 
@@ -104,18 +121,25 @@ The store lives in `.wrangler/` and **persists across restarts**, so filter by `
 
 Run `pnpm cf-typegen` after every `wrangler.jsonc` binding change, or `env.X` will typecheck against a binding that doesn't exist at runtime.
 
-CI runs on every push and PR (`.github/workflows/ci.yml`): lint, typecheck and
-`next build` in one job, then a second that bundles for workerd, sets up a local
-D1 from `seeds/ci.sql`, and runs `scripts/smoke.sh` — the same assertions a local
-run makes, since it no longer branches on the environment. No secrets needed —
-workerd, miniflare and local D1 all run unauthenticated.
+CI runs on every push and PR (`.github/workflows/ci.yml`): lint, typecheck,
+`pnpm test`, `next build` and `check-dynamic-routes` in one job, then a second
+that bundles for workerd, sets up a local D1 from `seeds/ci.sql`, and runs
+`scripts/smoke.sh` — the same assertions a local run makes, since it no longer
+branches on the environment. Neither job needs secrets: workerd, miniflare and
+local D1 all run unauthenticated. `backup.yml` is the one workflow that does,
+and it is scheduled rather than on push.
 
-Two assertions there are load-bearing. The build output must mark `/`, `/me` and
-`/projects` as `ƒ (Dynamic)`; a regression to `○ (Static)` bakes the build
-machine's database into the deploy and nothing surfaces it until production
-serves empty data. And the smoke test catches what `next build` cannot — a
-filesystem read on a dynamic route compiles cleanly and 500s under workerd.
-There are no unit tests. Both jobs pass clean on `main`; keep them that way.
+Two assertions there are load-bearing. `scripts/check-dynamic-routes.mjs` fails
+if a D1-backed route was prerendered, or if a new one is not guarded — how, and
+the two instruments that look right and are not, is in `.claude/rules/routes.md`.
+And the smoke test catches what `next build` cannot: a filesystem read on a
+dynamic route compiles cleanly and 500s under workerd. `pnpm test` is pure
+functions only; anything needing a binding goes in `smoke.sh`. Both jobs pass
+clean on `main`; keep them that way.
+
+The `pnpm test` and `check-dynamic-routes` steps are newer than the last `main`
+run, so confirm rather than assuming that sentence still holds:
+`gh run list --branch main --limit 1`.
 
 ESLint uses flat config in `eslint.config.mjs`. `eslint-config-next` ships a native flat-config array as of Next 15, so **no `@eslint/eslintrc` / `FlatCompat` shim is needed** — importing `eslint-config-next/core-web-vitals` pulls in the base `next` config and `next/typescript` too.
 
@@ -167,32 +191,6 @@ Keep every measurement, error string and verification result — that is the par
 worth having in the history. Recommendations and open questions belong in
 conversation with the author instead. `.github/PULL_REQUEST_TEMPLATE.md` and
 `.github/ISSUE_TEMPLATE/` carry the format.
-
-### Runtimes on Workers, so this is not researched twice
-
-| runtime | status |
-|---|---|
-| JS / TS, Python, Rust | native |
-| **Bun** | cannot run — Workers is workerd/V8, Bun is a separate runtime |
-| **Go** | WebAssembly only, via TinyGo |
-| Bun or Go natively | only in Containers: Workers Paid, billed per 10ms active, one Durable Object each, scale-to-zero so cold starts |
-
-Rust is the one native option that is not JS, and `workers-rs` covers D1 and R2
-— but **not the Images binding**, which `/media` depends on.
-
-Check the capability, not the ticket:
-
-```bash
-curl -s https://raw.githubusercontent.com/cloudflare/workers-rs/main/worker/src/env.rs \
-  | grep -c 'fn images('     # 0 as of 2026-08-12
-```
-
-[workers-rs#717](https://github.com/cloudflare/workers-rs/issues/717) asked for
-it and was closed as **completed on 2025-08-04 without the binding arriving** —
-`env.rs` still exposes `d1`, `bucket`, `kv`, `ai`, `hyperdrive`, `secret_store`
-and no `images()`. An earlier version of this file said that issue closing was
-the green light for a Rust rewrite, which would have given the wrong answer for a
-year. That grep returning non-zero is the signal.
 
 ### Firebase cannot run on the server. This is not a preference.
 

@@ -59,9 +59,44 @@ the build there comes from the first half of the script, not the second.
 cat node_modules/@opennextjs/cloudflare/dist/cli/commands/preview.js
 ```
 
+## `framer-motion` — reduced motion
+
+Verified **2026-08-24** against **framer-motion 13.1.1** / **motion-dom 13.1.1**.
+Supports the reduced-motion block in `.claude/rules/ui.md` and the comment in
+`src/ui/layout/motion-provider.tsx`.
+
+- `MotionConfig reducedMotion="user"` is read in `VisualElement.mount()`
+  (`motion-dom/dist/es/render/VisualElement.mjs`, branch at the
+  `reducedMotionConfig === "never" / "always"` lines). **Client-side only**, so
+  server output cannot depend on it — which is the whole reason it is safe in a
+  root layout.
+- What it suppresses: `animation/interfaces/visual-element-target.mjs` does
+  `shouldReduceMotion && positionalKeys.has(key) ? { type: false } : transition`.
+  `positionalKeys` is `width, height, top, left, right, bottom` plus
+  `transformPropOrder`. **Opacity is not positional, so fades still run** and
+  only the travel becomes instant.
+- **`useReducedMotion()` is not a substitute and will cause a hydration
+  mismatch.** It is literally `useState(prefersReducedMotion.current)`, captured
+  at first render; `initPrefersReducedMotion()` returns early with no `window`,
+  so the server sees `null` and a client with the preference set sees `true`.
+  Worth pinning because framer-motion's own JSDoc two lines above claims the
+  hook "actively responds to changes" — the implementation does not, and there
+  is a `TODO` in the source saying so.
+
+```bash
+node -e "console.log(require('./node_modules/framer-motion/package.json').version)"
+grep -rn 'reducedMotionConfig ===' node_modules/.pnpm/motion-dom@*/node_modules/motion-dom/dist/es/render/VisualElement.mjs
+```
+
 ## Older, due for re-verification
 
-Pinned only to 2026-08-12 in [[doc-truth-verified-2026-08-12]]: Cloudflare
-Containers pricing, and `workers-rs` exposing no Images binding. See
-[[doc-truth-rot-hotspots]] for why the `workers-rs` *citation* needs the grep
-rather than the issue state.
+Cloudflare Containers pricing is still pinned only to 2026-08-12 in
+[[doc-truth-verified-2026-08-12]].
+
+`workers-rs` was **re-derived 2026-08-24**: `grep -c 'fn images('` over
+`worker/src/env.rs` returns 0, and the 16 bindings it does expose were checked
+one at a time — `ai, analytics_engine, assets, bucket, d1, durable_object,
+dynamic_dispatcher, hyperdrive, kv, queue, rate_limiter, secret_store, secret,
+send_email, service, var`. That research now lives in
+`.claude/rules/runtimes.md`, not `AGENTS.md`. See [[doc-truth-rot-hotspots]] for
+why the *citation* needs the grep rather than the issue state.
