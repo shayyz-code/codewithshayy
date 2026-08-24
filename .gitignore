@@ -38,6 +38,10 @@ next-env.d.ts
 # One-off Firestore archives (contains PII) — keep local, back up outside the repo
 /.archive/
 
+# Production dumps from scripts/backup.sh. Same PII shape as .archive/, and the
+# scheduled copy lives in R2 — see .github/workflows/backup.yml.
+/backups/
+
 # Cloudflare Workers build output + local wrangler/miniflare state
 /.open-next/
 /.wrangler/
