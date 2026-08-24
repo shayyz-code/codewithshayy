@@ -38,9 +38,14 @@ export default function ProjectDetail({ project }: { project: Project }) {
                 </PrimaryBtn>
               )}
               {project.repoUrl && (
-                <Link className="text-sky-600" href={project.repoUrl}>
+                <a
+                  className="text-sky-600"
+                  href={project.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Github &gt;
-                </Link>
+                </a>
               )}
             </div>
           )}

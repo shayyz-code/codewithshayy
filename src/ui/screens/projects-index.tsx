@@ -1,7 +1,6 @@
 "use client"
 
 import { motion } from "framer-motion"
-import Link from "next/link"
 import type { Project } from "@/data/projects"
 import ProjectGrid from "@/ui/sections/project-grid"
 
@@ -19,12 +18,14 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
         </h1>
         <p className="font-body text-center">
           See all my projects at{" "}
-          <Link
+          <a
             className="text-sky-600"
             href="https://www.github.com/shayyz-code/"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             github.com/shayyz-code
-          </Link>
+          </a>
         </p>
       </motion.header>
 

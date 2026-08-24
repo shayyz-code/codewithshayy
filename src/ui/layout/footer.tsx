@@ -21,12 +21,14 @@ export default function Footer() {
           and grepping for anything this file emits. */}
       <p className="">
         Find an issue with this page?{" "}
-        <Link
+        <a
           href="https://github.com/shayyz-code/codewithshayy"
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-sky-600 ml-2 transition-all ease-out hover:text-blue-600"
         >
           Fix it on GitHub
-        </Link>
+        </a>
       </p>
       <ul className="flex justify-center flex-wrap gap-5">
         {socialLinks.map((link, index) => (
@@ -34,7 +36,9 @@ export default function Footer() {
             key={index}
             className="transform transition-all ease-out duration-300 hover:text-white dark:hover:text-secondary"
           >
-            <Link href={link.href}>{link.icon}</Link>
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
+              {link.icon}
+            </a>
           </li>
         ))}
       </ul>
@@ -65,12 +69,13 @@ export default function Footer() {
       </p>
       <Link
         href="/"
+        aria-label="Code w/ Shayy — home"
         className="flex justify-center my-6 transition ease-out transform rotate-1  hover:scale-110"
       >
         <Image
           src="/logo.webp"
           unoptimized
-          alt="logo"
+          alt=""
           width={50}
           height={50}
           className="shadow-2xl shadow-secondary"

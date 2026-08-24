@@ -19,9 +19,9 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
       transition={{ duration: 1.5, type: "spring" }}
       className="flex flex-wrap gap-10 justify-center pb-5"
     >
-      {projects.map((project) => (
+      {projects.map((project, index) => (
         <li key={project.id}>
-          <ProjectCard data={project} />
+          <ProjectCard data={project} priority={index === 0} />
         </li>
       ))}
     </motion.ul>
