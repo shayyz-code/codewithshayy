@@ -13,9 +13,6 @@ export default function StayTuned() {
       <h3 className="text-base">
         I Make Coding Videos On a Whim. So, Stay Tuned &lt;/🍓&gt;
       </h3>
-      {/* <PrimaryBtn href="/kids" size="sm">
-        Go to
-      </PrimaryBtn> */}
     </motion.div>
   )
 }
