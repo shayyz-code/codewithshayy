@@ -29,11 +29,9 @@
         "./public/*"
       ]
     },
-    "target": "ES2017"
+    "target": "ES2022"
   },
   "include": [
-    "video.d.ts",
-    "video.d.ts",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
