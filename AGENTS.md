@@ -106,15 +106,15 @@ Run `pnpm cf-typegen` after every `wrangler.jsonc` binding change, or `env.X` wi
 
 CI runs on every push and PR (`.github/workflows/ci.yml`): lint, typecheck and
 `next build` in one job, then a second that bundles for workerd, sets up a local
-D1 from `seeds/ci.sql`, and runs `scripts/smoke.sh` — 70 assertions, the same 70
-it runs locally. No secrets — workerd, miniflare and local D1 run unauthenticated.
+D1 from `seeds/ci.sql`, and runs `scripts/smoke.sh` — the same assertions a local
+run makes, since it no longer branches on the environment. No secrets needed —
+workerd, miniflare and local D1 all run unauthenticated.
 
 Two assertions there are load-bearing. The build output must mark `/`, `/me` and
 `/projects` as `ƒ (Dynamic)`; a regression to `○ (Static)` bakes the build
 machine's database into the deploy and nothing surfaces it until production
 serves empty data. And the smoke test catches what `next build` cannot — a
 filesystem read on a dynamic route compiles cleanly and 500s under workerd.
-
 There are no unit tests. Both jobs pass clean on `main`; keep them that way.
 
 ESLint uses flat config in `eslint.config.mjs`. `eslint-config-next` ships a native flat-config array as of Next 15, so **no `@eslint/eslintrc` / `FlatCompat` shim is needed** — importing `eslint-config-next/core-web-vitals` pulls in the base `next` config and `next/typescript` too.
