@@ -140,12 +140,25 @@ expect_body() {
 # bounded by that phase's start, because the store is shared on disk and a
 # single query at the end would silently drop everything phase one logged.
 error_log_check() {
-  local errors
-  errors=$(curl -s -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \
+  local raw errors
+  raw=$(curl -s --max-time 30 -X POST "$BASE/cdn-cgi/local/explorer/api/local/observability/query" \
     -H 'Content-Type: application/json' \
-    -d '{"sql":"SELECT count(*) FROM logs WHERE level=\"error\" AND ts_ms > '"$STARTED_MS"'"}' 2>/dev/null \
-    | grep -oE '\[\[[0-9]+\]\]' | grep -oE '[0-9]+' | head -1)
-  errors="${errors:-0}"
+    -d '{"sql":"SELECT count(*) FROM logs WHERE level=\"error\" AND ts_ms > '"$STARTED_MS"'"}' 2>/dev/null)
+  errors=$(grep -oE '\[\[[0-9]+\]\]' <<<"$raw" | grep -oE '[0-9]+' | head -1)
+
+  # This defaulted an empty result to 0 and printed ok. A dead port, a wrong
+  # $BASE and a changed response shape all produce an empty result, and running
+  # the old pipeline against a closed port did print "no errors". The store is
+  # the only place a worker error appears at all — `Body exceeded 1 MB limit.`
+  # reached no page and no stdout — so a check that cannot read it has taken no
+  # measurement, and must not report a pass.
+  if [[ -z "$errors" ]]; then
+    echo "  FAIL  observability store unreadable; errors not measured"
+    printf '        got (first 200 chars): %s\n' "$(tr -d '\n' <<<"$raw" | cut -c1-200)"
+    FAILED=1
+    return
+  fi
+
   if [[ "$errors" == "0" ]]; then
     echo "  ok    no errors in the observability store"
   else
@@ -180,11 +193,16 @@ expect /projects/does-not-exist 404
 # Wrangler pins the request host to the first configured route, so every
 # request under preview arrives as codewithshayy.com — which is not the admin
 # host, and with the bypass off that is what /admin must 404 on. This used to
-# read .dev.vars and assert whichever answer that implied, which made it vacuous
-# in one environment and absent from the other.
+# read .dev.vars and assert whichever answer that implied: real in CI, absent
+# locally, and never in the same run as the upload block below.
+#
+# Both paths have to be ones that 200 with the bypass on, or they are not
+# measuring confinement. /admin/dashboard was here and is not such a path — it
+# routes to /admin/[id], which notFound()s on a missing project, so it returns
+# 404 either way. /admin/new is asserted 200 in phase two.
 echo "admin is confined to the admin hostname"
 expect /admin 404
-expect /admin/dashboard 404
+expect /admin/new 404
 
 echo "redirects"
 expect /blogs 308
@@ -380,6 +398,9 @@ expect_body /sitemap.xml "/docs"
 #
 # Reaching the admin needs the bypass on and asserting it 404s needs it off, so
 # this is a second worker rather than a branch — and both now run everywhere.
+# Before the kill, so the window it covers ends here. Anything the worker logs
+# while shutting down falls between this and phase two's STARTED_MS and is
+# attributed to neither.
 echo "worker error log (bypass off)"
 error_log_check
 

@@ -53,8 +53,10 @@ whichever apply.
    overridden" when they were present below. Substitute: read the whole file, or
    grep the whole file for the specific thing claimed absent.
 8. **An empty response is not an absent string.** `scripts/smoke.sh` kills
-   `workerd` from its `EXIT` trap, so any `curl` after it returns nothing —
-   which greps identically to the string being gone. This produced "the email is
+   `workerd` from its `EXIT` trap *and* mid-run, in `shutdown` between its two
+   boots — so `$PORT` is dead for the second phase, and any `curl` against a
+   stopped worker returns nothing, which greps identically to the string being
+   gone. This produced "the email is
    absent from all five pages" against a server that was not running.
    Substitute: assert the status code in the same command
    (`curl -s -w '%{http_code}'`), and treat `000` as *no measurement taken*

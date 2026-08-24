@@ -46,7 +46,8 @@ honest check, and CI runs both on every push.
 `smoke.sh` boots the worker twice: once with the admin bypass off, where
 `/admin` has to 404 because the admin belongs to one hostname, and once with it
 on, where the upload actions are reachable at all. Deciding that from whether
-`.dev.vars` existed meant CI ran neither half of the pair.
+`.dev.vars` existed meant CI ran the first half and never the second, and a
+local run the reverse — the two were never measured together.
 
 Errors in the worker do not print to stdout. They go to a local observability
 store; `AGENTS.md` has the query — `CLAUDE.md` is a one-line import of it.
