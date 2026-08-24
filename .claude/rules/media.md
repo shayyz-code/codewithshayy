@@ -54,8 +54,14 @@ derived from the constant.
 `scripts/smoke.sh` uploads a 2 MB image through the real action and asserts it
 lands, then a 6 MB one and asserts the app's own message is what comes back —
 **in CI as well as locally**. It boots a second worker with
-`--var ADMIN_LOCAL_BYPASS:1`, which overrides `.dev.vars`, so nothing about the
-environment decides which half of the test runs.
+`--var ADMIN_LOCAL_BYPASS:1`, so nothing about the environment decides which
+half of the test runs.
+
+The two `--var` flags do different jobs, and only one of them is an override.
+Phase two's `:1` *supplies* the bypass where nothing else would — CI has no
+`.dev.vars` at all. Phase one's `:0` *overrides* a `.dev.vars` that says `1`,
+which only ever happens locally. Drop either and the failure is in the other
+environment from the one you are looking at.
 
 It used to branch on whether `.dev.vars` existed, and CI has none, so CI ran no
 upload assertion at all. Deleting the `experimental` block above would have gone

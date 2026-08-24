@@ -33,6 +33,6 @@ and did not work. Delete if there is nothing.
 What was actually run, and what it returned. Prefer output over adjectives.
 
   pnpm lint && pnpm typecheck   -> 0
-  pnpm preview + scripts/smoke.sh -> 23 assertions pass
+  pnpm preview + scripts/smoke.sh -> 70 assertions pass
   live: /projects 200, 6 cards, 0 broken images
 -->
