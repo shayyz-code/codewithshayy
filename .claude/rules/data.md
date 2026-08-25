@@ -39,6 +39,14 @@ bucket. Content lives only in D1 — every project, every write-up, and the whol
 of the site's copy — and a migration here once blanked every page while all
 routes returned 200.
 
+The bucket exists and carries one lifecycle rule, `expire-after-90-days`, read
+back on 2026-08-24 — without it the bucket grows without bound. The scheduled
+run additionally needs two repo secrets: `CLOUDFLARE_API_TOKEN`, scoped to D1
+read, R2 read on `codewithshayy-media` and R2 write on `codewithshayy-backups`,
+and `CLOUDFLARE_ACCOUNT_ID`. Wrangler cannot mint a scoped token, so that is a
+dashboard step; the workflow fails until both are set. `pnpm db:backup` and
+`db:migrate:remote` use the local wrangler session and need neither.
+
 **Restore is two commands, and the order is load-bearing:**
 
 ```bash
@@ -68,7 +76,14 @@ batches was never tested, and the failure needs no such explanation.
 
 Hence `--no-data` and `--no-schema` into two files. Round-tripped **against
 local D1** on 2026-08-24: 3 projects / 2 tags / 2 project_tags out, the same
-counts and slugs back into a fresh database. The remote half has not been run.
+counts and slugs back into a fresh database.
+
+Then against **production** the same day: 7 projects / 21 tags / 29
+project_tags / 1 settings row out, and 8 of 8 referenced media keys fetched
+with no dangling key. Restored into a fresh local database at identical counts,
+with the settings row's `hero`, `bio`, `email` and both media keys non-null —
+row counts alone would not have caught the partial-row failure this backup
+exists to survive.
 
 The media set is derived from D1 rather than listed from the bucket, because
 **`wrangler r2 object` has no listing command — only `get`, `put` and

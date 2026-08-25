@@ -53,18 +53,21 @@ echo "backup: $DB $TARGET -> $OUT"
 
 # ---------------------------------------------------------------- D1
 
-# `wrangler d1 export` emits tables in alphabetical order, and the single-file
-# dump it produces **does not restore**. Measured: `project_tags` is written
-# before `tags`, so replaying it fails at the first row with
+# The single-file dump `wrangler d1 export` produces **does not restore**.
+# Measured: `project_tags` is written before `tags`, so replaying it fails at
+# the first row with
 #   no such table: main.tags: SQLITE_ERROR
-# The `PRAGMA defer_foreign_keys=TRUE` at the head of that file does not save
-# it — `d1 execute --file` replays in batches, and the pragma does not survive
-# past the first one.
+# The order is not alphabetical — `settings` sorts before `tags` and is written
+# after it — and is not documented anywhere, so derive it rather than predict
+# it. The `PRAGMA defer_foreign_keys=TRUE` at the head of that file does not
+# save it: the pragma is cleared at the end of every transaction and the replay
+# autocommits per statement.
 #
-# Exporting schema and data separately does restore, verified against a fresh
-# *local* database: 3/2/2 rows out, 3/2/2 rows back, same slugs. The remote
-# half has not been run. So two files, and a restore is two commands in this
-# order.
+# Exporting schema and data separately does restore. Verified against a fresh
+# local database (3/2/2 rows out, 3/2/2 back, same slugs) and then against
+# production on 2026-08-24: 7 projects / 21 tags / 29 project_tags / 1 settings
+# row and 8 of 8 media objects, restored at identical counts with the settings
+# row intact. So two files, and a restore is two commands in this order.
 SCHEMA="$OUT/d1-schema.sql"
 DATA="$OUT/d1-data.sql"
 
