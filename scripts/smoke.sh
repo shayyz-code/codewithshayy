@@ -616,6 +616,15 @@ for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
     echo "  FAIL  /admin/ci-bare               no action fields; nothing measured"
     FAILED=1
   else
+    # The whole row as the API projects it, before anything is written. The
+    # restore below replays a fixed set of fields, so it round-trips only while
+    # ci-bare's other columns stay NULL and it has no tags. Comparing the row to
+    # itself afterwards makes that a checked assumption instead of a standing
+    # bet: give the fixture a role, a year, a body or a tag and this fails
+    # loudly rather than quietly clearing it. The projection carries no
+    # timestamp, so a byte comparison is stable.
+    BARE_BEFORE=$(curl -s --max-time 30 "$BASE/api/v1/projects/ci-fixture-bare")
+
     XSS=$(curl -s -o /dev/null -D - -w 'HTTPCODE=%{http_code}' --max-time 30 \
       -X POST "$BASE/admin/ci-bare" "${FORM_ARGS[@]}" \
       -F "slug=ci-fixture-bare" \
@@ -681,6 +690,16 @@ for form in re.findall(r"<form[^>]*>.*?</form>", doc, re.S):
       -F "description=Nullable columns are all NULL, so nothing should render a dead link." \
       -F "siteUrl=" \
       -F "published=on" 2>/dev/null
+
+    BARE_AFTER=$(curl -s --max-time 30 "$BASE/api/v1/projects/ci-fixture-bare")
+    if [[ "$BARE_BEFORE" == "$BARE_AFTER" ]]; then
+      echo "  ok    /admin/ci-bare               the fixture is back as it was"
+    else
+      echo "  FAIL  /admin/ci-bare               the restore did not round-trip"
+      echo "        before: $BARE_BEFORE"
+      echo "        after:  $BARE_AFTER"
+      FAILED=1
+    fi
   fi
 else
   echo "::error::admin unreachable with the bypass on; no upload assertion ran"
