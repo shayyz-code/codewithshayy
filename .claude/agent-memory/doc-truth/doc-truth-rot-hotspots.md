@@ -74,5 +74,67 @@ pnpm exec wrangler r2 bucket --help    # list, info, lifecycle, …   (4.125.0)
 Same shape as the `workers-rs` row: the answer is what the tool exposes today,
 not what you remember it exposing. See [[doc-truth-third-party-pins]].
 
-See [[doc-truth-verified-2026-08-12]] for what was checked clean, and
-[[doc-truth-third-party-pins]] for upstream facts with their version pins.
+Corrected 2026-08-25: the `wrangler r2` row is now right in both files, but the
+"**138 lines below**" in the sentence above is itself an undecorated integer and
+has already drifted — at `169415e` the distance was ~138, at `249418c` it is
+~145. Same disease as the row it documents.
+
+## New hotspot 2026-08-25: a conjunction measured in two configurations
+
+`.claude/rules/data.md` and `scripts/backup.sh` say a `sqlite3` restore
+*"exits 0 and silently drops every `project_tags` row"*. Neither half is wrong
+on its own; together they describe a state that does not exist. sqlite3's
+`foreign_keys` defaults to **OFF**, and the two behaviours split on it:
+
+```bash
+# defaults: exit 0, 29/29 project_tags land, nothing on stderr
+sqlite3 t.db ".read d1-schema.sql"; sqlite3 t.db ".read d1-data.sql"
+# foreign_keys=ON: exit 1, 29 lines of "FOREIGN KEY constraint failed (19)", 0 rows
+sqlite3 t.db "PRAGMA foreign_keys=ON;" ".read d1-data.sql"
+```
+
+Reproduced on sqlite3 **3.45.3** and **3.54.0**, via both `.read` and stdin.
+The silent-loss framing is what makes the warning frightening, and it is the
+part that does not reproduce: the replay is either loud or lossless.
+
+**Generalise it.** When a doc claims *"X happens and nothing tells you"*, find
+the flag the two halves depend on and re-measure both settings. A claim that is
+true only under an unstated configuration is the same shape as
+"middleware runs before bindings resolve".
+
+## New hotspot 2026-08-25: routes Next synthesises with no source file
+
+`.claude/rules/routes.md` says *"`favicon.ico` is the one output with no row in
+the `Route (app)` table"*. There are two: `/_global-error` is also compiled
+(`.next/server/app/_global-error.html`), also in both manifests, also unprinted
+— and it has no row in the route table either. `src/app/global-error.tsx` does
+not exist, so **the file-listing derive command the file recommends cannot ever
+find it**, which is the exact failure that paragraph was written to object to.
+
+```bash
+node -e "const m=require('./.next/app-path-routes-manifest.json');console.log(Object.values(m).filter(r=>r.startsWith('/_')))"
+```
+
+## New hotspot 2026-08-25: AGENTS.md's own line count
+
+`AGENTS.md` says the runtimes research *"lived here until this file went over
+200 lines"*, and `.claude/rules/runtimes.md` says the file *"had grown past its
+own 'under 200 lines' target"*. It never did — the committed maximum is **199**
+(`3cc4d33`), with a trailing newline, so `wc -l` is not undercounting. The move
+was good; the threshold that justifies it is fiction.
+
+```bash
+for c in $(git log --format=%h -- AGENTS.md); do echo "$c $(git show $c:AGENTS.md | wc -l)"; done
+```
+
+Third instance of the **any hand-maintained count** row, and the first where the
+integer is about the doc itself.
+
+Also 2026-08-25: `data.md` says the backups bucket *"carries one lifecycle
+rule"*. It carries two — `expire-after-90-days` plus R2's automatic
+`Default Multipart Abort Rule`. Derive with
+`pnpm exec wrangler r2 bucket lifecycle list codewithshayy-backups`.
+
+See [[doc-truth-verified-2026-08-12]] and [[doc-truth-verified-2026-08-25]] for
+what was checked clean, and [[doc-truth-third-party-pins]] for upstream facts
+with their version pins.

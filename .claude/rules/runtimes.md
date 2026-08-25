@@ -1,16 +1,28 @@
 ---
 paths:
   - "wrangler.jsonc"
+  - "**/wrangler.jsonc"
   - "open-next.config.ts"
+  - "**/open-next.config.ts"
   - "package.json"
+  - "**/package.json"
 ---
 
 # Runtimes on Workers, so this is not researched twice
 
-Moved here from `AGENTS.md` on 2026-08-24, which had grown past its own
-"under 200 lines" target. **The trade is real and is the reason for the move:**
-this used to load on every task and now loads only when one of the three files
-above is open. Someone asking "could we rewrite this in Rust" with no config
+Moved here from `AGENTS.md` on 2026-08-24, which had reached 199 lines against
+its own "under 200" target with more still to land. It had not breached 200 —
+the committed maximum is 199 — so the move bought headroom rather than repairing
+a violation.
+
+Each of the three files is listed twice, bare and `**/`-prefixed. Every other
+rule in `.claude/rules/` matches on a pattern containing a separator, so this is
+the first to rely on a root-level basename and nothing here demonstrates the
+loader anchors that way. The duplicate is insurance, not style; if a bare
+basename is confirmed to match, drop the `**/` half.
+
+**The trade is real and is the reason for the move:** this used to load on every
+task and now loads only when one of those files is open. Someone asking "could we rewrite this in Rust" with no config
 file open will not see it. If that happens more than once, move it back and cut
 something else instead.
 
@@ -36,10 +48,10 @@ curl -s https://raw.githubusercontent.com/cloudflare/workers-rs/main/worker/src/
 
 [workers-rs#717](https://github.com/cloudflare/workers-rs/issues/717) asked for
 it and was closed as **completed on 2025-08-04 without the binding arriving** —
-`env.rs` exposes `ai`, `analytics_engine`, `assets`, `bucket`, `d1`,
-`durable_object`, `dynamic_dispatcher`, `hyperdrive`, `kv`, `queue`,
-`rate_limiter`, `secret_store`, `secret`, `send_email`, `service` and `var`,
-and no `images()`. An earlier version of this said that issue closing was the
+`env.rs`'s typed binding accessors are `ai`, `analytics_engine`, `assets`,
+`bucket`, `d1`, `durable_object`, `dynamic_dispatcher`, `hyperdrive`, `kv`,
+`queue`, `rate_limiter`, `secret_store`, `secret`, `send_email`, `service` and
+`var` — alongside the untyped `get_binding` and `object_var`, and no `images()`. An earlier version of this said that issue closing was the
 green light for a Rust rewrite, which would have given the wrong answer for a
 year. That grep returning non-zero is the signal.
 

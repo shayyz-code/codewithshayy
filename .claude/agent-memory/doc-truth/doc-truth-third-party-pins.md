@@ -88,15 +88,49 @@ node -e "console.log(require('./node_modules/framer-motion/package.json').versio
 grep -rn 'reducedMotionConfig ===' node_modules/.pnpm/motion-dom@*/node_modules/motion-dom/dist/es/render/VisualElement.mjs
 ```
 
+## `sqlite3` CLI — exit code on a failed script
+
+Verified **2026-08-25** against sqlite3 **3.45.3** (`/opt/anaconda3/bin`) and
+**3.54.0** (`/usr/bin`, macOS). Supports the sqlite3 warning in
+`.claude/rules/data.md` and the header of `scripts/backup.sh` — and contradicts
+half of it.
+
+- `foreign_keys` defaults to **OFF**. The pragma is per-connection, so it has to
+  be passed on the same invocation as the `.read`.
+- Without `-bail`, sqlite3 continues past a runtime error but **exits 1**. It
+  does not exit 0. So a replay that loses rows to FK failures is loud.
+- `PRAGMA defer_foreign_keys` "delays enforcement of all foreign key constraints
+  until the outermost transaction is committed" and "is automatically switched
+  off at each COMMIT or ROLLBACK" — sqlite.org/pragma.html. It defers *checks*;
+  it does not defer table resolution, which is why the single-file D1 dump still
+  dies with `no such table: main.tags` despite carrying the pragma.
+
+See the conjunction hotspot in [[doc-truth-rot-hotspots]].
+
+## `wrangler` — R2 subcommands and `--persist-to`
+
+Re-derived **2026-08-25** against **4.125.0**, unchanged from 2026-08-24.
+`r2 object` is get/put/delete only; `r2 bucket` has create, update, list, info,
+delete, sippy, catalog, notification, domain, dev-url, local-uploads, lifecycle,
+cors, lock. Separately: `d1 execute` accepts `--persist-to`, **`d1 export` does
+not** — see [[doc-truth-verified-2026-08-25]] for the `--cwd` workaround.
+
 ## Older, due for re-verification
 
 Cloudflare Containers pricing is still pinned only to 2026-08-12 in
 [[doc-truth-verified-2026-08-12]].
 
-`workers-rs` was **re-derived 2026-08-24**: `grep -c 'fn images('` over
-`worker/src/env.rs` returns 0, and the 16 bindings it does expose were checked
-one at a time — `ai, analytics_engine, assets, bucket, d1, durable_object,
-dynamic_dispatcher, hyperdrive, kv, queue, rate_limiter, secret_store, secret,
-send_email, service, var`. That research now lives in
-`.claude/rules/runtimes.md`, not `AGENTS.md`. See [[doc-truth-rot-hotspots]] for
-why the *citation* needs the grep rather than the issue state.
+`workers-rs` was **re-derived again 2026-08-25** and still holds.
+`worker/src/env.rs` on `main` is 246 lines; `grep -c 'fn images('` returns 0 and
+so does `grep -ic image` — there is no Images binding under any spelling, which
+is the stronger check, since the narrow grep would miss a rename.
+`gh issue view 717 --repo cloudflare/workers-rs` → CLOSED / COMPLETED /
+`2025-08-04T20:41:31Z`, title "[Feature] Support for Images binding". Closed,
+completed, still absent: the issue state remains the wrong instrument.
+
+The doc's 16-name binding list is accurate but reads as exhaustive and is not —
+`env.rs` also has `get_binding` (the generic accessor) and `object_var`.
+Re-derive with `grep -oE 'pub fn [a-z_0-9]+' worker/src/env.rs | sort -u` rather
+than counting the prose. That research lives in `.claude/rules/runtimes.md`, not
+`AGENTS.md`. See [[doc-truth-rot-hotspots]] for why the *citation* needs the
+grep rather than the issue state.

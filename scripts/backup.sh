@@ -11,8 +11,8 @@
 # the media set is derived from D1 rather than enumerated from the bucket.
 # (`wrangler r2 bucket` *does* have `list` and `info`; this script calls
 # `bucket info` below. An earlier version of this comment said "wrangler r2 has
-# no listing command", which is wrong and which this file then contradicted
-# 138 lines later.)
+# no listing command", which is wrong, and which the `bucket info` call further
+# down this same file then contradicted.)
 #
 # Deriving from D1 is also the better set: keys are content-addressed and
 # referenced from exactly two tables, so anything not named here is
@@ -70,7 +70,8 @@ echo "backup: $DB $TARGET -> $OUT"
 # two files, and a restore is two commands in this order.
 #
 # Restore with wrangler, not sqlite3 — see .claude/rules/data.md. A sqlite3
-# replay exits 0 and silently drops every project_tags row.
+# replay is loud or lossless depending on a `foreign_keys` default it does not
+# share with D1, and wrangler is the path that is actually documented.
 SCHEMA="$OUT/d1-schema.sql"
 DATA="$OUT/d1-data.sql"
 

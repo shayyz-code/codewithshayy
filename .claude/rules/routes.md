@@ -45,17 +45,25 @@ command named only `robots.ts` and `sitemap.ts`. `/manifest.webmanifest` is a
 live 200 and an `○` row in the build, and it had no row here because the command
 that was supposed to catch that omission shared the omission.
 
-`favicon.ico` is the one output with no row in the `Route (app)` table — but
-**not** because it is "served as an asset rather than compiled to a route",
+`favicon.ico` is one of two outputs with no row in the `Route (app)` table —
+`/_global-error` is the other — but **not** because it is "served as an asset
+rather than compiled to a route",
 which this file claimed until 2026-08-24 and which is false. It *is* compiled:
 `.next/server/app/favicon.ico/route.js` exists, `app-path-routes-manifest.json`
 maps `/favicon.ico/route` → `/favicon.ico`, and it is a key in
 `prerender-manifest.json`. Only its absence from the printed table is real, and
 that is a property of Next's output formatting, not of how the file is served.
 
-Note `ui.md`'s "twelve `○`/`●` rows" arithmetic only balances while favicon has
-no row. The two files corroborate each other, which is not the same as either
-being checked — re-derive both together:
+`/_global-error` is compiled the same way — `.next/server/app/_global-error.html`,
+`.rsc`, `.meta` and `.segments`, `/_global-error/page` in the app manifest, a key
+in the prerender manifest — and Next synthesises it, so `src/app/global-error.tsx`
+does not exist. The file-listing derive command above therefore cannot find it by
+construction, which is the failure this section objects to, appearing inside the
+section that objects to it.
+
+Note `ui.md`'s "twelve `○`/`●` rows" arithmetic only balances while *both* of
+those have no row. The two files corroborate each other, which is not the same
+as either being checked — re-derive both together:
 
 ```bash
 node -e "const m=require('./.next/app-path-routes-manifest.json');console.log(Object.entries(m).filter(([k])=>k.includes('favicon')))"

@@ -79,8 +79,9 @@ load-bearing, not cosmetic.
 Seven rules today: `content`, `data`, `media`, `routes`, `security`, `ui`, and
 `runtimes` — which holds the "can we write this in Rust / Bun / Go" research and
 is scoped to `wrangler.jsonc`, `open-next.config.ts` and `package.json`. It
-lived here until this file went over 200 lines. That move traded reach for
-budget: it no longer loads on every task, so if the Rust question gets
+lived here until this file ran out of room at 199 lines against its own
+under-200 target — headroom, not a breach; the committed maximum has never
+exceeded 199. That move traded reach for budget: it no longer loads on every task, so if the Rust question gets
 re-researched anyway, move it back and cut something else.
 
 ```bash

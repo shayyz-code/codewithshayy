@@ -29,7 +29,8 @@ pnpm db:seed           # regenerate + load seeds/seed.sql into local D1
 pnpm db:studio         # browse the data
 ```
 
-`seeds/` is deliberately **outside** `migrations/` — `wrangler d1 migrations apply` runs every `.sql` in that directory, and the seed opens with `DELETE FROM projects`.
+`seeds/` is deliberately **outside** `migrations/` — `wrangler d1 migrations apply` runs every `.sql` in that directory, and the seed opens with `DELETE FROM project_tags`, then `tags`, then
+`projects`.
 
 ## Backups
 
@@ -39,8 +40,10 @@ bucket. Content lives only in D1 — every project, every write-up, and the whol
 of the site's copy — and a migration here once blanked every page while all
 routes returned 200.
 
-The bucket exists and carries one lifecycle rule, `expire-after-90-days`, read
-back on 2026-08-24 — without it the bucket grows without bound. The scheduled
+The bucket exists and carries `expire-after-90-days`, read back on 2026-08-24 —
+without it the bucket grows without bound. It is one of two rules: R2 adds
+`Default Multipart Abort Rule` at creation, which aborts incomplete multipart
+uploads after 7 days. The scheduled
 run additionally needs two repo secrets: `CLOUDFLARE_API_TOKEN`, scoped to D1
 read, R2 read on `codewithshayy-media` and R2 write on `codewithshayy-backups`,
 and `CLOUDFLARE_ACCOUNT_ID`. Wrangler cannot mint a scoped token, so that is a
@@ -50,8 +53,8 @@ dashboard step; the workflow fails until both are set. `pnpm db:backup` and
 **Restore is two commands, and the order is load-bearing:**
 
 ```bash
-wrangler d1 execute codewithshayy --local --file <dir>/d1-schema.sql -y
-wrangler d1 execute codewithshayy --local --file <dir>/d1-data.sql   -y
+pnpm exec wrangler d1 execute codewithshayy --local --file <dir>/d1-schema.sql -y
+pnpm exec wrangler d1 execute codewithshayy --local --file <dir>/d1-data.sql   -y
 ```
 
 The single-file dump `wrangler d1 export` produces by default **does not
@@ -71,10 +74,13 @@ for f in d1-schema.sql d1-data.sql; do
 done
 ```
 
-One file per invocation, deliberately. `grep` on this machine is `ugrep`, which
-searches multiple files concurrently and interleaves their output — passing both
-paths at once reported the data file's statements before the schema file's,
-which is the reverse of the truth and the exact property being measured.
+One file per invocation, deliberately. `grep` on this machine is `ugrep 7.8.4`,
+which searches files concurrently; its own `--help` says only `--sort` or `-J1`
+"produce replicable results". Passing both paths at once was observed once to
+report the data file's statements before the schema file's — the reverse of the
+truth, and the exact property being measured. That ordering has not reproduced
+since, which is what a race looks like and is a reason to avoid the form rather
+than to trust the one observation.
 
 Check both files, not just the schema. `d1-data.sql` also writes `d1_migrations`
 and `sqlite_sequence`; whether the schema half creates them is the difference
@@ -95,11 +101,24 @@ either table it references — lands all 29 rows. The pragma is still in force a
 the last statement, so wrangler replays the file as one transaction rather than
 statement by statement.
 
-**Do not restore with `sqlite3`.** It exits 0. It prints one
-`FOREIGN KEY constraint failed (19)` per row to stderr and keeps going, and the
-database that comes out holds 7 projects, 21 tags and **zero** `project_tags` —
-every project renders with no tags, and nothing anywhere returns an error.
-Measured 2026-08-25 against the 2026-08-24 production dump.
+A `sqlite3` replay of the same two files behaves differently again, and the
+difference is entirely `foreign_keys`, which sqlite3 defaults to **off**:
+
+| | exit | stderr | project_tags |
+|---|---|---|---|
+| `sqlite3` defaults | 0 | nothing | 29 |
+| `sqlite3` + `PRAGMA foreign_keys=ON` | 1 | 29 × `FOREIGN KEY constraint failed (19)` | 0 |
+
+Loud or lossless, never quietly lossy. Measured 2026-08-25 on sqlite3 3.45.3
+against the 2026-08-24 production dump. An earlier version of this paragraph
+combined the exit code of one row of that table with the row count of the other
+and warned that `sqlite3` silently drops every join row; it does not. That
+reading came from `$?` after a pipe into `head`, which reports the exit status
+of `head`.
+
+Restore with wrangler regardless — it is the documented path, it keeps the
+pragma in force, and it does not depend on which `foreign_keys` default the
+sqlite3 on `PATH` happens to ship.
 
 Hence `--no-data` and `--no-schema` into two files. Round-tripped **against
 local D1** on 2026-08-24: 3 projects / 2 tags / 2 project_tags out, the same
