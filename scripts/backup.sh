@@ -59,15 +59,18 @@ echo "backup: $DB $TARGET -> $OUT"
 #   no such table: main.tags: SQLITE_ERROR
 # The order is not alphabetical — `settings` sorts before `tags` and is written
 # after it — and is not documented anywhere, so derive it rather than predict
-# it. The `PRAGMA defer_foreign_keys=TRUE` at the head of that file does not
-# save it: the pragma is cleared at the end of every transaction and the replay
-# autocommits per statement.
+# it. `PRAGMA defer_foreign_keys=TRUE` at the head of that file does not save
+# it either: that pragma defers foreign key checks, not table resolution.
 #
 # Exporting schema and data separately does restore. Verified against a fresh
 # local database (3/2/2 rows out, 3/2/2 back, same slugs) and then against
 # production on 2026-08-24: 7 projects / 21 tags / 29 project_tags / 1 settings
-# row and 8 of 8 media objects, restored at identical counts with the settings
-# row intact. So two files, and a restore is two commands in this order.
+# row and 8 of 8 media objects. Replayed 2026-08-25 into a database no migration
+# had ever touched: 7/21/29/1 back, all fourteen settings columns non-null. So
+# two files, and a restore is two commands in this order.
+#
+# Restore with wrangler, not sqlite3 — see .claude/rules/data.md. A sqlite3
+# replay exits 0 and silently drops every project_tags row.
 SCHEMA="$OUT/d1-schema.sql"
 DATA="$OUT/d1-data.sql"
 

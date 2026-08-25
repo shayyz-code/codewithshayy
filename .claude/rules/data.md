@@ -65,25 +65,56 @@ order the dump actually uses is not documented, so derive it rather than
 predicting it:
 
 ```bash
-grep -oE '^(CREATE TABLE|INSERT INTO) .?[a-z_]+' <dir>/d1-schema.sql | uniq
+for f in d1-schema.sql d1-data.sql; do
+  echo "== $f"
+  grep -ohE '^(CREATE TABLE( IF NOT EXISTS)?|INSERT INTO) .?[a-z_0-9]+' <dir>/$f | uniq
+done
 ```
 
-The `PRAGMA defer_foreign_keys=TRUE` at the head of that file does not save it,
-because that pragma is cleared at the end of every transaction and the replay
-autocommits per statement. Measured in a single `sqlite3` session with the
-pragma present and `foreign_keys=ON`; whether `d1 execute --file` *additionally*
-batches was never tested, and the failure needs no such explanation.
+One file per invocation, deliberately. `grep` on this machine is `ugrep`, which
+searches multiple files concurrently and interleaves their output — passing both
+paths at once reported the data file's statements before the schema file's,
+which is the reverse of the truth and the exact property being measured.
+
+Check both files, not just the schema. `d1-data.sql` also writes `d1_migrations`
+and `sqlite_sequence`; whether the schema half creates them is the difference
+between a restore that works on a fresh database and one that only works where
+migrations have already run. It creates `d1_migrations` explicitly, and
+`sqlite_sequence` appears once an `AUTOINCREMENT` table does.
+
+`PRAGMA defer_foreign_keys=TRUE` at the head of the dump was never going to
+rescue it — that pragma defers foreign key checks, not table resolution. It
+does not save a `sqlite3` replay either: the pragma is cleared at the end of every transaction and
+`.read` autocommits per statement. Measured with the pragma present and
+`foreign_keys=ON`.
+
+`wrangler d1 execute --file` is not that, and the difference matters. Local D1
+reports `foreign_keys = 1` and rejects a `project_tags` row naming an unknown
+`project_id`, yet replaying `d1-data.sql` — which writes `project_tags` before
+either table it references — lands all 29 rows. The pragma is still in force at
+the last statement, so wrangler replays the file as one transaction rather than
+statement by statement.
+
+**Do not restore with `sqlite3`.** It exits 0. It prints one
+`FOREIGN KEY constraint failed (19)` per row to stderr and keeps going, and the
+database that comes out holds 7 projects, 21 tags and **zero** `project_tags` —
+every project renders with no tags, and nothing anywhere returns an error.
+Measured 2026-08-25 against the 2026-08-24 production dump.
 
 Hence `--no-data` and `--no-schema` into two files. Round-tripped **against
 local D1** on 2026-08-24: 3 projects / 2 tags / 2 project_tags out, the same
 counts and slugs back into a fresh database.
 
 Then against **production** the same day: 7 projects / 21 tags / 29
-project_tags / 1 settings row out, and 8 of 8 referenced media keys fetched
-with no dangling key. Restored into a fresh local database at identical counts,
-with the settings row's `hero`, `bio`, `email` and both media keys non-null —
-row counts alone would not have caught the partial-row failure this backup
-exists to survive.
+project_tags / 1 settings row out, and 8 of 8 referenced media keys fetched with
+no dangling key.
+
+Restored on 2026-08-25 into a database no migration had ever touched — both
+files replayed with `wrangler d1 execute --local --persist-to <empty dir>` —
+which came back 7 / 21 / 29 / 1, with all fourteen of the settings row's text
+and media columns non-null. Check the columns, not just the row: a partial
+`settings` row is authoritative and blank everywhere else, and a count of 1
+looks the same either way.
 
 The media set is derived from D1 rather than listed from the bucket, because
 **`wrangler r2 object` has no listing command — only `get`, `put` and
