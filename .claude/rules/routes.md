@@ -75,11 +75,31 @@ false, and the whole check would otherwise pass while the site went static.
 
 Coverage is computed, not listed. It walks the import graph from
 `src/data/db.ts` — the one module that resolves the D1 binding — and requires
-every `src/app` route reaching it to be guarded, so a new D1-backed route
-cannot be added without the guard noticing. Type-only imports are excluded:
-they are erased at compile time, and counting them marked `/docs`,
-`/openapi.json`, `/blog/[slug]` and both `/api/v1/posts` routes as D1 readers
-because they reach `@/data/projects` for its `Project` type alone.
+every `src/app` route reaching it to be guarded. Both quote styles and
+`import()` / `require()` are matched — the repo writes double quotes and
+nothing enforces that, so a single-quoted import would otherwise be invisible
+to the walk. Type-only imports are excluded: they are erased at compile time,
+and counting them marked `/docs`, `/openapi.json`, `/blog/[slug]` and both
+`/api/v1/posts` routes as D1 readers because they reach `@/data/projects` for
+its `Project` type alone.
+
+Two things make "reaches `db.ts`" the same question as "reads D1", and the
+script asserts both rather than assuming them:
+
+- **`src/data/db.ts` is the only module that may touch `env.DB`.** Otherwise a
+  route could call `getCloudflareContext` itself and the walk would never see
+  it. Comments are stripped before that test, so prose naming `env.DB` does not
+  fail the build — which is the mistake this file objects to in the
+  `grep -rl force-dynamic src/app` instrument below.
+- **The source enumeration has to have found something.** If it comes back
+  empty the coverage loop iterates zero times and the script prints its success
+  line having checked nothing. It requires `db.ts` and at least one route module
+  in the result, the same job `MUST_BE_PRERENDERED` does for the manifest half.
+
+Measured on a throwaway copy of `src` plus the two manifests, repo untouched:
+a single-quoted import of a D1 module, an `await import()` of one, a direct
+`env.DB` read, and the enumeration pointed at a non-existent directory each
+exit 1. A commented-out `env.DB` and a block comment naming it exit 0.
 
 Two narrower versions were tried first and both were wrong. A blanket
 `from "@/data/` demanded that `/blog`, `/blog/[slug]`, `/rss.xml` and both
