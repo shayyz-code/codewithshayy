@@ -54,13 +54,17 @@ export default function Hero({
             </ul>
           )}
           {heading && (
-            <h2 className="font-display md:[w-500px] text-3xl md:text-5xl">
+            // The page's one <h1>. It used to be an <h2>, with the site header's
+            // logo as the <h1>; the header is a <span> now, so this is the
+            // heading / has. Lines are block spans because a heading may only
+            // hold phrasing content, and <div> is not.
+            <h1 className="font-display md:[w-500px] text-3xl md:text-5xl">
               {heading.split("\n").map((line) => (
-                <div key={line} className="bg-black w-fit">
+                <span key={line} className="block bg-black w-fit">
                   {line}
-                </div>
+                </span>
               ))}
-            </h2>
+            </h1>
           )}
           {children && (
             <div className="hero-prose font-body md:w-[500px] text-base mt-5 mb-10 bg-black">

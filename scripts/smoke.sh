@@ -138,6 +138,32 @@ expect_body() {
   FAILED=1
 }
 
+# expect_one_h1 <path>
+#
+# Exactly one <h1>. The site header's logo used to be the <h1> on every page;
+# when it became a <span>, / and /me were left with none, because each page's
+# own heading had been written as an <h2> beneath it. Every other assertion here
+# passed. Retries for the same streamed-body reason as expect_body, and a count
+# of zero reports the byte count so truncation stays distinguishable.
+expect_one_h1() {
+  local path="$1" body n size
+  body=$(mktemp)
+  for attempt in 1 2 3; do
+    curl -s --max-time 30 "$BASE$path" >"$body"
+    n=$(grep -o '<h1[ >]' "$body" | wc -l | tr -d ' ')
+    [[ "$n" == "1" ]] && break
+    sleep 2
+  done
+  size=$(wc -c <"$body" | tr -d ' ')
+  if [[ "$n" == "1" ]]; then
+    printf '  ok    %-28s one <h1>\n' "$path"
+  else
+    printf '  FAIL  %-28s %s <h1> elements, want 1 (body %sB)\n' "$path" "$n" "$size"
+    FAILED=1
+  fi
+  rm -f "$body"
+}
+
 # The worker logs errors nowhere else: they never reach stdout, only the local
 # observability store. Called once per phase, against that phase's worker and
 # bounded by that phase's start, because the store is shared on disk and a
@@ -389,6 +415,11 @@ for b in blocks:
 fi
 # The docs page is only findable if it is advertised.
 expect_body /sitemap.xml "/docs"
+
+# One <h1> per public page — see expect_one_h1.
+for page in / /me /projects /projects/ci-fixture-full /blog /blog/hello /privacy /terms /docs; do
+  expect_one_h1 "$page"
+done
 
 # Every assertion above is a GET, and the upload defect was invisible to all of
 # them: the framework rejects an oversized body before the action runs, so a
