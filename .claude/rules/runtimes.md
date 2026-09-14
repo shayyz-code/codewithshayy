@@ -26,18 +26,23 @@ and repeated back the markers that arrived:
 | `"nested-bare.json"` | `sub/nested-bare.json` | yes |
 | `"never-read.json"` | not read | no (negative control) |
 
-A bare filename matches at any depth — one level of nesting was tested. So
-these three patterns load this rule for the root files and for a nested
-`package.json` too. Whether that extends into git-ignored directories such as
-`node_modules/` was not tested. An earlier version listed
+A bare filename matches at any depth. A second probe, read from Claude Code's
+own session log rather than from the model, found `two-deep.json` loading for
+`a/b/two-deep.json`, `in-ignored.json` for a file inside a git-ignored
+directory, and `package.json` for `node_modules/pkg/package.json`. So this rule
+also loads whenever an agent reads any of the `package.json` files under
+`node_modules/`, `.next/` or `.open-next/` — fair times to see it. An earlier
+version listed
 each file a second time with a `**/` prefix as insurance against a bare name
 not matching; the measurement above makes that redundant.
 
-The first attempt at measuring this grepped the `stream-json` output for the
-markers and found none — including for the `**/` pattern that does match — because
-rule text injected alongside a tool result does not appear in that stream. Only
-asking the session to repeat what it saw, with a control that could not be
-guessed, answered the question.
+Two instruments give wrong answers here. Grepping `--output-format stream-json`
+for the markers finds none, even for rules that loaded — that stream carries no
+event for injected rule text. And asking the model *when* a marker arrived
+does not work: in the five-file probe every rule attached at the same moment,
+after the last Read, while the model reported each one arriving after its own
+file. The reliable record is the session log under `~/.claude/projects/`, whose
+`attachment` entries name each rule file and when it was injected.
 
 **The trade is real and is the reason for the move:** this used to load on every
 task and now loads only when one of those files is open. Someone asking "could we rewrite this in Rust" with no config
