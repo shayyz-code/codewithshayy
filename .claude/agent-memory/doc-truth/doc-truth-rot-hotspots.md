@@ -138,3 +138,28 @@ rule"*. It carries two — `expire-after-90-days` plus R2's automatic
 See [[doc-truth-verified-2026-08-12]] and [[doc-truth-verified-2026-08-25]] for
 what was checked clean, and [[doc-truth-third-party-pins]] for upstream facts
 with their version pins.
+
+## New hotspot 2026-09-14: CI trigger scope, and "passes clean on main"
+
+`AGENTS.md` said *"CI runs on every push and PR"* from `493c6ef` (2026-08-11)
+and `README.md` *"CI runs both on every push"* from `b991579`. **Wrong, not
+stale**: `ci.yml`'s `on:` has been `push: branches: [main]` + bare
+`pull_request:` since the file was created. Corrected on `docs/ci-triggers`
+(`c9574c1`). Re-derive, don't reread prose:
+
+```bash
+git log --format=%h -L3,7:.github/workflows/ci.yml | grep -cE '^[0-9a-f]{7}$'   # commits touching on:
+gh run list --workflow ci.yml --event push --limit 200 --json headBranch --jq '[.[].headBranch]|unique'  # ["main"] at 32c77a0
+gh api 'repos/{owner}/{repo}/activity?ref=refs/heads/<branch>'   # push times, to line up against the first pull_request run
+```
+
+What "every pull request" hides (GitHub docs, fetched 2026-09-14): default
+types are opened/synchronize/reopened; **no run while the PR has a merge
+conflict**; `[skip ci]`-family strings skip both push and pull_request;
+repo `approval_policy` is `first_time_contributors`, so a first-time fork PR
+waits for approval. No draft or fork PR exists in this repo's history to test.
+
+"Both jobs pass clean on `main`" is a present-tense claim that rots on every
+push. Re-check with `gh run list --workflow ci.yml --branch main --limit 1`,
+then `gh run view <id> --json jobs` to confirm `Run pnpm test` and
+`Assert D1 routes are dynamic` are present — they entered at `4c10738`.
