@@ -122,7 +122,8 @@ The store lives in `.wrangler/` and **persists across restarts**, so filter by `
 
 Run `pnpm cf-typegen` after every `wrangler.jsonc` binding change, or `env.X` will typecheck against a binding that doesn't exist at runtime.
 
-CI runs on every push and PR (`.github/workflows/ci.yml`): lint, typecheck,
+CI runs on every pull request and on pushes to `main` — not on other pushes, so
+a branch shows no CI until its PR opens (`.github/workflows/ci.yml`): lint, typecheck,
 `pnpm test`, `next build` and `check-dynamic-routes` in one job, then a second
 that bundles for workerd, sets up a local D1 from `seeds/ci.sql`, and runs
 `scripts/smoke.sh` — the same assertions a local run makes, since it no longer
@@ -137,10 +138,6 @@ And the smoke test catches what `next build` cannot: a filesystem read on a
 dynamic route compiles cleanly and 500s under workerd. `pnpm test` is pure
 functions only; anything needing a binding goes in `smoke.sh`. Both jobs pass
 clean on `main`; keep them that way.
-
-The `pnpm test` and `check-dynamic-routes` steps are newer than the last `main`
-run, so confirm rather than assuming that sentence still holds:
-`gh run list --branch main --limit 1`.
 
 ESLint uses flat config in `eslint.config.mjs`. `eslint-config-next` ships a native flat-config array as of Next 15, so **no `@eslint/eslintrc` / `FlatCompat` shim is needed** — importing `eslint-config-next/core-web-vitals` pulls in the base `next` config and `next/typescript` too.
 
