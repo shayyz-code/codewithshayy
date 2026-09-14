@@ -42,7 +42,8 @@ event for injected rule text. And asking the model *when* a marker arrived
 does not work: in the five-file probe every rule attached at the same moment,
 after the last Read, while the model reported each one arriving after its own
 file. The reliable record is the session log under `~/.claude/projects/`, whose
-`attachment` entries name each rule file and when it was injected.
+`attachment` entries name each rule file that was injected. Their timestamps
+are per batch, not per file — every rule in that probe carries the same one.
 
 **The trade is real and is the reason for the move:** this used to load on every
 task and now loads only when one of those files is open. Someone asking "could we rewrite this in Rust" with no config
