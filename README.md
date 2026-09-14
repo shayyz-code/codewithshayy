@@ -41,7 +41,7 @@ pnpm preview        # bundle for workerd and serve it
 `pnpm build` passing does not mean the app works. Production runs on `workerd`,
 which forbids things Node allows — every serious bug in this project's history
 compiled cleanly and failed only under the real runtime. `pnpm preview` is the
-honest check, and CI runs both on every push.
+honest check, and CI runs both on every pull request and every push to `main`.
 
 `smoke.sh` boots the worker twice: once with the admin bypass off, where
 `/admin` has to 404 because the admin belongs to one hostname, and once with it
