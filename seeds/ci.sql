@@ -28,7 +28,9 @@ VALUES (
   'https://example.com',
   'https://github.com/example/repo',
   'projects/ci-fixture.png',
-  '## Heading
+  '# Top-level heading
+
+## Heading
 
 Body text with **bold** and a [link](/projects).
 

@@ -17,6 +17,16 @@ type WithNode<T> = T & { node?: unknown }
 const strip = <T,>({ node: _node, ...rest }: WithNode<T>) => rest as T
 
 export const markdownComponents = {
+  // Content never gets the page's <h1>: every page that renders markdown already
+  // has one, so a top-level `#` in a post, a project body, the hero or the bio
+  // would make a second. It renders as a styled <h2> instead. seeds/ci.sql puts
+  // a `#` in ci-fixture-full, and scripts/smoke.sh counts the <h1>s there.
+  h1: (props: ComponentProps<"h1">) => (
+    <h2
+      className="font-display text-2xl md:text-3xl tracking-wider mt-12 mb-4"
+      {...strip(props as ComponentProps<"h2">)}
+    />
+  ),
   h2: (props: ComponentProps<"h2">) => (
     <h2
       className="font-display text-2xl md:text-3xl tracking-wider mt-12 mb-4"

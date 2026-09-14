@@ -53,11 +53,14 @@ export default function Hero({
               </li>
             </ul>
           )}
-          {heading && (
-            // The page's one <h1>. It used to be an <h2>, with the site header's
-            // logo as the <h1>; the header is a <span> now, so this is the
-            // heading / has. Lines are block spans because a heading may only
-            // hold phrasing content, and <div> is not.
+          {/* The page's one <h1>. It used to be an <h2>, with the site header's
+              logo as the <h1>; the header is a <span> now, so this is the
+              heading / has, and it renders whether or not the admin has left
+              the heading blank — saving the settings form with it empty stores
+              NULL, and a conditional <h1> would take the page's only heading
+              with it. Lines are block spans because a heading may only hold
+              phrasing content, and <div> is not. */}
+          {heading ? (
             <h1 className="font-display md:[w-500px] text-3xl md:text-5xl">
               {heading.split("\n").map((line) => (
                 <span key={line} className="block bg-black w-fit">
@@ -65,6 +68,8 @@ export default function Hero({
                 </span>
               ))}
             </h1>
+          ) : (
+            <h1 className="sr-only">Code w/ Shayy</h1>
           )}
           {children && (
             <div className="hero-prose font-body md:w-[500px] text-base mt-5 mb-10 bg-black">
