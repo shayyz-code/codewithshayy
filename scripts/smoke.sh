@@ -143,19 +143,24 @@ expect_body() {
 # Exactly one <h1>. The site header's logo used to be the <h1> on every page;
 # when it became a <span>, / and /me were left with none, because each page's
 # own heading had been written as an <h2> beneath it. Every other assertion here
-# passed. Retries for the same streamed-body reason as expect_body, and a count
-# of zero reports the byte count so truncation stays distinguishable.
+# passed. A second one arrives through content instead: a top-level `#` in
+# markdown, which seeds/ci.sql puts in ci-fixture-full's body for that reason.
+#
+# A count is only trusted from a complete document. A body truncated after the
+# first <h1> would count 1 and pass while hiding a second further down, so a
+# response without </html> is retried like a miss. Any count other than 1
+# reports the byte count, so truncation stays distinguishable from absence.
 expect_one_h1() {
   local path="$1" body n size
   body=$(mktemp)
   for attempt in 1 2 3; do
     curl -s --max-time 30 "$BASE$path" >"$body"
     n=$(grep -o '<h1[ >]' "$body" | wc -l | tr -d ' ')
-    [[ "$n" == "1" ]] && break
+    [[ "$n" == "1" ]] && grep -qF '</html>' "$body" && break
     sleep 2
   done
   size=$(wc -c <"$body" | tr -d ' ')
-  if [[ "$n" == "1" ]]; then
+  if [[ "$n" == "1" ]] && grep -qF '</html>' "$body"; then
     printf '  ok    %-28s one <h1>\n' "$path"
   else
     printf '  FAIL  %-28s %s <h1> elements, want 1 (body %sB)\n' "$path" "$n" "$size"
