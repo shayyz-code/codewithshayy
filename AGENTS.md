@@ -122,8 +122,9 @@ The store lives in `.wrangler/` and **persists across restarts**, so filter by `
 
 Run `pnpm cf-typegen` after every `wrangler.jsonc` binding change, or `env.X` will typecheck against a binding that doesn't exist at runtime.
 
-CI runs on every pull request and on pushes to `main` — not on other pushes, so
-a branch shows no CI until its PR opens (`.github/workflows/ci.yml`): lint, typecheck,
+CI (`.github/workflows/ci.yml`) runs on every pull request and on pushes to
+`main` — not on other pushes, so a branch shows no CI until its PR opens. It
+runs lint, typecheck,
 `pnpm test`, `next build` and `check-dynamic-routes` in one job, then a second
 that bundles for workerd, sets up a local D1 from `seeds/ci.sql`, and runs
 `scripts/smoke.sh` — the same assertions a local run makes, since it no longer
