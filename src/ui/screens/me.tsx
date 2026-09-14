@@ -30,7 +30,7 @@ export default function Me({
         photoKey={settings.developerMediaKey}
         backgroundKey={settings.backgroundMediaKey}
       />
-      <SectionLabel>About Me</SectionLabel>
+      <SectionLabel as="h1">About Me</SectionLabel>
       <Bio>{bio}</Bio>
       <FeaturedProjects projects={projects} />
 
