@@ -1,11 +1,8 @@
 ---
 paths:
   - "wrangler.jsonc"
-  - "**/wrangler.jsonc"
   - "open-next.config.ts"
-  - "**/open-next.config.ts"
   - "package.json"
-  - "**/package.json"
 ---
 
 # Runtimes on Workers, so this is not researched twice
@@ -15,11 +12,32 @@ its own "under 200" target with more still to land. It had not breached 200 —
 the committed maximum is 199 — so the move bought headroom rather than repairing
 a violation.
 
-Each of the three files is listed twice, bare and `**/`-prefixed. Every other
-rule in `.claude/rules/` matches on a pattern containing a separator, so this is
-the first to rely on a root-level basename and nothing here demonstrates the
-loader anchors that way. The duplicate is insurance, not style; if a bare
-basename is confirmed to match, drop the `**/` half.
+This is the only rule matched on bare filenames — every other one uses a
+pattern with a directory in it — so how the loader treats them was measured
+rather than assumed. On Claude Code 2.1.270, in a throwaway repo with one rule
+per pattern, each carrying a random marker, a headless session read three files
+and repeated back the markers that arrived:
+
+| rule `paths:` | file read | loaded |
+|---|---|---|
+| none | — | at session start (positive control) |
+| `"bare-root.json"` | `bare-root.json` | yes |
+| `"**/glob-root.json"` | `glob-root.json` | yes |
+| `"nested-bare.json"` | `sub/nested-bare.json` | yes |
+| `"never-read.json"` | not read | no (negative control) |
+
+A bare filename matches at any depth — one level of nesting was tested. So
+these three patterns load this rule for the root files and for a nested
+`package.json` too. Whether that extends into git-ignored directories such as
+`node_modules/` was not tested. An earlier version listed
+each file a second time with a `**/` prefix as insurance against a bare name
+not matching; the measurement above makes that redundant.
+
+The first attempt at measuring this grepped the `stream-json` output for the
+markers and found none — including for the `**/` pattern that does match — because
+rule text injected alongside a tool result does not appear in that stream. Only
+asking the session to repeat what it saw, with a control that could not be
+guessed, answered the question.
 
 **The trade is real and is the reason for the move:** this used to load on every
 task and now loads only when one of those files is open. Someone asking "could we rewrite this in Rust" with no config
