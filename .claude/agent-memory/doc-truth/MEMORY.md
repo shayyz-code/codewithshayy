@@ -4,3 +4,4 @@
 - [Third-party pins](doc-truth-third-party-pins.md) — upstream facts (Next body size limit, opennext `preview`, framer-motion reduced motion, workers-rs bindings) with the package version each was verified against
 - [Rules loader probe, 2026-09-14](doc-truth-rules-loader-probe.md) — verify rule-loading claims from transcript attachments; stream-json grep and model timing reports are false instruments
 - [Tree contamination, 2026-08-12](doc-truth-tree-contamination.md) — how this agent recorded a false conclusion by reading a working tree that changed mid-run; pin the commit before trusting source-settled claims
+- [App repo (codewithshayy-app), 2026-09-18](doc-truth-app-repo-2026-09-18.md) — the OTHER repo's hotspots, each with its re-derive command; a record that denies the prose citing it means one of them is stale, and it may be the record (corrected 2026-09-19)
