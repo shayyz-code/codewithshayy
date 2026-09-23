@@ -134,3 +134,16 @@ Re-derive with `grep -oE 'pub fn [a-z_0-9]+' worker/src/env.rs | sort -u` rather
 than counting the prose. That research lives in `.claude/rules/runtimes.md`, not
 `AGENTS.md`. See [[doc-truth-rot-hotspots]] for why the *citation* needs the
 grep rather than the issue state.
+
+## App repo (codewithshayy-app), verified 2026-09-23
+
+- **ESLint 10.10.0 flat config replaces a rule's options; it does not merge
+  them.** Two blocks each set `no-restricted-properties`, with
+  `Math.random` in the first and `Intl.Segmenter` in the second.
+  `--print-config` shows only `Intl.Segmenter` for a file both blocks match.
+  Record 0017 depends on this.
+- **Node v24.15.0 / ICU 78.2 / Unicode 17.0 `Intl.Segmenter` grapheme splits**
+  match record 0017's Burmese table: virama stacks and kinzi stay one grapheme;
+  U+102C and U+1038 split off. Safari's ICU was not checked.
+- **`performance.now()` and `process.hrtime.bigint()` step in 41–42 ns on the
+  Apple M3 Pro** (24 MHz timebase).
