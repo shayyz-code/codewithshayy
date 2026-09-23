@@ -1,6 +1,6 @@
 ---
 name: doc-truth-app-repo-2026-09-18
-description: doc-truth against the SEPARATE codewithshayy-app repo — its hotspots, the commands to re-derive each, and the corrected lesson about a record that denies its own prose (a contradiction means one side is stale, not that the prose is false)
+description: doc-truth against the SEPARATE codewithshayy-app repo — its hotspots and their re-derive commands, the corrected lesson about a record that denies its own prose, and the 0017 lesson-engine probes (é is precomposed; eslint --format json; tsx and scratch-copy instruments)
 metadata:
   type: project
 ---
@@ -102,6 +102,69 @@ They are consistent as of 2026-09-19: 10 auto-linking, 13 batch, 14 migrations.
   Hono 4.13.8 repro of the real mount shape (`app.route` + sub-app `use("*")`).
   Observably true; "runs before routing" is a simplification of Hono's
   match-then-dispatch, not a falsehood.
+
+## Record 0017 / packages/lesson (checked 2026-09-23, branch `feat/m4-lesson-engine` @ 1fcbb87)
+
+Found **wrong** (never true, present since cb67405): "a combining accent" in
+the generator's text pieces. The `é` in `PIECES` is precomposed U+00E9, one
+code unit, so it cannot catch code-unit slicing. A terminal or an editor
+shows the two forms identically, so check the code points:
+`python3 -c "print([hex(ord(c)) for c in 'é'])"` on the literal from the file,
+or `xxd` (`c3 a9` = precomposed; `65 cc 81` = e + U+0301). Test for
+generator-coverage claims ("not ASCII", "combining") the same way.
+
+Instruments that worked here, with the tree left clean:
+- lint claims: `eslint --stdin --stdin-filename <path> --format json` and read
+  `ruleId`s. The exit code is not enough, because an unused probe binding
+  also trips `no-unused-vars`.
+- semantics: a scratch `.ts` importing `src/*.ts` by absolute path, run with
+  `packages/lesson/node_modules/.bin/tsx`. Bare node cannot resolve the
+  extensionless imports.
+- entry walk and timing controls: copy `packages/lesson/{src,test,package.json,tsconfig.json}`
+  plus `tsconfig.base.json` into the scratchpad, and symlink `node_modules` to
+  the repo's absolute path. Never run `m4-data/lesson-controls.sh`, which
+  edits tracked files.
+
+Held on 2026-09-23: 38 tests / 9 properties; the controls table matches
+`lesson-controls.txt` row for row; the Burmese table (Node 24.15.0, ICU 78.2);
+all lint forms; the fixture numbers (2,000 units, 1,260 graphemes, 10.7%
+mid-reveal, up to 7 typing at once); a 41.7 ns timer step on the M3 Pro.
+
+Soft spots to re-check: "by about 150 times" (the p95 rows in the same table
+give about 65×); contract 6's "lint keeps segmentation out of stateAt" (lint
+covers only `state.ts`); and the speed and generator-history figures, which
+have no evidence file under `m4-data/`.
+
+### Re-check 2026-09-23 at 9c37467 (PR #64), after "name the source of every speed figure"
+
+Held: every table number, slowest-call, 108/72,000, 41/452, 16 ms GC, 428,
+~41 ns, 0.0004 ms figure against `m4-data/lesson-speed.txt`; the lint scope
+(eslint probes, compile.ts free, any other src file incl. new/nested refused);
+the history file's counts; AGENTS.md 199 lines.
+
+Found at 9c37467 (check first next time):
+- **Wrong, added by that diff:** "its tracks hold at most 4 entries" (Speed).
+  Only *per-element* tracks do; `cameraSegs:100` and 300 captions/lang are
+  binary-searched every call (`state.ts` camera/caption lines). The replaced
+  text ("no list longer than 300") was right. An edit turned true into false.
+- "Mostly multi-code-unit" generator text (0017, arbitraries.ts comment, PR):
+  measure with `fc.sample(text(), { numRuns: 20000, seed: 42 })` under tsx and
+  segment. Pieces 5/14; drawn pieces 36%; graphemes 41%; code units 74%. Only
+  the code-unit reading makes "mostly" true. A `Math.random` sim of the
+  generator is the wrong instrument (fast-check biases draws).
+- Unsourced figure after a "name every source" commit: the ~8 ms median of the
+  segment-every-element control. `lesson-controls.sh` strips `NNms` from its
+  output, so no evidence file can hold it.
+- `lesson-speed.txt` header shows load 7.42 at the start of the "quiet" run;
+  this machine idles at load 4–7. "Quiet" means "no added busy loops".
+- A "(doc-truth, again: 0.59–0.61)" lazy-segmentation p95 is attributed to
+  this agent; nothing in memory records it. Record what you measure here.
+
+All five were corrected in record 0017 at 2f1fff7 (app PR #64): per-element
+tracks vs the camera and caption lists, "5 of 14 pieces", "no added load",
+exact ratios, and scratch sources named for the 8 ms and lazy figures. The
+0.59–0.61 ms p95 came from the first 2026-09-23 run's report, which did not
+write it here. Re-check them on the next pass rather than trusting this line.
 
 See [[doc-truth-rot-hotspots]] (portfolio repo) and
 [[doc-truth-third-party-pins]] for the version-pin pattern used above.
