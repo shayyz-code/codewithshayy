@@ -1,6 +1,6 @@
 ---
 name: doc-truth-app-repo-2026-09-18
-description: doc-truth against the SEPARATE codewithshayy-app repo — its hotspots and their re-derive commands, the corrected lesson about a record that denies its own prose, and the 0017 lesson-engine probes (é is precomposed; eslint --format json; tsx and scratch-copy instruments)
+description: doc-truth against the SEPARATE codewithshayy-app repo — its hotspots and their re-derive commands, the corrected lesson about a record that denies its own prose, the 0017 lesson-engine probes (é is precomposed; eslint --format json; tsx and scratch-copy instruments), and 0018's D1 limit / workerd content-length pins plus the scratch-mirror backup round trip
 metadata:
   type: project
 ---
@@ -166,5 +166,68 @@ exact ratios, and scratch sources named for the 8 ms and lazy figures. The
 0.59–0.61 ms p95 came from the first 2026-09-23 run's report, which did not
 write it here. Re-check them on the next pass rather than trusting this line.
 
+## Record 0018 / lesson storage (checked 2026-09-23, branch `feat/m4-lesson-storage` @ 83645fb)
+
+Third-party pins, read 2026-09-23:
+- D1 limits page (last updated 2026-04-21): statement 100,000 bytes; string/row
+  2,000,000 bytes; "processes queries one at a time".
+- D1's own docs (`/d1/sql-api/query-json/`) list `->` and `->>` as supported.
+  sqlite.org: `->>` added in 3.38.0, HAVING without GROUP BY in 3.39.0.
+- Local D1 (wrangler 4.131.1): `sqlite_version()` refused ("not authorized to
+  use function"); `->>` and HAVING without GROUP BY both work. Remote was not tried.
+- workerd (wrangler 4.131.1): a Request with a hand-set `content-length: 5` and
+  a 10-byte body delivers all 10 bytes, both called directly and through a
+  service binding (the test harness's path). So "fetch cannot send more than it
+  declares" is false for those two paths. HTTP ingress was not tested, and this
+  says nothing about production.
+
+Instruments that worked, and left the tree clean:
+- TOOBIG: a scratch dir holding its own `wrangler.jsonc`, running the app's
+  `apps/worker/node_modules/.bin/wrangler` with `cd` into the scratch dir in the
+  same command. `d1 export` has no `--persist-to`, so the cwd is the only
+  isolation. Measured boundary: a 99,997-byte statement runs, 100,007 does not.
+  `execute --file` of an export holding CREATE, a tiny row, a 90k row and a 150k
+  row restored nothing (no table).
+- Backup round trip: a scratch mirror built from `git archive <sha> apps/worker/migrations
+  scripts/backup.sh scripts/restore-check.sh`, plus a stub `wrangler.jsonc`
+  (same db and bucket names), a `package.json` and a `node_modules` symlink.
+  Run backup.sh from there with `--local`. Gave "migrations 8, media 2, 2 files".
+  restore-check **never restores R2**; it counts files in the backup.
+- zod check: `wrangler deploy --dry-run --outdir <scratch>` from apps/worker.
+  Grep for a string the new code must contain (`cws.lesson/1`) as a positive control.
+
+Soft spots found (check first next time): the control row "each first save
+mints" lists test 7, which was unchanged since fd046e0, where the first-save-only
+code would pass it. "Every test body declares its length" (the 411 test does
+not). The "Access check (2–7 ms)" cite is the M0 figure for RS256 verification
+against a local JWKS; Access uses a remote JWKS. 150 KB (AGENTS/0001/invariant-audit)
+vs 153,600 in the code. Record 0011:90-94, "no route serves admin/", is now false.
+Two changed comments were wrong: the `admin-media.ts` guard comment says "no upload through
+this route may be given admin/", but proofs are (admin-media.test.ts:138). The
+diff dropped the word "else". And the schema.ts media.kind comment says "D1 cannot hold
+them", while 0018's own table stored 150k. Only the restore fails.
+Note: `wrangler deploy --dry-run` from apps/worker writes the gitignored `apps/worker/.wrangler/tmp`.
+
 See [[doc-truth-rot-hotspots]] (portfolio repo) and
 [[doc-truth-third-party-pins]] for the version-pin pattern used above.
+
+## Record 0018 re-check at dcc435e (2026-09-23)
+
+Held: controls table rows = lesson-storage-controls.txt; every fault pattern in the
+.sh occurs once in admin-lessons.ts (read-only python check, not the .sh);
+d1-statement-limit.sh re-run output byte-identical to its .txt; 150,113 / 279 /
+8-2-2 match the roundtrip .txt; 17 tests. New test "measured again on the bytes
+read" reaches the second check: in a scratch mirror, logging showed declared 100,
+read 153,713; faulting only the read check (UTF-16) turned it 413 -> 200.
+Found: control label "declared-length check in UTF-16 units, and no read check"
+describes the opposite of the .sh (it removes the declared check and makes the
+read check UTF-16). 0018:99 "Invariant 3 says 150 KB" went stale in the same
+commit (AGENTS.md now says KiB). "Every test body then declared its true length"
+still ignores the 411 test.
+The soft spots in this section and the one before it were corrected by e1cbfce
+(app PR #70). Re-check them rather than trusting this line.
+Mirror instrument: `git archive dcc435e apps/worker packages tsconfig.base.json ...`
+into scratch, symlink root and apps/worker node_modules, run
+`apps/worker/node_modules/.bin/vitest run test/admin-lessons.test.ts` there.
+Pitfall: `ln -s` onto a mirror that already has the symlink creates a link INSIDE
+the real node_modules (did so once; unlinked). Check `[ -e ]` first. Disk had 1.1 GiB free.
