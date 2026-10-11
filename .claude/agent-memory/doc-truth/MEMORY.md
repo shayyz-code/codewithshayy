@@ -6,3 +6,4 @@
 - [Tree contamination, 2026-08-12](doc-truth-tree-contamination.md) — how this agent recorded a false conclusion by reading a working tree that changed mid-run; pin the commit before trusting source-settled claims
 - [App repo (codewithshayy-app)](doc-truth-app-repo-2026-09-18.md) — the OTHER repo: hotspots and their re-derive commands, stale records, 0017 probes, 0018 D1/workerd pins and scratch-mirror backup (2026-09-23)
 - [App repo 0018 cleanups and test stall, 2026-10-11](doc-truth-app-repo-0018-cleanups-2026-10-11.md) — stall reproduced, I/O-context and storage-persistence probes, FK pins, a safe watchdog, soft spots
+- [App repo, record 0019 (2026-10-11)](doc-truth-app-repo-0019-lesson-route.md) — lesson route: older records' test counts go stale when a test is added; read-only instruments for controls scripts
